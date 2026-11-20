@@ -26,8 +26,10 @@ function render(){
   const iso=isoSide();
   const max=(iso>=0&&!state.goal&&state.isoAt!=null)?state.isoAt+state.bonusMax:state.par;
   $('#moves').innerHTML=`Coup <b>${state.moves}</b> / ${max??'—'}`;
-  $('#goalBadge').innerHTML=state.goal?`🎯 ${mathEq([[T([S(state.target)])],state.goalSum])}`:'';
-  $('#goalBadge').classList.toggle('hidden',!state.goal);
+  $('#goalBig').innerHTML=state.goal?`<span class="glab">🎯 Objectif</span>${mathEq([[T([S(state.target)])],state.goalSum])}`:'';
+  $('#goalBig').classList.toggle('hidden',!state.goal);
+  const tilt=pend?((1-pend.side)===0?-1:1)*(pend.w||1)*2:0;
+  boardEl.style.transform=`rotate(${tilt}deg)`;boardEl.classList.toggle('tilted',!!pend);
   const bar=$('#isobar');
   if(iso>=0&&!state.won&&!pend&&!state.coach){
     bar.classList.remove('hidden');
@@ -49,7 +51,7 @@ function render(){
 function renderDeck(){
   if(SILENT)return;const pend=state.pending;const MBd={d:false,box:state.box};
   const cards=state.deck.map((c,i)=>{const f=state.flip[i];
-    return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}</div>`}).join('');
+    return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}${c.user?`<span class="ddel" data-del="${i}" title="Retirer ce jeton">✕</span>`:''}</div>`}).join('');
   const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
   $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+(tools?'<span class="tsep"></span>'+tools:'');
 }
@@ -96,6 +98,7 @@ const boardEl=$('#board'),deckEl=$('#deck');
 let drag=null,hotEl=null;
 $('#game').addEventListener('pointerdown',e=>{
   if(state.won||e.button>0)return;
+  const del=e.target.closest('[data-del]');if(del){e.preventDefault();removeDeckCard(+del.dataset.del);return}
   const el=e.target.closest('[data-deck],[data-tool],[data-fid],[data-tid]');
   if(!el||!(boardEl.contains(el)||deckEl.contains(el)))return;
   e.preventDefault();
@@ -116,7 +119,7 @@ function onMove(e){
 }
 function dropTarget(cx,cy){
   const h=document.elementFromPoint(cx,cy);if(!h)return null;
-  if(drag.kind==='deck')return h.closest('[data-zone]:not([data-zone="fn"])');
+  if(drag.kind==='deck'){const dc=h.closest('[data-deck]');if(dc&&+dc.dataset.deck!==drag.src)return dc;return h.closest('[data-zone]:not([data-zone="fn"])')}
   if(drag.kind==='tool')return h.closest('[data-zone="fn"]');
   if(deckEl.contains(h))return deckEl;
   const t=h.closest('[data-fid],[data-tid]');if(t&&boardEl.contains(t)&&!drag.gsrc.contains(t))return t;return null;
@@ -130,16 +133,45 @@ function onUp(e){
   if(!d.moved){
     if(d.kind==='deck'){state.flip[d.src]=!state.flip[d.src];renderDeck();coachCheck()}
     else if(d.kind==='tool')toast("Glisse l'outil sur un côté du plateau : il s'appliquera à tout ce côté.");
-    else if(d.fn)simplifyFn(d.fn);
+    else if(d.fn)tapFn(d.fn);
     else if(d.dev)develop(d.dev);
     return;
   }
   if(!tgt)return;
-  if(d.kind==='deck')doDeck(+tgt.closest('.panel').dataset.side,tgt.dataset.zone,d.src);
+  if(d.kind==='deck'&&tgt.dataset.deck!==undefined)combineDeck(d.src,+tgt.dataset.deck);
+  else if(d.kind==='deck')doDeck(+tgt.closest('.panel').dataset.side,tgt.dataset.zone,d.src);
   else if(d.kind==='tool')doTool(+tgt.closest('.panel').dataset.side,d.src);
   else if(tgt===deckEl)copyToDeck(d.src);
   else boardDrop(d.src,tgt.dataset.fid||tgt.dataset.tid);
 }
+
+/* ---------- toucher une fonction : simple = simplifier, double = libérer la puissance ---------- */
+let lastTap={id:null,t:0},tapTimer=null;
+function tapFn(id){
+  const l=locate(id);if(!l||!l.f)return;const f=l.f,now=Date.now();
+  if(f.fn==='pow'){
+    if(lastTap.id===id&&now-lastTap.t<450){clearTimeout(tapTimer);lastTap={id:null,t:0};expandPow(id);return}
+    lastTap={id,t:now};clearTimeout(tapTimer);
+    if(canTapFn(f)){tapTimer=setTimeout(()=>simplifyFn(id),460);return}
+    tapTimer=setTimeout(()=>toast(`Double-touche <b>${esc(textF(f))}</b> pour l'écrire en produit.`),460);return;
+  }
+  simplifyFn(id);
+}
+$('#game').addEventListener('dblclick',e=>e.preventDefault());
+/* ---------- opérations intermédiaires dans la pioche ---------- */
+function combineDeck(a,b){
+  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  const ca=clone(state.deck[a]),cb=clone(state.deck[b]);if(state.flip[a])ca.neg=!ca.neg;if(state.flip[b])cb.neg=!cb.neg;
+  const va=numVal([ca]),vb=numVal([cb]);let card;
+  if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
+  else card=T([G([reid(cb),reid(ca)])]);
+  const neg=card.neg;card.neg=false;card.user=true;
+  if(state.deck.some(c=>keyT(c)===keyT(card))){toast('Ce jeton existe déjà dans la pioche.');return}
+  if(state.deck.length>=14)return fail('La pioche est pleine : retire un jeton avec ✕.');
+  state.deck.push(card);state.flip.push(neg);renderDeck();flashDeck(state.deck.length-1);
+  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (opération dans la pioche, ça ne compte pas comme un coup).`);
+}
+function removeDeckCard(i){if(state.pending)return fail('Termine d’abord l’opération en cours.');state.deck.splice(i,1);state.flip.splice(i,1);renderDeck()}
 
 /* ---------- indice ---------- */
 function hint(){
@@ -248,9 +280,12 @@ const SCENES={
  trig:{t:'arcsin(½) = π/6 : touche pour calculer.',tap:1,b:bed(Xc(),fb('arcsin',fr(c(1),c(2)),'A')),a:bed(Xc(),fr(sy('π'),c(6)))},
  lncomb:{t:'ln a + ln b = ln(a·b).',b:bed(tm(fb('ln',Xc()),'A')+sgn('+')+tm(fb('ln',c(2)),'B'),c(1)),a:bed(fb('ln',c(2)+dot+Xc()),c(1))},
  i2:{t:'i · i = −1 : glisse un i sur l’autre.',b:bed(c('i','A','s im')+dot+c('i','B','s im')+dot+Xc('','z'),c(3)),a:bed(sgn('−')+Xc('','z'),c(3))},
+ pow2:{t:'Deux jetons identiques côte à côte : v·v = v². Double-touche v² pour revenir à v·v.',b:bed(sy('m')+dot+sy('v','A')+dot+sy('v','B'),sy('Ec')),a:bed(sy('m')+dot+pw(sy('v'),2),sy('Ec'))},
+ recip:{t:'Outil 1/□ : on inverse les deux côtés.',b:bed(sy('f'),fr(c(1),Xc('','T')),'L')+rail(`<span class="dtool" data-a="A">1/□</span>`),a:bed(fr(c(1),sy('f')),Xc('','T'))+rail(`<span class="dtool">1/□</span>`)},
+ deckop:{t:'Dans la pioche, glisse un jeton sur un autre : ils s’additionnent ou se regroupent entre ( ).',b:rail(dk(sy('a'),'A')+dk(sy('b'),'B')),a:rail(dk(sy('a'))+dk(sy('b'))+dk(bx(sy('b')+sgn('+')+sy('a'))))},
  conj:{t:'Multiplie par le conjugué : (1−i)(1+i) = 2.',b:bed(bx(c(1)+sgn('+')+c('i','','s im'))+dot+Xc('','z'),c(2),'L')+rail(dk(bx(c(1)+sgn('−')+c('i','','s im')),'A')),a:bed(c(2)+dot+Xc('','z'),c(2)+dot+bx(c(1)+sgn('−')+c('i','','s im')))},
 };
-const HELP=[['Les bases',['flip','add','cancel','like','copy']],['Fractions',['frac','mul','gcd','product','neg']],['Boîtes',['dev','fact']],['Fonctions',['tool','inv','eval','explog','trig','lncomb']],['Complexes',['i2','conj']],['Score',['goal','bonus']]];
+const HELP=[['Les bases',['flip','add','cancel','like','copy']],['Fractions',['frac','mul','gcd','product','neg']],['Boîtes et pioche',['dev','fact','deckop']],['Puissances et fonctions',['pow2','tool','recip','inv','eval','explog','trig','lncomb']],['Complexes',['i2','conj']],['Score',['goal','bonus']]];
 const sceneHTML=k=>`<div class="scard"><div class="scene" data-scene="${k}"></div><div class="scap">${SCENES[k].t}</div></div>`;
 function animateScenes(root){root.querySelectorAll('[data-scene]').forEach(el=>playScene(el,SCENES[el.dataset.scene]))}
 async function playScene(el,sc){

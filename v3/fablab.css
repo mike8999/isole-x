@@ -367,3 +367,21 @@ body.dragtool .tzones{display:grid}
 @media (max-width:620px){.spec.wide{grid-column:auto}}
 .spec .specicon{font-size:36px}
 @media (max-width:600px){header{flex-wrap:wrap}#goalBadge{order:10;flex:1 1 100%;text-align:center;font-size:14px}}
+
+/* ===== v3.1 : objectif géant, balance qui penche, pioche combinable ===== */
+#goalBig{align-self:center;margin:0 12px 10px;padding:6px 26px 8px;border-radius:16px;font-size:clamp(28px,4.4vw,48px);display:flex;align-items:center;gap:16px;
+  background:rgba(20,10,0,.5);box-shadow:inset 0 0 0 3px var(--brass2),0 6px 16px rgba(0,0,0,.35);max-width:calc(100% - 24px);overflow-x:auto}
+#goalBig .glab{font-family:var(--title);font-size:.34em;color:var(--brass1);white-space:nowrap}
+#main{align-items:stretch}
+#boardwrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0;position:relative;padding-bottom:26px}
+#board{flex:0 0 auto;height:min(44vh,400px);transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.5,.5,1)}
+#board.tilted{box-shadow:inset 0 0 0 6px #3a3f45,inset 0 0 0 8px #1b1d20,inset 0 0 50px rgba(0,0,0,.6),0 6px 0 rgba(40,20,5,.5),0 22px 30px rgba(0,0,0,.45)}
+#pivot{position:absolute;left:50%;bottom:0;width:0;height:0;transform:translateX(-50%);border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:30px solid var(--steel2);filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+#pivot::after{content:"";position:absolute;left:-40px;top:30px;width:80px;height:6px;border-radius:3px;background:var(--steel3)}
+#history{max-height:min(60vh,520px);align-self:center}
+.ddel{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:4px;border-radius:50%;background:var(--laser);color:#fff;font-size:11px;font-weight:700;cursor:pointer;align-self:flex-start}
+.dcard.hot{outline:3px dashed var(--acc);outline-offset:2px}
+.math .card.im{color:#e3b6ff}
+.mbox .math .card.im,#isobar .math .card.im{color:#7a1fa2}
+@media (prefers-reduced-motion:reduce){#board{transition:none}}
+@media (max-width:600px){#goalBig{font-size:26px;padding:4px 14px}#board{height:min(40vh,360px)}}

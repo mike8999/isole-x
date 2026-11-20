@@ -38,8 +38,8 @@ const INV={exp:'ln',ln:'exp',log:'p10',p10:'log',sin:'asin',asin:'sin',cos:'acos
 const SUP={2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶'};
 const FNAME={exp:'exp',ln:'ln',log:'log',p10:'10^',sin:'sin',cos:'cos',tan:'tan',asin:'arcsin',acos:'arccos',atan:'arctan'};
 const fnLab=f=>f.fn==='root'?(f.n===2?'√':f.n===3?'∛':f.n+'√'):f.fn==='pow'?(SUP[f.n]||'^'+f.n):FNAME[f.fn];
-const toolLab=t=>t.fn==='root'?(t.n===2?'√□':t.n===3?'∛□':t.n+'√□'):t.fn==='pow'?'□'+(SUP[t.n]||'^'+t.n):t.fn==='exp'?'e<sup>□</sup>':t.fn==='p10'?'10<sup>□</sup>':FNAME[t.fn]+' □';
-const toolTxt=t=>t.fn==='root'?(t.n===2?'√( )':'∛( )'):t.fn==='pow'?'( )'+(SUP[t.n]||'^'+t.n):t.fn==='exp'?'e^( )':t.fn==='p10'?'10^( )':FNAME[t.fn]+'( )';
+const toolLab=t=>t.fn==='recip'?'1/□':t.fn==='root'?(t.n===2?'√□':t.n===3?'∛□':t.n+'√□'):t.fn==='pow'?'□'+(SUP[t.n]||'^'+t.n):t.fn==='exp'?'e<sup>□</sup>':t.fn==='p10'?'10<sup>□</sup>':FNAME[t.fn]+' □';
+const toolTxt=t=>t.fn==='recip'?'1/( )':t.fn==='root'?(t.n===2?'√( )':'∛( )'):t.fn==='pow'?'( )'+(SUP[t.n]||'^'+t.n):t.fn==='exp'?'e^( )':t.fn==='p10'?'10^( )':FNAME[t.fn]+'( )';
 const isInv=(f,g)=>(f.fn==='root'&&g.fn==='pow'&&f.n===g.n)||(f.fn==='pow'&&g.fn==='root'&&f.n===g.n)||(f.fn!=='root'&&f.fn!=='pow'&&INV[f.fn]===g.fn);
 function innerFn(f){if(f.arg.length!==1)return null;const t=f.arg[0];if(t.neg||t.den.length||t.num.length!==1||t.num[0].t!=='f')return null;return t.num[0]}
 function numVal(arg){
@@ -70,7 +70,8 @@ function evalFn(f,v){
   return null;
 }
 const resTerms=r=>r.p===0?[]:[T([N(Math.abs(r.p)),...(r.pi?[S('π')]:[])],r.q>1?[N(r.q)]:[],r.p<0)];
-const canTapFn=f=>{const g=innerFn(f);if(g&&isInv(f,g))return true;const v=numVal(f.arg);return !!(v&&evalFn(f,v))};
+const rootProd=f=>{if(f.fn!=='root'||f.arg.length!==1)return null;const t=f.arg[0];return(!t.neg&&!t.den.length&&t.num.length===f.n&&t.num.every(x=>keyF(x)===keyF(t.num[0])))?t.num[0]:null};
+const canTapFn=f=>{if(rootProd(f))return true;const g=innerFn(f);if(g&&isInv(f,g))return true;const v=numVal(f.arg);return !!(v&&evalFn(f,v))};
 
 /* ---------- analyseur d'équations ---------- */
 const FNAMES={sqrt:'root2',racine:'root2',rac:'root2',cbrt:'root3',exp:'exp',ln:'ln',log:'log',sin:'sin',cos:'cos',tan:'tan',arcsin:'asin',asin:'asin',arccos:'acos',acos:'acos',arctan:'atan',atan:'atan'};
@@ -222,7 +223,9 @@ function applyOp(side,op,card){
   if(sm.length===1){const t=sm[0];t.neg=t.neg!==c.neg;t.num.unshift(...cn);t.den.push(...cd)}
   else{const g=G(sm.splice(0));sm.push({id:uid(),neg:c.neg,num:[...cn,g],den:[...cd]})}
 }
-function applyFn(side,tool){const sm=state.eq[side];const arg=sm.splice(0);sm.push(T([F(tool.fn,tool.n,arg)]))}
+function applyFn(side,tool){const sm=state.eq[side];const arg=sm.splice(0);
+  if(tool.fn==='recip'){sm.push(arg.length===1?recT(arg[0]):T([],[G(arg)]));return}
+  sm.push(T([F(tool.fn,tool.n,arg)]))}
 const OPSYM={add:'+',mul:'×',div:'÷'};
 function opLabel(op,card){const tx=textT(card,true);return OPSYM[op]+' '+(card.neg||card.den.length||card.num.length>1?'('+tx+')':tx)}
 
@@ -234,17 +237,17 @@ function doDeck(side,op,idx){
     applyOp(side,op,card);const lab=state.pending.label;state.pending=null;hideToast();return finishMove(lab+' des deux côtés');
   }
   pushUndo();applyOp(side,op,card);norm(state.eq[side]);
-  state.pending={side:1-side,sig,op,idx,label:opLabel(op,card)};render();
+  state.pending={side:1-side,sig,op,idx,label:opLabel(op,card),w:op==='add'?(card.neg?-1:1):op==='mul'?1:-1};render();
   toast(`Maintenant <b>${state.pending.label}</b> de l'autre côté.`);return true;
 }
 function doTool(side,idx){
-  const tool=state.tools[idx];const sig='fn|'+tool.fn+tool.n;
+  const tool=state.tools[idx];if(tool.fn==='recip'&&!state.eq[side].length)return fail('On ne peut pas inverser 0.');const sig='fn|'+tool.fn+tool.n;
   if(state.pending){
     if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Applique <b>${state.pending.label}</b> aussi de l'autre côté.`);
     applyFn(side,tool);const lab=state.pending.label;state.pending=null;hideToast();return finishMove(lab+' des deux côtés');
   }
   pushUndo();applyFn(side,tool);
-  state.pending={side:1-side,sig,op:'fn',tidx:idx,label:toolTxt(tool)};render();
+  state.pending={side:1-side,sig,op:'fn',tidx:idx,label:toolTxt(tool),w:tool.fn==='recip'?-1:1};render();
   toast(`Applique <b>${state.pending.label}</b> de l'autre côté aussi.`);return true;
 }
 
@@ -284,7 +287,10 @@ function boardDrop(src,tgt){
     if(a.f.t==='n'&&b.f.t==='n'){pushUndo();const tx=a.f.v+'·'+b.f.v;b.f.v*=a.f.v;removeF(a);return finishMove(`Calcul : ${tx} = ${b.f.v}`,'product')}
     if(a.f.t==='s'&&b.f.t==='s'&&isImagV(a.f.v)&&a.f.v===b.f.v){pushUndo();removeF(a);removeF(b);a.term.neg=!a.term.neg;return finishMove(`${a.f.v}·${a.f.v} = −1`,'i2')}
     if(a.f.t==='f'&&b.f.t==='f'&&a.f.fn==='exp'&&b.f.fn==='exp'){pushUndo();const nf=F('exp',0,reid(a.f.arg).concat(reid(b.f.arg)));a.term[a.row].splice(a.term[a.row].indexOf(b.f),1,nf);removeF(a);return finishMove('e^a·e^b = e^(a+b)')}
-    return fail("Seuls deux <b>nombres</b> (ou i·i) côte à côte se calculent.");
+    const ba=powBase(a.f),bb=powBase(b.f);
+    if(ba&&bb&&ba.k===bb.k){pushUndo();const nf=F('pow',ba.n+bb.n,[T([reid(ba.base)])]);const row=b.term[b.row];row.splice(row.indexOf(b.f),1,nf);removeF(a);
+      return finishMove(`${textF(ba.base)}·${textF(ba.base)} = ${textF(nf)}`,'powmerge')}
+    return fail("Seuls deux <b>nombres</b>, ou deux jetons identiques (v·v = v²), côte à côte se regroupent.");
   }
   const e=b.chain.find(c=>c.sum===a.sum);
   if(!e)return fail("Ces cartes ne sont pas dans la même somme.");
@@ -299,6 +305,18 @@ function boardDrop(src,tgt){
     return fail(`Pour factoriser, les deux termes doivent contenir <b>${esc(textF(a.f))}</b>.`)}
   return fail("Ces deux termes ne sont pas semblables.");
 }
+function powBase(f){
+  if(f.t==='n')return null;
+  if(f.t==='f'&&f.fn==='pow'){if(f.arg.length===1&&f.arg[0].num.length===1&&!f.arg[0].den.length&&!f.arg[0].neg)return{k:keyF(f.arg[0].num[0]),n:f.n,base:f.arg[0].num[0]};return{k:'('+f.arg.map(keyT).join('+')+')',n:f.n,base:G(f.arg)}}
+  return{k:keyF(f),n:1,base:f};
+}
+function expandPow(id){
+  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  const l=locate(id);if(!l||l.kind!=='factor'||l.f.t!=='f'||l.f.fn!=='pow')return false;
+  const f=l.f,b=powBase(f);const base=b.base.t==='g'?b.base:b.base;pushUndo();
+  const row=l.term[l.row],k=row.indexOf(f);const rest=f.n===2?reid(base):F('pow',f.n-1,[T([reid(base)])]);
+  row.splice(k,1,reid(base),rest);return finishMove(`${textF(f)} = ${textF(base)}·${textF(rest)}`,'powsplit');
+}
 function develop(gid){
   if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
   const l=locate(gid);if(!l||l.kind!=='factor')return false;
@@ -312,6 +330,7 @@ function develop(gid){
 function simplifyFn(id){
   if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
   const l=locate(id);if(!l||l.kind!=='factor'||l.f.t!=='f')return false;const f=l.f,row=l.term[l.row],k=row.indexOf(f);
+  const rp=rootProd(f);if(rp){pushUndo();row.splice(k,1,G([T([reid(rp)])]));return finishMove(`${fnLab(f)}(${textF(rp)}·${textF(rp)}) = ${textF(rp)}`,'inv')}
   const g=innerFn(f);
   if(g&&isInv(f,g)){pushUndo();row.splice(k,1,G(reid(g.arg)));return finishMove(`${fnLab(f)} et ${fnLab(g)} s'annulent`,'inv')}
   const v=numVal(f.arg);
@@ -391,6 +410,8 @@ function findSimp(sum){
     for(const a of t.num)for(const b of t.den)if(keyF(a)===keyF(b))return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]};
     for(const a of t.num)for(const b of t.den)if(a.t==='n'&&b.t==='n'&&gcd(a.v,b.v)>1)return{msg:`${a.v} et ${b.v} sont divisibles par ${gcd(a.v,b.v)} : glisse l'un sur l'autre.`,ids:[a.id,b.id]};
     for(const r of['num','den']){const im=t[r].filter(f=>f.t==='s'&&isImagV(f.v));if(im.length>1)return{msg:'i·i = −1 : glisse un i sur l\'autre.',ids:[im[0].id,im[1].id]}}
+    for(const r of['num','den']){const fs=t[r].filter(f=>f.t!=='n'&&!(f.t==='s'&&isImagV(f.v)));for(let i=0;i<fs.length;i++)for(let j=i+1;j<fs.length;j++){const x=powBase(fs[i]),y=powBase(fs[j]);
+      if(x&&y&&x.k===y.k)return{msg:`Deux jetons identiques : glisse l'un sur l'autre (${esc(textF(x.base))}·${esc(textF(x.base))} = ${esc(textF(x.base))}²).`,ids:[fs[i].id,fs[j].id]}}}
     for(const r of['num','den'])for(const f of t[r]){
       if(f.t==='f'){if(canTapFn(f))return{msg:`Touche <b>${esc(fnLab(f))}</b> pour simplifier.`,ids:[f.id],act:'tap'};const h=findSimp(f.arg);if(h)return h}
       if(f.t==='g'){const h=findSimp(f.terms);if(h)return h}
@@ -479,7 +500,7 @@ function setup(o){
     const side=g[0].length===1&&g[0][0].num.length===1&&g[0][0].num[0].v===state.target?g[1]:g[0];state.goalKey=canS(side);state.goalSum=side}
   state.deck=o.deck?o.deck.map(d=>{const s=parseSum(d);return s.length===1?s[0]:T([G(s)])}):autoDeck(o.nocomp);
   if(!state.deck.some(c=>keyT(c)==='#1/'))state.deck.push(T([N(1)]));
-  state.flip=state.deck.map(()=>false);state.tools=o.tools||autoTools();
+  state.flip=state.deck.map(()=>false);state.tools=o.tools||autoTools();if(!state.tools.some(t=>t.fn==='recip'))state.tools.push({fn:'recip',n:0});
   state.pending=null;state.moves=0;state.undo=[];state.won=false;state.tip=o.tip||'';state.isoAt=null;state.bonusMax=0;
   state.history=[{desc:'Départ',eq:clone(state.eq)}];
   const r=runSolver();state.par=r.ok?(state.goal?r.total:r.iso):(o.par||null);

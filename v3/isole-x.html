@@ -81,7 +81,6 @@
       <div class="badge"><span class="dotacc"></span><span id="lvlNum">1/10</span></div>
       <div id="lvlTitle"></div>
       <div class="spacer"></div>
-      <div id="goalBadge" class="hidden"></div>
       <div id="moves"></div>
       <button class="hbtn" id="btnUndo" title="Annuler">↶</button>
       <button class="hbtn" id="btnHint" title="Indice">💡</button>
@@ -92,8 +91,9 @@
     </header>
     <div id="tip" class="ply hidden"></div>
     <div id="isobar" class="hidden"></div>
+    <div id="goalBig" class="hidden"></div>
     <div id="main">
-      <div id="board">
+      <div id="boardwrap"><div id="board">
         <div class="panel" data-side="0"><div class="content"></div>
           <div class="zones"><div class="zone" data-zone="mul">× Multiplier</div><div class="zone" data-zone="add">+ Ajouter</div><div class="zone" data-zone="div">÷ Diviser</div></div>
           <div class="tzones"><div class="zone" data-zone="fn">ƒ Appliquer à tout ce côté</div></div>
@@ -103,7 +103,7 @@
           <div class="tzones"><div class="zone" data-zone="fn">ƒ Appliquer à tout ce côté</div></div>
         </div>
         <div class="eqmed">=</div>
-      </div>
+      </div><div id="pivot"></div></div>
       <aside id="history"></aside>
     </div>
     <div id="mathline"></div>
