@@ -218,3 +218,15 @@ body.calm .looksave .bigbtn.pulse{animation:none}
 .lookbox .looktop{position:static;margin:0;flex:none;border-radius:18px 18px 0 0}
 .lookbox .looksave{position:static;margin:0;flex:none;border-radius:0 0 18px 18px;padding:10px 14px max(10px,env(safe-area-inset-bottom))}
 @media (max-width:520px){.lookbox .lookbody{padding:10px 14px 14px}}
+
+/* en-têtes de menu : le titre garde de la place, les boutons passent dessous sur écran étroit */
+.menutop>#specHead,.menutop>#worldHead{flex:1 1 300px;min-width:min(300px,100%)}
+.menutop #specHead>div,.menutop #worldHead>div{min-width:0;flex:1}
+.menutop #specHead h1{overflow-wrap:break-word}
+@media (max-width:560px){.menutop>.ghostbtn{flex:1 1 auto}}
+/* défi ultime (fond sombre) : chiffre toujours lisible, quel que soit le thème */
+body[data-theme] .lvbtn.ultime{color:#fff6cf}
+body[data-theme] .lvbtn.ultime small,body[data-theme] .lvbtn.ultime .st{color:#ffd23f}
+body[data-theme] .lvbtn{color:#fff}
+body[data-theme] .lvbtn small,body[data-theme] .lvbtn .st{color:rgba(255,255,255,.75)}
+body[data-theme] .chap h2 small{color:color-mix(in srgb,var(--ink) 70%,transparent)}

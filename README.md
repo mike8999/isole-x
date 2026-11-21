@@ -5,6 +5,7 @@ Jeux pour s’entraîner en STI2D.
 - **Version 1 (plateau vert)** : https://mike8999.github.io/isole-x/
 - **Version 2 (établi / fablab, spécialités)** : https://mike8999.github.io/isole-x/fablab/
 - **Atelier STI2D (Isole x ! + Physic’s & Co) — dernière version** : https://mike8999.github.io/isole-x/v3/
+  - ancienne version 7 conservée : https://mike8999.github.io/isole-x/v3-v7/
   - ancienne version 6 conservée : https://mike8999.github.io/isole-x/v3-v6/
   - ancienne version 5 conservée : https://mike8999.github.io/isole-x/v3-v5/
   - ancienne version 4 conservée : https://mike8999.github.io/isole-x/v3-v4/
@@ -24,4 +25,4 @@ Jeux pour s’entraîner en STI2D.
   - ancienne version 1 conservée : https://mike8999.github.io/isole-x/college-v1/
 
 
-Apparence (🎨, dans les réglages) : 9 thèmes communs aux trois jeux (établi, jungle, nuit, tableau blanc, contraste élevé gratuits ou propres au jeu ; océan, espace, bonbon, prestige à débloquer avec les pièces), style du plateau, forme de l'inconnue, couleur des boutons, taille des jetons.
+Apparence (🎨, dans les réglages) : 9 thèmes communs aux trois jeux (établi, jungle, nuit, tableau blanc, contraste élevé gratuits ou propres au jeu ; océan, espace, prestige à débloquer ; « Le labo des SII » gratuit dans l'atelier, « Bonbon » à débloquer dans la Jungle avec les pièces), style du plateau, forme de l'inconnue, couleur des boutons, taille des jetons.
