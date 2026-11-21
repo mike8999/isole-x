@@ -4,6 +4,7 @@
    taille des jetons. Réglages communs à tous les jeux du site.
    ===================================================================== */
 const LOOK=(()=>{
+  const BUILD='21/11/2026 · n° 5';
   const KEY='isoleX_look',OWN='isoleX_look_owned';
   const THEMES=[
     {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d\'abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},
@@ -47,7 +48,9 @@ const LOOK=(()=>{
   }
   function html(){
     const th=current(),coins=shop&&shop.coins?shop.coins():null;
-    return`<h2>🎨 Apparence</h2>${prevHTML()}
+    const dirty=changed();
+    return`<div class="looktop"><button class="ghostbtn" data-lk="cancel" data-v="1">◀ Retour${dirty?' sans enregistrer':''}</button><h2>🎨 Apparence</h2>
+      <span class="lookstate ${dirty?'dirty':'ok'}">${dirty?'● Modifié, pas encore enregistré':'✔ Tout est enregistré'}</span></div>${prevHTML()}
      <h3>Thème</h3><div class="lookgrid">${THEMES.map(t=>{const ok=owned(t.k),on=t.k===th;
        return`<button class="lth${on?' on':''}${ok?'':' locked'}" data-lk="theme" data-v="${t.k}"><span class="sw" style="background:${t.sw[0]}"><i style="background:${t.sw[1]}"></i><i class="x" style="background:${t.sw[2]}"></i><i style="background:${t.sw[3]};outline:2px solid ${t.sw[1]}"></i></span>
         <b>${t.n}${t.k===native?' ★':''}</b><small>${t.d}</small>${ok?'':`<span class="lk">${shop&&shop.spend?'🪙 '+t.price:'🔒'}</span>`}</button>`}).join('')}</div>
@@ -57,13 +60,15 @@ const LOOK=(()=>{
      <h3>Couleur des boutons</h3><div class="lookrow">${ACCS.map(c=>`<button class="lsw${c==='auto'?' auto':''}${draft.acc===c?' on':''}" data-lk="acc" data-v="${c}" title="${c==='auto'?'Selon la spécialité ou le thème':c}" style="${c==='auto'?'':'background:'+c}"></button>`).join('')}</div>
      <h3>Taille des jetons</h3><div class="lookrow">${TOKS.map(([v,n])=>`<button class="chip${+draft.tok===v?' on':''}" data-lk="tok" data-v="${v}">${n}</button>`).join('')}</div>
      <div class="lookrow" style="margin-top:14px;justify-content:center"><button class="ghostbtn" data-lk="reset" data-v="1">↺ Tout remettre par défaut</button></div>
-     <div class="looksave">${changed()?'<small>Modifications non enregistrées</small>':''}<button class="ghostbtn" data-lk="cancel" data-v="1">Annuler</button><button class="bigbtn" data-lk="save" data-v="1">💾 Enregistrer</button></div>`;
+     <div class="looksave"><small class="lookstate ${dirty?'dirty':'ok'}">${dirty?'● Tes changements sont visibles en aperçu : touche Enregistrer pour les garder.':'✔ Tout est enregistré. Choisis un thème ou un réglage pour l\'essayer.'}</small>
+      <button class="ghostbtn" data-lk="cancel" data-v="1">${dirty?'Annuler':'◀ Retour'}</button><button class="bigbtn${dirty?' pulse':''}" data-lk="save" data-v="1"${dirty?'':' disabled'}>💾 Enregistrer</button>
+      <small class="lookver">Version du ${BUILD}</small></div>`;
   }
   const changed=()=>JSON.stringify(draft)!==JSON.stringify(cfg);
   /* clic dans la fenêtre : renvoie {msg, act} ; act = 'save' ou 'cancel' quand il faut fermer */
   function click(el){
     const b=el.closest('[data-lk]');if(!b)return null;const k=b.dataset.lk,v=b.dataset.v;let msg='';
-    if(k==='save'){cfg=Object.assign({},draft);save();apply();if(shop&&shop.onChange)shop.onChange();return{act:'save',msg:'✔ Apparence enregistrée'}}
+    if(k==='save'){if(!changed())return{act:'cancel',msg:''};cfg=Object.assign({},draft);save();apply();if(shop&&shop.onChange)shop.onChange();return{act:'save',msg:'✔ Apparence enregistrée'}}
     if(k==='cancel'){cancel();return{act:'cancel',msg:''}}
     if(k==='theme'){const t=find(v);
       if(!owned(v)){
@@ -91,5 +96,10 @@ const LOOK=(()=>{
   function textZoom(z){z=+z||1;if(z<=1)return 1;return Math.max(1,Math.min(z,innerWidth/340,innerHeight/540))}
   let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(window.applyOpts)try{applyOpts()}catch(e){}fit()},120)});
   if(window.ResizeObserver)addEventListener('load',()=>{const ro=new ResizeObserver(()=>requestAnimationFrame(fit));['#board','#reaction','#deck'].forEach(q=>{const e=document.querySelector(q);if(e)ro.observe(e)})});
-  return{init,apply,html,click,cancel,fit,textZoom,changed,owned,current,THEMES,get cfg(){return cfg}};
+  /* mise à jour automatique : vérifie une nouvelle version à chaque ouverture et recharge la page une fois */
+  function sw(){if(!('serviceWorker'in navigator)||!/^https:|^http:\/\/localhost/.test(location.href))return;
+    const had=!!navigator.serviceWorker.controller;let done=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!done){done=true;location.reload()}});
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})}).catch(()=>{})}
+  return{init,apply,html,click,cancel,fit,textZoom,changed,owned,current,sw,BUILD,THEMES,get cfg(){return cfg}};
 })();

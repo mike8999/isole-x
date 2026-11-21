@@ -626,13 +626,13 @@ function showSettings(){
    <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l'inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
    <div class="setrow"><span><b>Taille du texte</b><small>Sur un petit écran, elle est limitée automatiquement pour que rien ne soit coupé.</small></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
    <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l\'appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l\'écran d\'accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l\'application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
-   </div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
+   </div><p class="lookver" style="text-align:center">Version du ${LOOK.BUILD}</p><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
   document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
   document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{OPTS.size=+b.dataset.size;saveOpts();applyOpts();showSettings()});
   $('#btnLookSet').onclick=showLook;
   const bi=$('#btnInstall');if(bi)bi.onclick=async()=>{installEvt.prompt();await installEvt.userChoice;installEvt=null;showSettings()};
 }
-if('serviceWorker'in navigator&&/^https:|^http:\/\/localhost/.test(location.href))navigator.serviceWorker.register('sw.js').catch(()=>{});
+LOOK.sw();
 
 /* ---------- sauvegarde : code et QR code, sans serveur ---------- */
 const B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
