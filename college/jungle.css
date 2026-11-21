@@ -172,3 +172,5 @@ body.dys,body.dys .jlead,body.dys .mbox,body.dys #toast,body.dys #tip,body.dys b
 body.dys .math,body.dys .card{font-family:"Atkinson Hyperlegible",sans-serif;font-style:normal}
 body.calm #board{transform:none!important}
 body.calm .jegg,body.calm .pet.idle,body.calm .stone,body.calm .petmini{animation:none!important}
+.profcode{display:block;margin:10px auto 4px;width:180px;text-align:center;font:700 28px var(--title);letter-spacing:.3em;padding:8px;border-radius:14px;border:2px solid #c9b26a;background:#fffbea;color:#3b2a0a}
+.profmsg{min-height:1.3em;color:#c62828;font-weight:700}

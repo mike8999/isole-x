@@ -206,7 +206,12 @@ function hint(){
 let STATS={wins:0,noHint:0,bestNoHint:0,simp:0,goals:0,perfect:0,chronoBest:0};
 try{Object.assign(STATS,JSON.parse(localStorage.getItem('isoleX_college2_stats')||'{}'))}catch(e){}
 const saveStats=()=>{try{localStorage.setItem('isoleX_college2_stats',JSON.stringify(STATS))}catch(e){}};
-let OPTS={mute:false,teacher:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_college2_opts')||'{}'))}catch(e){}
+let OPTS={mute:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_college2_opts')||'{}'))}catch(e){}
+/* mode professeur : protégé par un code, jamais enregistré (s'éteint à la fermeture de la page) */
+let TEACHER=false;delete OPTS.teacher;
+const PROF_H='253314d2';
+const profHash=c=>{let h=2166136261;for(const ch of 'pepix-jungle|'+c){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return h.toString(16)};
+let profFails=0,profLockUntil=0;
 const saveOpts=()=>{try{localStorage.setItem('isoleX_college2_opts',JSON.stringify(OPTS))}catch(e){}};
 let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_college2_badges')||'{}')}catch(e){}
 const saveGot=()=>{try{localStorage.setItem('isoleX_college2_badges',JSON.stringify(GOT))}catch(e){}};
@@ -215,7 +220,7 @@ const worldPts=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{})
 const worldDone=i=>WORLDS[i].levels.every((_,li)=>PROG[progKey(i,li)]);
 const totalStars=()=>WORLDS.reduce((a,_,i)=>a+worldStars(i),0);
 const UNLOCK=15;
-const unlocked=i=>OPTS.teacher||i===0||worldStars(UNLOCK_FROM[i]??i-1)>=UNLOCK;
+const unlocked=i=>TEACHER||i===0||worldStars(UNLOCK_FROM[i]??i-1)>=UNLOCK;
 const PET_STEPS=[0,5,20,50,100,170];
 const PET_NAMES=['un œuf','un bébé','un petit','un ado','un grand','légendaire'];
 const petStage=()=>{const t=totalStars();let s=0;PET_STEPS.forEach((v,i)=>{if(t>=v)s=i});return s};
@@ -296,7 +301,7 @@ function renderHome(){
     return`<button class="wtile${u?'':' locked'}" data-w="${i}" style="--wc:${w.color}"><span class="wnum">${i+1}</span><span class="wicon">${w.icon}</span><span class="wname">${esc(w.name)}</span>
       <span class="wbar"><i style="width:${Math.round(100*s/30)}%"></i></span><span class="wstar">★ ${s}/30</span>${u?'':`<span class="wlock">🔒 ${UNLOCK} ★ dans le monde ${prevWorld(i)+1}</span>`}</button>`}).join('');
   document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(!unlocked(i)){sfx('fail');toast(`🔒 Gagne ${UNLOCK} étoiles dans le monde ${prevWorld(i)+1} pour ouvrir celui-ci (tu en as ${worldStars(prevWorld(i))}).`,'warn');return}toWorld(i)});
-  $('#btnMute').textContent=OPTS.mute?'🔇':'🔊';$('#optTeacher').checked=OPTS.teacher;
+  $('#btnMute').textContent=OPTS.mute?'🔇':'🔊';$('#optTeacher').checked=TEACHER;
 }
 function toWorld(i){closeModal();state.ci=i;const w=WORLDS[i];document.documentElement.style.setProperty('--wc',w.color);
   $('#worldHead').innerHTML=`<span class="wbig">${w.icon}</span><div><div class="kicker">Monde ${i+1}</div><h1>${esc(w.name)}</h1><div class="kicker">★ ${worldStars(i)}/30 · ${worldPts(i)} points</div></div>`;
@@ -643,7 +648,20 @@ $('#expInput').addEventListener('input',expPreview);$('#expGoal').addEventListen
 $('#expInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('#btnExpGo').disabled)startExp()});
 $('#coachSkip').onclick=()=>{stopCoach();render()};
 $('#btnMute').onclick=()=>{OPTS.mute=!OPTS.mute;saveOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊';sfx('pop')};
-$('#optTeacher').onchange=e=>{OPTS.teacher=e.target.checked;saveOpts();renderHome()};
+$('#optTeacher').onchange=e=>{if(!e.target.checked){TEACHER=false;renderHome();return}e.target.checked=false;askProfCode()};
+function askProfCode(){
+  const wait=Math.ceil((profLockUntil-Date.now())/1000);
+  if(wait>0){toast(`🔒 Trop d'essais : attends ${wait} s.`,'warn');return}
+  modal(`<h2>🔒 Mode professeur</h2><p>Tape le code professeur pour ouvrir tous les mondes.<br><small>Il se désactive tout seul quand on ferme la page.</small></p>
+   <input id="profCode" class="profcode" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••">
+   <div id="profMsg" class="profmsg"></div>
+   <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="profOk">Valider</button></div>`,'intro');
+  const inp=$('#profCode');setTimeout(()=>inp.focus(),50);
+  const go=()=>{if(profHash(inp.value.trim())===PROF_H){profFails=0;TEACHER=true;closeModal();renderHome();sfx('badge');toast('🔓 Mode professeur activé : tous les mondes sont ouverts jusqu\'à la fermeture de la page.')}
+    else{profFails++;inp.value='';sfx('fail');if(profFails>=3){profFails=0;profLockUntil=Date.now()+60000;closeModal();toast("🔒 Code incorrect 3 fois : réessaie dans 1 minute.",'warn')}
+      else $('#profMsg').textContent=`Code incorrect (${3-profFails} essai${3-profFails>1?'s':''} restant${3-profFails>1?'s':''}).`}};
+  $('#profOk').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+}
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!$('#game').classList.contains('hidden')){e.preventDefault();undo()}});
 window.addEventListener('resize',()=>{if(state.coach)coachShow()});
 document.documentElement.style.setProperty('--acc','#ff8c42');
