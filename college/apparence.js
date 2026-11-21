@@ -4,7 +4,7 @@
    taille des jetons. Réglages communs à tous les jeux du site.
    ===================================================================== */
 const LOOK=(()=>{
-  const BUILD='21/11/2026 · n° 7';
+  const BUILD='21/11/2026 · n° 8';
   const KEY='isoleX_look',OWN='isoleX_look_owned';
   const THEMES=[
     {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d\'abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},
@@ -20,9 +20,10 @@ const LOOK=(()=>{
   const BOARDS=[['auto','Selon le thème'],['nid','Nid d\'abeille'],['feutre','Feutre'],['ardoise','Ardoise'],['quadrillage','Quadrillage'],['bois','Bois']];
   const XS=[['auto','Selon le thème'],['laiton','Plaque'],['oeuf','Œuf'],['bille','Bille'],['hexa','Écrou'],['etoile','Étoile']];
   const ACCS=['auto','#1e88e5','#e53935','#ff8c42','#f4b400','#2e9e5b','#00a8a8','#6c5ce7','#d6336c'];
-  const TOKS=[[1,'Normale'],[1.15,'Grande'],[1.3,'Très grande']];
+  const TOKS=[[1,'Normale ×1'],[1.25,'Grande ×1,25'],[1.5,'Très grande ×1,5']];
   const DEF={theme:null,board:'auto',x:'auto',acc:'auto',tok:1};
   let cfg=Object.assign({},DEF);try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+  {const old={1.15:1.25,1.3:1.5};if(old[cfg.tok])cfg.tok=old[cfg.tok]} // anciennes tailles
   let draft=Object.assign({},cfg); // aperçu en cours, enregistré seulement avec le bouton Enregistrer
   let own={};try{own=JSON.parse(localStorage.getItem(OWN)||'{}')}catch(e){}
   const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg));localStorage.setItem(OWN,JSON.stringify(own))}catch(e){}};
