@@ -219,8 +219,9 @@ const worldStars=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{
 const worldPts=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{}).p||0),0);
 const worldDone=i=>WORLDS[i].levels.every((_,li)=>PROG[progKey(i,li)]);
 const totalStars=()=>WORLDS.reduce((a,_,i)=>a+worldStars(i),0);
-const UNLOCK=15;
-const unlocked=i=>TEACHER||i===0||worldStars(UNLOCK_FROM[i]??i-1)>=UNLOCK;
+const maxStars=i=>WORLDS[i]?WORLDS[i].levels.length*3:30;
+const need=i=>Math.ceil(maxStars(prevWorld(i))/2); // la moitié des étoiles du chapitre précédent
+const unlocked=i=>TEACHER||i===0||worldStars(prevWorld(i))>=need(i);
 const PET_STEPS=[0,5,25,60,120,200];
 const PET_NAMES=['un kit à monter','un prototype','un petit robot','un robot','un grand robot','légendaire'];
 const petStage=()=>{const t=totalStars();let s=0;PET_STEPS.forEach((v,i)=>{if(t>=v)s=i});return s};
@@ -234,7 +235,7 @@ const BADGES=[
  {k:'goal10',icon:'🎯',name:"Tireur d'élite",d:'10 résultats précis atteints',ok:()=>STATS.goals>=10},
  {k:'ch5',icon:'⚡',name:'Éclair',d:'5 équations en un défi chrono',ok:()=>STATS.chronoBest>=5},
  {k:'ch12',icon:'🌩️',name:'Tempête',d:'12 équations en un défi chrono',ok:()=>STATS.chronoBest>=12},
- ...['Addition','Multiplication','Équations mixtes','Développer','Puissances','Exp et ln','Trigonométrie','Complexes','Formules de spécialité','Problèmes STI2D','Inéquations'].map((n,i)=>({k:'world'+i,icon:['＋','×','±','( )','√','eˣ','∿','ℂ','ƒ','📖','<'][i],name:'Maître : '+n,d:'Réussir les 10 défis du chapitre',ok:()=>WORLDS[i]&&worldDone(i)})),
+ ...['Addition','Multiplication','Équations mixtes','Développer','Puissances','Exp et ln','Trigonométrie','Complexes','Formules de spécialité','Problèmes','Inéquations'].map((n,i)=>({k:'world'+i,icon:['＋','×','±','( )','√','eˣ','∿','ℂ','ƒ','📖','<'][i],name:'Maître : '+n,d:'Réussir tous les défis du chapitre',ok:()=>WORLDS[i]&&worldDone(i)})),
  {k:'detective',icon:'🔎',name:'Détective',d:'5 problèmes bien traduits du premier coup',ok:()=>(STATS.storyFirst||0)>=5},
  {k:'day3',icon:'📅',name:'Fidèle',d:'Défi du jour 3 jours de suite',ok:()=>DAILY.best>=3},
  {k:'day7',icon:'🗓️',name:'Inarrêtable',d:'Défi du jour 7 jours de suite',ok:()=>DAILY.best>=7},
@@ -319,13 +320,13 @@ function renderMenu(){
   $('#specHead').innerHTML=`<span class="specicon">${iconSVG(sp.icon)}</span><div><div class="kicker">${esc(sp.cls)}</div><h1>${esc(sp.name)} <span>${esc(sp.full)}</span></h1></div>`;
   $('#worlds').innerHTML=WORLDS.map((w,i)=>{const s=worldStars(i),u=unlocked(i);
     return`<button class="wtile${u?'':' locked'}" data-w="${i}" style="--wc:${w.color}"><span class="wnum">${i+1}</span><span class="wicon">${w.icon}</span><span class="wname">${esc(w.name)}</span>
-      <span class="wbar"><i style="width:${Math.round(100*s/30)}%"></i></span><span class="wstar">★ ${s}/30</span>${u?'':`<span class="wlock">🔒 ${UNLOCK} ★ dans le chapitre ${prevWorld(i)+1}</span>`}</button>`}).join('');
-  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(!unlocked(i)){sfx('fail');toast(`🔒 Gagne ${UNLOCK} étoiles dans le chapitre ${prevWorld(i)+1} pour ouvrir celui-ci (tu en as ${worldStars(prevWorld(i))}).`,'warn');return}toWorld(i)});
+      <span class="wbar"><i style="width:${Math.round(100*s/maxStars(i))}%"></i></span><span class="wstar">★ ${s}/${maxStars(i)}</span>${u?'':`<span class="wlock">🔒 ${need(i)} ★ dans le chapitre ${prevWorld(i)+1}</span>`}</button>`}).join('');
+  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(!unlocked(i)){sfx('fail');toast(`🔒 Gagne ${need(i)} étoiles dans le chapitre ${prevWorld(i)+1} pour ouvrir celui-ci (tu en as ${worldStars(prevWorld(i))}).`,'warn');return}toWorld(i)});
 }
 function toWorld(i){closeModal();state.ci=i;const w=WORLDS[i];document.documentElement.style.setProperty('--wc',w.color);
-  $('#worldHead').innerHTML=`<span class="wbig">${w.icon}</span><div><div class="kicker">${esc(SPECS[state.spec].name)} · chapitre ${i+1}</div><h1>${esc(w.name)}</h1><div class="kicker">★ ${worldStars(i)}/30 · ${worldPts(i)} points</div></div>`;
+  $('#worldHead').innerHTML=`<span class="wbig">${w.icon}</span><div><div class="kicker">${esc(SPECS[state.spec].name)} · chapitre ${i+1}</div><h1>${esc(w.name)}</h1><div class="kicker">★ ${worldStars(i)}/${maxStars(i)} · ${worldPts(i)} points</div></div>`;
   $('#stones').innerHTML=w.levels.map((lv,li)=>{const p=PROG[progKey(i,li)];const s=p?p.s:0;
-    return`<button class="stone${p?' done':''}${li===9?' ultime':''}" data-l="${li}" style="--i:${li}"><span class="snum">${li===9?'👑':w.formula||w.story?esc(lv.t||li+1):li+1}</span><small>${'★'.repeat(s)+'☆'.repeat(3-s)}</small>${lv.goal?'<i>🎯</i>':''}</button>`}).join('');
+    return`<button class="stone${p?' done':''}${li===w.levels.length-1?' ultime':''}" data-l="${li}" style="--i:${li}"><span class="snum">${li===w.levels.length-1?'👑':w.formula||w.story?esc(lv.t||li+1):li+1}</span><small>${'★'.repeat(s)+'☆'.repeat(3-s)}</small>${lv.goal?'<i>🎯</i>':''}</button>`}).join('');
   document.querySelectorAll('.stone').forEach(b=>b.onclick=()=>startLevel(i,+b.dataset.l));
   showScreen('world');
 }
