@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Isole x ! (version 1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fablab.css?v=3.1">
+</head>
+<body class="bench">
+<div id="app">
+
+  <!-- ===== ACCUEIL ISOLE X ===== -->
+  <div id="landing" class="screen scrollscreen bench">
+    <div class="wrap">
+      <a class="backlink" href="index.html">◀ Accueil de l'atelier</a>
+      <div class="brand"><span class="brass">x</span><h1>Isole x !</h1></div>
+      <p class="lead">Déplace les jetons pour laisser l'inconnue toute seule. Ce que tu fais d'un côté du =, fais-le de l'autre ! Choisis ta spécialité :</p>
+      <div class="group"><div class="grouplab">Enseignement de spécialité SI</div><div class="specs" id="specSI"></div></div>
+      <div class="group"><div class="grouplab">Série STI2D</div><div class="specs" id="specSTI"></div></div>
+      <div class="group"><div class="grouplab">Atelier libre</div>
+        <div class="specs"><button class="spec wide" id="btnExp" style="--c:#ff3b2f"><span class="specicon">🧪</span><span class="sname">Mode expérimental</span><span class="sfull">Charge l'équation de ton choix et isole la lettre que tu veux</span></button></div></div>
+      <div class="landfoot"><button class="ghostbtn" id="btnHelpLand">▶ Aide animée</button></div>
+    </div>
+  </div>
+
+  <!-- ===== MENU SPÉCIALITÉ ===== -->
+  <div id="menu" class="screen scrollscreen bench hidden">
+    <div class="wrap">
+      <div class="menutop">
+        <button class="hbtn" id="btnLand" title="Changer de spécialité">◀</button>
+        <div id="specHead"></div>
+        <button class="ghostbtn" id="btnHelpMenu">▶ Aide animée</button>
+      </div>
+      <div id="chapters"></div>
+      <div class="chap">
+        <h2>🎲 Entraînement ciblé <small>choisis les thèmes à travailler</small></h2>
+        <div class="gen" id="themeChips"></div>
+        <div class="gen" style="margin-top:10px">
+          <button class="chip" data-diff="0">Facile</button>
+          <button class="chip" data-diff="1">Moyen</button>
+          <button class="chip" data-diff="2">Difficile</button>
+          <button class="bigbtn" id="btnGen">Générer ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODE EXPÉRIMENTAL ===== -->
+  <div id="exp" class="screen scrollscreen bench hidden">
+    <div class="wrap">
+      <div class="menutop"><button class="hbtn" id="btnExpBack" title="Retour">◀</button>
+        <div id="specHead2"><h1 class="exptitle">🧪 Mode expérimental</h1></div></div>
+      <div class="chap">
+        <h2>1. Écris ton équation</h2>
+        <input id="expInput" class="expin" type="text" autocomplete="off" spellcheck="false" placeholder="ex. 3x + 2 = 11   ·   U = R*I   ·   e^(2x) = 9">
+        <div class="exphelp">Opérations : + − * / ^ · fonctions : sqrt( ) cbrt( ) e^( ) ln( ) log( ) 10^( ) sin( ) cos( ) tan( ) arcsin( )… · nombres π (pi) et i · écris <b>a*b</b> pour un produit de lettres.</div>
+        <div class="gen" id="expEx"></div>
+      </div>
+      <div class="chap">
+        <h2>2. Vérifie et choisis l'inconnue</h2>
+        <div class="expprev" id="expPrev"></div>
+        <div class="gen" id="expUnk"></div>
+      </div>
+      <div class="chap">
+        <h2>3. Options</h2>
+        <div class="gen">
+          <label class="check"><input type="checkbox" id="expBox" checked> Effet boîte sur les parenthèses</label>
+          <label class="check grow">🎯 Résultat à atteindre (facultatif) : <input id="expGoal" class="expin small" type="text" placeholder="ex. 3"></label>
+        </div>
+        <div class="btns left"><button class="bigbtn" id="btnExpGo" disabled>Lancer ▶</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== JEU ===== -->
+  <div id="game" class="screen bench hidden">
+    <header>
+      <button class="hbtn" id="btnBack" title="Menu">◀</button>
+      <div class="badge"><span class="dotacc"></span><span id="lvlNum">1/10</span></div>
+      <div id="lvlTitle"></div>
+      <div class="spacer"></div>
+      <div id="moves"></div>
+      <button class="hbtn" id="btnUndo" title="Annuler">↶</button>
+      <button class="hbtn" id="btnHint" title="Indice">💡</button>
+      <button class="hbtn" id="btnReset" title="Recommencer">⟲</button>
+      <button class="hbtn on" id="btnTrad" title="Traduction en équation">𝑓</button>
+      <button class="hbtn" id="btnHist" title="Historique des étapes">📜</button>
+      <button class="hbtn" id="btnHelp" title="Aide animée">?</button>
+    </header>
+    <div id="tip" class="ply hidden"></div>
+    <div id="isobar" class="hidden"></div>
+    <div id="goalBig" class="hidden"></div>
+    <div id="main">
+      <div id="boardwrap"><div id="board">
+        <div class="panel" data-side="0"><div class="content"></div>
+          <div class="zones"><div class="zone" data-zone="mul">× Multiplier</div><div class="zone" data-zone="add">+ Ajouter</div><div class="zone" data-zone="div">÷ Diviser</div></div>
+          <div class="tzones"><div class="zone" data-zone="fn">ƒ Appliquer à tout ce côté</div></div>
+        </div>
+        <div class="panel" data-side="1"><div class="content"></div>
+          <div class="zones"><div class="zone" data-zone="mul">× Multiplier</div><div class="zone" data-zone="add">+ Ajouter</div><div class="zone" data-zone="div">÷ Diviser</div></div>
+          <div class="tzones"><div class="zone" data-zone="fn">ƒ Appliquer à tout ce côté</div></div>
+        </div>
+        <div class="eqmed">=</div>
+      </div><div id="pivot"></div></div>
+      <aside id="history"></aside>
+    </div>
+    <div id="mathline"></div>
+    <div id="deck"></div>
+  </div>
+</div>
+<div id="coach" class="hidden"><div id="coachCap"></div><button id="coachSkip">Passer le tutoriel ✕</button><div id="coachHand">👆</div></div>
+<div id="toast"></div>
+<div id="modal" class="modal hidden"><div class="mbox" id="mbox"></div></div>
+<script src="isole-x.js?v=3.1"></script>
+<script src="isole-x-levels.js?v=3.1"></script>
+<script src="isole-x-ui.js?v=3.1"></script>
+</body>
+</html>

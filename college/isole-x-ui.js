@@ -607,7 +607,7 @@ function seeded(str){let h=1779033703;for(const ch of str)h=Math.imul(h^ch.charC
   return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return((h^=h>>>16)>>>0)/4294967296}}
 function startDaily(){
   const R=Math.random;Math.random=seeded('pepix'+dayKey());let g,th;
-  try{const ths=THEMES.filter((t,i)=>unlocked(i)&&!['formula','trig','story'].includes(t.k)).map(t=>t.k);th=pick(ths.length?ths:['add']);g=genEq(th,ths.length>2?2:1)}finally{Math.random=R}
+  try{th=pick(['add','mul','frac','mix','dev']);g=genEq(th,1)}finally{Math.random=R}
   state.mode='daily';const o={eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,tip:"📅 L'équation du jour est la même pour toute la classe. Reviens demain pour allonger ta série !",box:false,label:'📅',title:'Défi du jour · '+THEMES.find(t=>t.k===th).n};
   lastSetup=Object.assign({},o,{eq0:clone(g.eq)});setup(o);state.chain=null;
 }

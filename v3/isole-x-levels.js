@@ -165,10 +165,46 @@ const SPECS={
   {e:'θ=θ0*e^(-t/τ)',t:'t',tip:"Refroidissement d'un bâtiment : niveau ultime ! Isole l'instant <b>t</b>."},
  ]},
 };
-function chapters(){const sp=SPECS[state.spec];return COMMON.concat([{name:'Formules '+sp.name,icon:'ƒ',theme:'formula',formula:true,levels:sp.f}])}
+/* ---------- problèmes STI2D : choisir l'équation qui traduit la situation ---------- */
+const PROB={name:'Problèmes STI2D',icon:'📖',theme:'story',story:true,levels:[
+ {story:"Une résistance de <b>220 Ω</b> est parcourue par un courant d'intensité <b>I</b>. La tension à ses bornes vaut <b>11 V</b> (loi d'Ohm U = R·I). Trouve I.",ch:['220*I=11','I/220=11','220+I=11'],ok:0,t:'I',goal:'I=1/20',why:"Loi d'Ohm : U = R × I, donc 11 = 220 × I.",intro:'story'},
+ {story:"Un moteur de puissance <b>P</b> fonctionne pendant <b>3 h</b> et consomme une énergie de <b>6 kWh</b> (E = P·t). Trouve P.",ch:['P/3=6','3*P=6','P+3=6'],ok:1,t:'P',goal:'P=2',why:"E = P × t : l'énergie, c'est la puissance multipliée par la durée, donc 3 × P = 6."},
+ {story:"Un vélo électrique roule à vitesse constante <b>v</b>. En <b>2 h</b>, il parcourt <b>50 km</b> (d = v·t). Trouve v.",ch:['2*v=50','v/2=50','v+2=50'],ok:0,t:'v',goal:'v=25',why:"d = v × t, donc 50 = v × 2."},
+ {story:"Deux résistances en <b>série</b> : R et <b>470 Ω</b>. La résistance équivalente vaut <b>1 000 Ω</b>. Trouve R.",ch:['470*R=1000','R+470=1000','R/470=1000'],ok:1,t:'R',goal:'R=530',why:"En série, les résistances <b>s'additionnent</b> : R + 470 = 1 000."},
+ {story:"Un panneau solaire fournit <b>300 W</b>. Il charge une batterie de <b>1 800 Wh</b> en <b>t</b> heures. Trouve t.",ch:['300*t=1800','t/300=1800','300+t=1800'],ok:0,t:'t',goal:'t=6',why:"Énergie = puissance × durée : 300 × t = 1 800."},
+ {story:"Facture d'électricité : abonnement de <b>12 €</b>, plus <b>1/5 €</b> (0,20 €) par kWh. Le total vaut <b>52 €</b>. Trouve l'énergie consommée E.",ch:['12+E/5=52','12*E+1/5=52','(12+E)/5=52'],ok:0,t:'E',goal:'E=200',why:"Chaque kWh coûte 1/5 € : E kWh coûtent E/5 €. On ajoute l'abonnement : 12 + E/5."},
+ {story:"Un ressort de raideur <b>k = 50 N/m</b> est tiré avec une force de <b>20 N</b> (F = k·x). Trouve son allongement x.",ch:['50*x=20','x/50=20','50+x=20'],ok:0,t:'x',goal:'x=2/5',why:"F = k × x, donc 20 = 50 × x."},
+ {story:"Un moteur fournit une puissance utile de <b>450 W</b> avec un rendement <b>η = 3/4</b> (η = Pu/Pa). Trouve la puissance absorbée Pa.",ch:['3/4=Pa/450','3/4=450/Pa','3/4*450=Pa'],ok:1,t:'Pa',goal:'Pa=600',why:"Le rendement, c'est utile / absorbé : η = Pu / Pa = 450 / Pa."},
+ {story:"La température en °F vaut <b>9/5</b> de la température en °C, <b>plus 32</b>. Un capteur affiche <b>77 °F</b>. Trouve la température C en °C.",ch:['9*C/5+32=77','9/(5*C)+32=77','9*(C+32)/5=77'],ok:0,t:'C',goal:'C=25',why:"On multiplie d'abord C par 9/5, puis on ajoute 32 : 9C/5 + 32."},
+ {story:"Niveau ultime ! Une voiture électrique consomme <b>15 kWh pour 100 km</b>. Sa batterie de <b>60 kWh</b> n'a plus que <b>12 kWh</b> après <b>d</b> km. Trouve d.",ch:['60-15*d/100=12','60-15/(100*d)=12','60-15*100*d=12'],ok:0,t:'d',goal:'d=320',why:"Pour d km, la voiture consomme 15 × d / 100 kWh. On l'enlève des 60 kWh de départ."},
+]};
+PROB.levels.forEach(lv=>lv.answer=lv.ch[lv.ok]);
+/* ---------- inéquations ---------- */
+const INEQ={name:'Inéquations',icon:'<',theme:'ineq',levels:[
+ {e:'x+4<9',goal:'x<5',intro:'ineq',tip:"Une <b>inéquation</b> : même règle que pour une équation, ce que tu fais d'un côté, fais-le de l'autre."},
+ {e:'3x≥12',goal:'x≥4',tip:"Diviser par un nombre <b>positif</b> ne change pas le sens."},
+ {e:'-2x>6',goal:'x<-3',intro:'ineqneg',tip:"Attention : multiplier ou diviser par un nombre <b>négatif</b> change le sens de l'inégalité !"},
+ {e:'5-x≤2',goal:'x≥3'},
+ {e:'3x+1>x+7',goal:'x>3'},
+ {e:'x/2-1≤3',goal:'x≤8'},
+ {e:'-x/3>2',goal:'x<-6'},
+ {e:'2(x-1)<x+4',goal:'x<6'},
+ {e:'4I≤12',t:'I',goal:'I≤3',tip:"Une résistance de 4 Ω ne doit pas dépasser <b>12 V</b> (U = R·I ≤ 12). Quelle intensité I au maximum ?"},
+ {e:'7-3x≥2x-8',goal:'x≤3',tip:"Niveau ultime !"},
+]};
+function chapters(){const sp=SPECS[state.spec]||SPECS.sin;return COMMON.concat([{name:'Formules '+sp.name,icon:'ƒ',theme:'formula',formula:true,levels:sp.f},PROB,INEQ])}
+const WORLD_COLORS=['#1e88e5','#e67e22','#ff3b2f','#8e44ad','#2e9e5b','#c9982e','#00a8a8','#6c5ce7','var(--acc)','#e4572e','#5f676f'];
+const WORLDS=[];const THEMES=[];
+function refreshWorlds(){WORLDS.length=0;chapters().forEach((c,i)=>{c.color=WORLD_COLORS[i];WORLDS.push(c)});THEMES.length=0;WORLDS.forEach(w=>THEMES.push({k:w.theme,n:w.name,icon:w.icon}))}
+function levelOpts(ci,li){
+  const ch=WORLDS[ci],lv=ch.levels[li],src=lv.story?lv.answer:lv.e;
+  return{eq:parseEq(src),rel:parseRel(src),target:lv.t||ch.t||'x',goal:lv.goal,tip:lv.story?'📖 '+lv.story:lv.tip,deck:lv.deck,nocomp:lv.nocomp,par:lv.par,
+    box:lv.box!==undefined?lv.box:(li<6&&!ch.formula&&!ch.story&&ch.theme!=='ineq'),
+    label:`${li+1}/${ch.levels.length}`,title:SPECS[state.spec].name+' · '+ch.name+(lv.t&&(ch.formula||ch.story)?' — isoler '+lv.t:''),
+    coach:lv.coach&&!SEEN['coach_'+lv.coach]?lv.coach:null,intro:lv.intro?[].concat(lv.intro).filter(k=>!SEEN[k]):null};
+}
 
 /* ---------- générateur aléatoire ciblé par thème ---------- */
-const THEMES=[{k:'add',n:'Addition'},{k:'mul',n:'Multiplication'},{k:'mix',n:'Mixtes'},{k:'dev',n:'Développer'},{k:'pow',n:'Puissances'},{k:'explog',n:'Exp & ln'},{k:'trig',n:'Trigo'},{k:'cplx',n:'Complexes'},{k:'formula',n:'Formules'}];
 const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[ri(0,a.length-1)];
 const sg=v=>v<0?'-'+(-v):'+'+v;           // signe + valeur pour concaténer
@@ -193,6 +229,9 @@ function genTheme(th,d){
       return pick([()=>({e:`${f}(x)=${v}`,goal:`x=${r}`}),()=>({e:`${c}${f}(x)${sg(b)}=${frs(c*vp+b*vq,vq)}`,goal:`x=${r}`}),()=>({e:`${f}(${c}x)=${v}`,goal:`x=${r}/${c}`})].slice(0,d+1))()}
     case'cplx':{const p=ri(1,6),q=ri(1,6);return pick([()=>({e:`z+${q}i=${p}`,goal:`z=${p}-${q}i`}),()=>({e:`z${sg(-b)}=${p}+${q}i`,goal:`z=${p+b}+${q}i`}),
       ()=>({e:`${c}z=${c*p}+${c*q}i`,goal:`z=${p}+${q}i`}),()=>({e:`${c}z${sg(b)}=z+${(c-1)*p+b}+${(c-1)*q}i`,goal:`z=${p}+${q}i`})].slice(0,d+2))()}
+    case'story':{const lv=pick(PROB.levels.slice(0,4+3*d));return{e:lv.answer,t:lv.t,goal:lv.goal,tip:'📖 '+lv.story}}
+    case'ineq':{const r=pick(['<','>','≤','≥']);const k=pick([a,-a]);const val=k*x0+b;const fl=k<0?{'<':'>','>':'<','≤':'≥','≥':'≤'}[r]:r;
+      return pick([()=>({e:`x${sg(b)}${r}${x0+b}`,goal:`x${r}${x0}`}),()=>({e:`${k}x${sg(b)}${r}${val}`,goal:`x${fl}${x0}`})].slice(0,d>0?2:1))()}
     case'formula':{const lv=pick(SPECS[state.spec].f);return{e:lv.e,t:lv.t,tip:lv.tip}}
   }
 }
