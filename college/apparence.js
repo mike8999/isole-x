@@ -4,7 +4,7 @@
    taille des jetons. Réglages communs à tous les jeux du site.
    ===================================================================== */
 const LOOK=(()=>{
-  const BUILD='21/11/2026 · n° 8';
+  const BUILD='21/11/2026 · n° 10';
   const KEY='isoleX_look',OWN='isoleX_look_owned';
   const THEMES=[
     {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d\'abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},
@@ -42,7 +42,10 @@ const LOOK=(()=>{
     requestAnimationFrame(fit);
   }
   /* opts : {coins:()=>n, spend:(prix)=>bool, onChange:()=>{}} ; sans opts.spend, on ne peut pas acheter ici */
-  function init(nat,opts){native=nat;shop=opts||null;apply()}
+  function init(nat,opts){native=nat;shop=opts||null;
+    /* atelier STI2D : le thème Bonbon devient « Le labo des SII », gratuit */
+    if(nat==='etabli'){const t=find('bonbon');t.n='Le labo des SII';t.d='Rose et lilas, gratuit dans l\'atelier';t.price=0}
+    apply()}
   function prevHTML(){
     const c=(v,cl='n')=>`<span class="card ${cl}">${v}</span>`;
     return`<div class="scene lookscene"><div class="stage"><div class="sbed"><div class="sp">${c('x','box')}<span class="sign">+</span>${c(3)}<span class="dot">·</span>${c('a','s')}</div><div class="smid">=</div><div class="sp">${c(7)}</div></div></div></div>`;

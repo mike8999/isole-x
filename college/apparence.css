@@ -218,3 +218,46 @@ body.calm .looksave .bigbtn.pulse{animation:none}
 .lookbox .looktop{position:static;margin:0;flex:none;border-radius:18px 18px 0 0}
 .lookbox .looksave{position:static;margin:0;flex:none;border-radius:0 0 18px 18px;padding:10px 14px max(10px,env(safe-area-inset-bottom))}
 @media (max-width:520px){.lookbox .lookbody{padding:10px 14px 14px}}
+
+/* en-têtes de menu : le titre garde de la place, les boutons passent dessous sur écran étroit */
+.menutop>#specHead,.menutop>#worldHead{flex:1 1 300px;min-width:min(300px,100%)}
+.menutop #specHead>div,.menutop #worldHead>div{min-width:0;flex:1}
+.menutop #specHead h1{overflow-wrap:break-word}
+@media (max-width:560px){.menutop>.ghostbtn{flex:1 1 auto}}
+/* défi ultime (fond sombre) : chiffre toujours lisible, quel que soit le thème */
+body[data-theme] .lvbtn.ultime{color:#fff6cf}
+body[data-theme] .lvbtn.ultime small,body[data-theme] .lvbtn.ultime .st{color:#ffd23f}
+body[data-theme] .lvbtn{color:#fff}
+body[data-theme] .lvbtn small,body[data-theme] .lvbtn .st{color:rgba(255,255,255,.75)}
+body[data-theme] .chap h2 small{color:color-mix(in srgb,var(--ink) 70%,transparent)}
+
+/* ---------- petites formules (message, objectif, ligne Équation, fenêtres) : toujours des formules, jamais des jetons ---------- */
+body .math .card,body[data-theme] .math .card{background:none!important;box-shadow:none!important;border-radius:0!important;clip-path:none!important;
+  width:auto!important;min-width:0!important;height:auto!important;padding:0 .04em!important;font-family:"Cambria Math","Times New Roman",serif;font-weight:400;font-size:1em;animation:none!important;text-shadow:none!important;color:inherit}
+body .math .card.box{font-weight:700;color:var(--brass3)}
+body[data-theme] .math .sign,body[data-theme] .math .dot,body[data-theme] .math .par{color:inherit!important}
+body[data-theme] .math .bar{background:currentColor!important}
+body[data-theme] #isobar,body[data-theme] #isobar .math{color:#3a2412}
+body[data-theme] #isobar .math .card.box{color:#8f6512}
+body[data-theme] #goalBig .math,body[data-theme] #mathline .math,body[data-theme] #history .math{color:var(--cream)}
+body #goalBig .math .card.box,body #mathline .math .card.box{color:var(--brass2)}
+body[data-theme] .mbox .math{color:var(--ink)}
+body[data-theme] #tip .math{color:var(--ink)}
+
+/* parenthèses : zone de toucher plus large, sans décaler l'affichage */
+#board .par,.scene .par{padding:0 .2em;margin:0 -.14em;position:relative;z-index:1}
+@media (pointer:coarse){#board .par{padding:.12em .28em;margin:-.12em -.2em}}
+
+/* barre du haut du jeu : tient sur une ligne sur téléphone */
+@media (max-width:440px){
+  #game header{gap:5px;padding:6px 6px}
+  #game header .hbtn{width:40px;height:40px;font-size:17px}
+  #game header .badge{padding:4px 9px;gap:5px;font-size:18px}
+  #game header #moves{padding:5px 8px;font-size:13px}#game header #moves b{font-size:14px}
+  #game header .petmini{width:32px;height:32px}
+  #game header .spacer{flex:1 1 0;min-width:0}
+}
+@media (max-width:350px){#game header .petmini{display:none}#game header .hbtn{width:36px;height:36px}}
+/* message « est isolé » : la règle de largeur ne doit viser que le texte, pas chaque morceau de formule */
+#isobar .math span,#isobar .math{flex:none!important;min-width:0!important}
+#isobar .math{display:inline-flex;vertical-align:middle;margin:0 .2em}

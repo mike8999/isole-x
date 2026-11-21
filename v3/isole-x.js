@@ -430,12 +430,15 @@ function findSimp(sum){
 }
 function findGroupDev(sum){for(const t of sum){const g=t.num.find(f=>f.t==='g');if(g&&(t.num.length>1||t.den.length||t.neg))return g;
   for(const f of t.num.concat(t.den)){const sub=f.t==='g'?f.terms:f.t==='f'?f.arg:null;if(sub){const r=findGroupDev(sub);if(r)return r}}}return null}
+function findTermOf(sum,g){for(const t of sum){if(t.num.includes(g))return t;for(const f of t.num.concat(t.den)){const sub=f.t==='g'?f.terms:f.t==='f'?f.arg:null;if(sub){const r=findTermOf(sub,g);if(r)return r}}}return null}
 function conjCard(g){return T([G(g.terms.map(t=>{const c=reid(t);if(hasImag(c))c.neg=!c.neg;return c}))])}
 function computeHint(){
   const tg=state.target,E=state.eq;
   const iso=isoSide();
   if(iso>=0){const o=1-iso;const h=findSimp(E[o]);if(h)return h;
-    if(state.goal&&!goalMatch()){const g=findGroupDev(E[o]);if(g)return{msg:'Développe pour arriver au résultat demandé.',ids:[g.id],act:'dev'};return{msg:'Compare avec le résultat demandé 🎯.',ids:[]}}
+    if(state.goal&&!goalMatch()){const g=findGroupDev(E[o]);if(g){const t=E[o].find(t=>t.num.includes(g))||findTermOf(E[o],g);
+      if(t&&t.neg&&t.num.length===1&&!t.den.length)return{msg:'Distribue le signe − : touche la parenthèse. −(a − b) devient −a + b.',ids:[g.id],act:'dev'};
+      return{msg:'Développe pour arriver au résultat demandé : touche la parenthèse.',ids:[g.id],act:'dev'}}return{msg:'Compare avec le résultat demandé 🎯.',ids:[]}}
     return{msg:'C\'est le plus simple possible : valide !',ids:[],act:'validate'}}
   const both=hasT(E[0])&&hasT(E[1]);const sd=hasT(E[0])?0:1;const sum=E[sd];
   let h=findSimp(sum)||(both?findSimp(E[1-sd]):null);if(h)return h;

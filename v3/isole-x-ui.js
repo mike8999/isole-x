@@ -33,7 +33,7 @@ function render(){
   const bar=$('#isobar');
   if(iso>=0&&!state.won&&!pend&&!state.coach){
     bar.classList.remove('hidden');
-    if(state.goal)bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé, mais il faut arriver à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}. Continue à simplifier !</span>`;
+    if(state.goal){const hh=computeHint();bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé, mais il faut arriver exactement à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}.${hh&&hh.act==='dev'?` <b>💡 ${hh.msg}</b>`:' Continue à simplifier !'}</span>`}
     else{const left=Math.max(0,state.isoAt+state.bonusMax-state.moves);
       bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé ! ✨ Simplifie au maximum${left?` (encore ${left} coup${left>1?'s':''} bonus)`:''} pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
   }else bar.classList.add('hidden');

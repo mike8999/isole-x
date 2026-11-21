@@ -1,6 +1,6 @@
 /* Isole x ! Jungle 2 : fonctionne hors ligne après une première visite */
-const CACHE='isolex-college-c12';const MINE=k=>k.startsWith('isolex-college-')||k.startsWith('isolex-jungle2-');
-const SHELL=['./','./index.html','./fablab.css?v=c4','./jungle.css?v=c4','./isole-x.js?v=c5','./college-levels.js?v=c4','./isole-x-ui.js?v=c9','./qrcode.js?v=c4','./apparence.css?v=a6','./apparence.js?v=a6','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='isolex-college-c14';const MINE=k=>k.startsWith('isolex-college-')||k.startsWith('isolex-jungle2-');
+const SHELL=['./','./index.html','./fablab.css?v=c4','./jungle.css?v=c4','./isole-x.js?v=c13','./college-levels.js?v=c4','./isole-x-ui.js?v=c13','./qrcode.js?v=c4','./apparence.css?v=b1','./apparence.js?v=b1','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>MINE(k)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
