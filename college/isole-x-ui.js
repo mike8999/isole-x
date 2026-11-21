@@ -632,12 +632,85 @@ function showSettings(){
 }
 if('serviceWorker'in navigator&&/^https:|^http:\/\/localhost/.test(location.href))navigator.serviceWorker.register('sw.js').catch(()=>{});
 
+/* ---------- sauvegarde : code et QR code, sans serveur ---------- */
+const B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const SLOT_KEYS=['head','eyes','neck','color'];
+const DAY0=Date.UTC(2026,0,1);
+function bitW(){const b=[];return{b,put(v,n){for(let i=n-1;i>=0;i--)b.push((v>>i)&1)},vint(v){v=Math.max(0,Math.floor(v||0));do{const c=v&7;v=Math.floor(v/8);b.push(v?1:0);this.put(c,3)}while(v)}}}
+function bitR(b){let p=0;return{get(n){let v=0;for(let i=0;i<n;i++){if(p>=b.length)throw new Error('court');v=v*2+b[p++]}return v},vint(){let v=0,m=1,more;do{more=this.get(1);v+=this.get(3)*m;m*=8}while(more);return v},left:()=>b.length-p}}
+const crc10=bits=>{let h=0x2A5;for(const x of bits){h=((h<<1)|x)^((h&0x200)?0x233:0);h&=0x3FF}return h};
+const levelList=()=>{const a=[];WORLDS.forEach((w,ci)=>w.levels.forEach((lv,li)=>a.push({k:progKey(ci,li),goal:!!(lv.goal||lv.steps)})));return a};
+function makeSaveCode(){
+  const w=bitW();const zv=v=>{v=Math.max(0,Math.floor(v||0));if(!v)w.put(0,1);else{w.put(1,1);w.vint(v-1)}};
+  w.put(2,3);
+  ['chronoBest','bestNoHint','storyFirst','bonusCoins','spent'].forEach(k=>zv(STATS[k]));
+  const own=ITEMS.map(it=>SHOP.owned[it.k]?1:0);if(own.some(Boolean)){w.put(1,1);own.forEach(x=>w.put(x,1));SLOT_KEYS.forEach(sl=>{const its=ITEMS.filter(i=>i.slot===sl);w.put(its.findIndex(i=>i.k===SHOP.eq[sl])+1,3)})}else w.put(0,1);
+  if(DAILY.last){w.put(1,1);zv(Math.round((Date.UTC(...DAILY.last.split('-').map((v,i)=>i===1?v-1:+v))-DAY0)/864e5));zv(DAILY.streak);zv(DAILY.best)}else w.put(0,1);
+  const L=levelList(),runs=[];let i=0;
+  while(i<L.length){let g=0;while(i<L.length&&!PROG[L[i].k]){g++;i++}if(i>=L.length)break;const st=i;while(i<L.length&&PROG[L[i].k])i++;runs.push([g,st,i])}
+  zv(runs.length);runs.forEach(([g,a,b])=>{zv(g);zv(b-a-1);for(let k=a;k<b;k++){const p=PROG[L[k].k],sp=p.p>p.s*100;if(p.s===3&&sp)w.put(1,1);else{w.put(0,1);w.put(p.s,2);w.put(sp?1:0,1)}}});
+  const bits=w.b;while((bits.length+10)%5)bits.push(0);const c=crc10(bits);bits.push(...[9,8,7,6,5,4,3,2,1,0].map(i=>(c>>i)&1));
+  let out='';for(let i=0;i<bits.length;i+=5)out+=B32[bits.slice(i,i+5).reduce((a,x)=>a*2+x,0)];
+  return out.match(/.{1,4}/g).join('-');
+}
+function readSaveCode(code){
+  const s=code.toUpperCase().replace(/[\s\-_.]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1').replace(/U/g,'V');
+  if(s.length<3)throw new Error('Code trop court.');
+  const bits=[];for(const ch of s){const v=B32.indexOf(ch);if(v<0)throw new Error(`Caractère inconnu : « ${ch} ».`);for(let i=4;i>=0;i--)bits.push((v>>i)&1)}
+  const body=bits.slice(0,-10),c=bits.slice(-10).reduce((a,x)=>a*2+x,0);if(crc10(body)!==c)throw new Error('Ce code contient une erreur : vérifie chaque caractère.');
+  const r=bitR(body);const zv=()=>r.get(1)?r.vint()+1:0;if(r.get(3)!==2)throw new Error('Code d\'une version inconnue.');
+  const d={stats:{},owned:{},eq:{},daily:{last:'',streak:0,best:0},prog:{}};
+  ['chronoBest','bestNoHint','storyFirst','bonusCoins','spent'].forEach(k=>d.stats[k]=zv());
+  if(r.get(1)){ITEMS.forEach(it=>{if(r.get(1))d.owned[it.k]=1});SLOT_KEYS.forEach(sl=>{const its=ITEMS.filter(i=>i.slot===sl);const v=r.get(3);d.eq[sl]=v?(its[v-1]||{}).k||null:null})}
+  if(r.get(1)){const dl=zv();d.daily={last:dayKey(new Date(DAY0+dl*864e5+12*36e5)),streak:zv(),best:zv()}}
+  const L=levelList();let i=0;const nr=zv();
+  for(let q=0;q<nr;q++){i+=zv();const n=zv()+1;for(let k=0;k<n;k++,i++){let st=3,sp=1;if(!r.get(1)){st=r.get(2);sp=r.get(1)}if(L[i])d.prog[L[i].k]={s:st,p:st*100+(sp?50:0)}}}
+  const done=L.filter(l=>d.prog[l.k]);
+  Object.assign(d.stats,{wins:done.length,perfect:done.filter(l=>d.prog[l.k].s===3).length,goals:done.filter(l=>l.goal).length,simp:done.filter(l=>!l.goal&&d.prog[l.k].p%100).length,noHint:0});
+  return d;
+}
+function applySave(d){
+  for(const k in PROG)delete PROG[k];Object.assign(PROG,d.prog);saveProg();
+  Object.assign(STATS,d.stats);saveStats();SHOP.owned=d.owned;SHOP.eq=d.eq;saveShop();Object.assign(DAILY,d.daily);saveDaily();
+  for(const k in GOT)delete GOT[k];BADGES.forEach(b=>{if(b.ok())GOT[b.k]=Date.now()});saveGot();
+  SEEN.coach_tuto1=true;WORLDS.forEach((w,ci)=>w.levels.forEach((lv,li)=>{if(PROG[progKey(ci,li)]&&lv.intro)[].concat(lv.intro).forEach(k=>SEEN[k]=true)}));saveSeen();
+}
+const saveSummary=d=>{const st=Object.values(d.prog).reduce((a,p)=>a+p.s,0),n=Object.keys(d.prog).length;return`★ ${st} étoile${st>1?'s':''} · ${n} défi${n>1?'s':''} réussi${n>1?'s':''}`};
+const saveURL=code=>location.href.split('#')[0].split('?')[0].replace(/[^/]*$/,'')+'#reprendre='+code.replace(/-/g,'');
+function showSave(tab='save'){
+  const code=makeSaveCode();let qr='';
+  try{if(window.qrcode){const q=qrcode(0,'M');q.addData(saveURL(code));q.make();qr=q.createSvgTag({cellSize:4,margin:2,scalable:true,alt:'QR code de sauvegarde'})}}catch(e){}
+  modal(`<h2>💾 Ma sauvegarde</h2>
+   <div class="savetabs"><button class="chip${tab==='save'?' on':''}" data-stab="save">Sauvegarder</button><button class="chip${tab==='load'?' on':''}" data-stab="load">Reprendre sur cet appareil</button></div>
+   ${tab==='save'?`<p>Ta progression reste sur cet appareil. Pour la retrouver <b>sur un autre ordinateur ou une tablette</b>, note ce code ou prends le QR code en photo.</p>
+    <div class="savebox"><div class="savecode" id="saveCode">${code}</div>${qr?`<div class="saveqr">${qr}</div>`:''}</div>
+    <div class="kicker">${saveSummary(readSaveCode(code))}</div>
+    <p><small>Le code change quand tu progresses : refais une sauvegarde à la fin de chaque séance. Il ne contient ni ton nom ni aucune donnée personnelle.${qr?' Scanne le QR code avec l\'appareil photo d\'une tablette : le jeu s\'ouvre et reprend ta partie.':''}</small></p>
+    <div class="btns"><button class="ghostbtn" id="btnCopySave">📋 Copier le code</button><button class="bigbtn" data-act="close">Fermer</button></div>`
+   :`<p>Tape ton code de sauvegarde. <b>Attention :</b> la progression actuelle de cet appareil sera remplacée.</p>
+    <input id="loadCode" class="loadcode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX">
+    <div id="loadMsg" class="profmsg"></div>
+    <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="btnLoadSave">Reprendre ▶</button></div>`}`,'badgesbox');
+  document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>showSave(b.dataset.stab));
+  const cp=$('#btnCopySave');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(code);cp.textContent='✔ Copié !'}catch(e){const r=document.createRange();r.selectNodeContents($('#saveCode'));getSelection().removeAllRanges();getSelection().addRange(r);cp.textContent='Sélectionné : fais Ctrl+C'}};
+  const go=$('#btnLoadSave');if(go){const inp=$('#loadCode');setTimeout(()=>inp.focus(),50);
+    const run=()=>{try{const d=readSaveCode(inp.value);confirmLoad(d)}catch(e){$('#loadMsg').textContent=e.message;sfx('fail')}};go.onclick=run;inp.onkeydown=e=>{if(e.key==='Enter')run()}}
+}
+let pendingSave=null;
+function confirmLoad(d){pendingSave=d;
+  modal(`<h2>💾 Reprendre cette partie ?</h2><div class="pts">${saveSummary(d)}</div><p>La progression actuelle de cet appareil sera <b>remplacée</b>.</p>
+   <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="btnDoLoad">Oui, reprendre</button></div>`,'intro');
+  $('#btnDoLoad').onclick=()=>{applySave(pendingSave);pendingSave=null;closeModal();toHome();sfx('badge');confetti(60);toast('✔ Partie reprise : bon retour dans la jungle !')};
+}
+function checkSaveLink(){const m=location.hash.match(/reprendre=([0-9A-Za-z]+)/);if(!m)return;history.replaceState(null,'',location.href.split('#')[0]);
+  try{confirmLoad(readSaveCode(m[1]))}catch(e){toast('Ce lien de sauvegarde est abîmé : '+e.message,'warn',6000)}}
+
 /* ---------- boutons ---------- */
 $('#btnBack').onclick=backFromGame;$('#btnWorldBack').onclick=toHome;$('#btnTrainBack').onclick=toHome;
 $('#btnUndo').onclick=undo;$('#btnHint').onclick=()=>{state.usedHint=true;hint()};
 $('#btnReset').onclick=replay;
 $('#btnTrad').onclick=()=>{state.trad=!state.trad;$('#btnTrad').classList.toggle('on',state.trad);render()};
-$('#toast').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(b)showWhy(+b.dataset.why)});$('#btnSettings').onclick=showSettings;
+$('#toast').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(b)showWhy(+b.dataset.why)});$('#btnSettings').onclick=showSettings;$('#btnSave').onclick=()=>showSave('save');
 $('#btnHelp').onclick=showHelp;$('#btnHelpHome').onclick=showHelp;
 $('#btnHist').onclick=()=>modal('<h2>Traduction pas à pas</h2><div class="histlist">'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq,h.rel)}</div>`).join('')+'</div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>');
 $('#tip').addEventListener('click',e=>{if(e.target.id==='tipX'){state.tipClosed=true;render()}});
@@ -665,5 +738,5 @@ function askProfCode(){
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!$('#game').classList.contains('hidden')){e.preventDefault();undo()}});
 window.addEventListener('resize',()=>{if(state.coach)coachShow()});
 document.documentElement.style.setProperty('--acc','#ff8c42');
-applyOpts();renderHome();
+applyOpts();renderHome();checkSaveLink();
 if(location.hash==='#labo')showExp();
