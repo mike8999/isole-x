@@ -4,7 +4,7 @@
    taille des jetons. Réglages communs à tous les jeux du site.
    ===================================================================== */
 const LOOK=(()=>{
-  const BUILD='21/11/2026 · n° 6';
+  const BUILD='21/11/2026 · n° 7';
   const KEY='isoleX_look',OWN='isoleX_look_owned';
   const THEMES=[
     {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d\'abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},

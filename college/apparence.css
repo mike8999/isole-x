@@ -212,8 +212,6 @@ body.calm .looksave .bigbtn.pulse{animation:none}
 /* ---------- iPhone / iPad : la fenêtre tient dans la partie vraiment visible (barres de Safari comprises) ---------- */
 .modal{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));height:100%;height:100dvh;box-sizing:border-box}
 .mbox{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
-#app,html,body{height:100%}
-@supports (height:100dvh){#app{height:100dvh}}
 /* fenêtre Apparence : haut (Retour) et bas (Enregistrer) fixes, seul le milieu défile */
 .mbox.lookbox{display:flex;flex-direction:column;overflow:hidden!important;padding:0!important}
 .lookbox .lookbody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 22px 16px}
