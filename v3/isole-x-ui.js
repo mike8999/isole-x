@@ -633,7 +633,7 @@ function dailyWin(){if(dailyDone())return 0;DAILY.streak=DAILY.last===yesterday(
   const bonus=20+10*Math.min(DAILY.streak,7);STATS.bonusCoins=(STATS.bonusCoins||0)+bonus;saveStats();return bonus}
 /* ---------- réglages et accessibilité ---------- */
 function applyOpts(){document.body.classList.toggle('dys',!!OPTS.dys);document.body.classList.toggle('calm',!!OPTS.calm);
-  document.documentElement.style.setProperty('--zoom',OPTS.size||1);$('#app').style.zoom=OPTS.size||1}
+  document.documentElement.style.setProperty('--zoom',OPTS.size||1);$('#app').style.zoom=LOOK.textZoom(OPTS.size||1)}
 let installEvt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 function showSettings(){
   const sz=OPTS.size||1;
@@ -642,7 +642,7 @@ function showSettings(){
    <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
    <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l'inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
-   <div class="setrow"><span><b>Taille du texte</b></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
+   <div class="setrow"><span><b>Taille du texte</b><small>Sur un petit écran, elle est limitée automatiquement pour que rien ne soit coupé.</small></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
    <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l\'appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l\'écran d\'accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l\'application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
    </div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
   document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
@@ -726,9 +726,17 @@ function checkSaveLink(){const m=location.hash.match(/reprendre=([0-9A-Za-z]+)/)
   try{confirmLoad(readSaveCode(m[1]))}catch(e){toast('Ce lien de sauvegarde est abîmé : '+e.message,'warn',6000)}}
 
 /* ---------- apparence : thèmes et réglages fins ---------- */
-function showLook(){modal(LOOK.html(),'lookbox')}
+let lookFrom='home';
+function showLook(){if(!$('#mbox').classList.contains('lookbox'))lookFrom=['home','menu','world','train','game','exp'].find(k=>$('#'+k)&&!$('#'+k).classList.contains('hidden'))||'home';modal(LOOK.html(),'lookbox')}
 document.getElementById('mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;
-  const msg=LOOK.click(e.target);sfx(msg&&msg.startsWith('🎨')?'badge':'pop');const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(msg)toast(msg,msg.startsWith('🎨')?'':'warn')});
+  const r=LOOK.click(e.target);if(!r)return;
+  if(r.act){closeModal();sfx(r.act==='save'?'badge':'pop');if(lookFrom==='home')toHome();else showScreen(lookFrom);if(lookFrom==='game')render();if(r.msg)toast(r.msg);return}
+  sfx(r.msg&&r.msg.startsWith('🎨')?'badge':'pop');const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(r.msg)toast(r.msg,r.warn?'warn':'')});
+/* fermer la fenêtre Apparence sans enregistrer annule l'aperçu */
+const _closeModal=closeModal;closeModal=function(){if($('#mbox').classList.contains('lookbox'))LOOK.cancel();_closeModal()};
+/* après chaque affichage : ajuster la taille pour que rien ne soit coupé */
+const _render=render;render=function(){_render.apply(this,arguments);LOOK.fit()};
+const _renderDeck=renderDeck;renderDeck=function(){_renderDeck.apply(this,arguments);LOOK.fit()};
 LOOK.init('etabli',{coins:()=>coins(),spend:pr=>{if(coins()<pr)return false;STATS.spent=(STATS.spent||0)+pr;saveStats();return true},onChange:()=>{if(!$('#home').classList.contains('hidden'))renderHome()}});
 
 /* ---------- boutons ---------- */

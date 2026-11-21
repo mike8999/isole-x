@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L'atelier STI2D (version 3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fablab.css?v=3.1">
+<link rel="stylesheet" href="apparence.css?v=a1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<style>
+html,body{overflow:auto}
+.hub{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:clamp(24px,5vw,56px) 16px 48px}
+.hub .wrap{width:min(1000px,100%)}
+.hub h1{font-family:var(--title);font-size:clamp(36px,6vw,58px);line-height:1.05;margin:0 0 8px;text-shadow:0 3px 0 rgba(40,20,5,.5)}
+.hub .lead{margin-bottom:28px}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:22px}
+.door{position:relative;display:flex;flex-direction:column;gap:14px;padding:26px 24px 24px;text-decoration:none;color:var(--ink);border-radius:20px;min-height:300px;transition:transform .18s;
+  background:repeating-linear-gradient(88deg,rgba(150,100,40,.10) 0 1px,transparent 1px 7px),linear-gradient(170deg,var(--birch1),var(--birch2));
+  box-shadow:inset 0 0 0 2px var(--burn),inset 0 8px 0 var(--c),0 8px 0 rgba(60,35,10,.45),0 18px 30px rgba(0,0,0,.35)}
+.door:hover{transform:translateY(-5px) rotate(-.4deg)}
+.door:focus-visible{outline:3px solid var(--c);outline-offset:4px}
+.door .pic{height:120px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:34px;background-color:var(--bed);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48.5' viewBox='0 0 28 48.5'%3E%3Cpath d='M14 0 28 8.08v16.17L14 32.33 0 24.25V8.08zM14 32.33 28 40.42v16.16M14 32.33 0 40.42v16.16' fill='none' stroke='%23404449' stroke-width='1.6'/%3E%3C/svg%3E");box-shadow:inset 0 0 30px rgba(0,0,0,.6)}
+.door h2{font-family:var(--title);font-size:34px;margin:0;line-height:1}
+.door p{margin:0;font-size:16px;line-height:1.45;color:#5a3c1d}
+.door .go{margin-top:auto;align-self:flex-start;background:var(--c);color:#fff;font-family:var(--title);font-weight:700;padding:10px 18px;border-radius:12px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.door .pic .sign{font-size:30px}
+.mol3{display:flex;align-items:center;gap:4px}
+.mol3 i{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--a) 55%);box-shadow:0 2px 3px rgba(0,0,0,.6);display:block}
+.tags{display:flex;flex-wrap:wrap;gap:6px}.tags span{font-size:13px;font-weight:600;background:rgba(120,70,20,.14);padding:3px 9px;border-radius:999px}
+</style>
+</head>
+<body class="bench">
+<div class="hub">
+  <div class="wrap">
+    <h1>L'atelier STI2D</h1>
+    <p class="lead">Deux établis pour s'entraîner en jouant. Choisis où tu veux travailler :</p>
+    <div class="doors">
+      <a class="door" href="isole-x.html" style="--c:#1e88e5">
+        <div class="pic"><span class="card box" style="font-size:34px">x</span><span class="sign">+</span><span class="card n" style="font-size:34px">3</span><span class="sign" style="color:#ff3b2f">=</span><span class="card n" style="font-size:34px">7</span></div>
+        <h2>Isole x !</h2>
+        <p>Mathématiques : déplace les jetons pour isoler l'inconnue, des premières équations jusqu'aux fonctions, aux nombres complexes et aux formules de ta spécialité.</p>
+        <div class="tags"><span>SI</span><span>SIN</span><span>ITEC</span><span>EE</span><span>AC</span><span>🧪 mode expérimental</span></div>
+        <span class="go">Entrer ▶</span>
+      </a>
+      <a class="door" href="physics.html" style="--c:#e4572e">
+        <div class="pic"><span class="mol3"><i style="--a:#2b2b2b"></i><i style="--a:#f1f1f1"></i><i style="--a:#f1f1f1"></i></span><span class="sign" style="color:#ff3b2f">⟶</span><span class="mol3"><i style="--a:#e53935"></i><i style="--a:#2b2b2b"></i><i style="--a:#e53935"></i></span></div>
+        <h2>Physic's &amp; Co</h2>
+        <p>Chimie : équilibre les équations de réaction en ajustant les coefficients, en comptant les atomes et les charges.</p>
+        <div class="tags"><span>🔥 Combustions</span><span>⚡ Oxydoréduction</span><span>🧪 Acides et bases</span><span>🏭 Matériaux et énergie</span></div>
+        <span class="go">Entrer ▶</span>
+      </a>
+    </div>
+  </div>
+</div>
+<script src="apparence.js?v=a1"></script><script>LOOK.init('etabli');</script>
+<script>if('serviceWorker'in navigator&&/^https:|^http:\/\/localhost/.test(location.href))navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+</body>
+</html>

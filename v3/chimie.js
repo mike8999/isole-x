@@ -221,7 +221,11 @@ $('#btnHelp').onclick=showHelp;$('#btnHelpMenu').onclick=showHelp;
 LOOK.init('etabli');
 function showLook(){modal(LOOK.html(),'lookbox')}
 $('#btnLookMenu').onclick=showLook;
-$('#mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;const msg=LOOK.click(e.target);const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(msg)toast(msg,'warn')});$('#btnRnd').onclick=startRandom;
+$('#mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;const r=LOOK.click(e.target);if(!r)return;
+  if(r.act){closeModal();if(!$('#game').classList.contains('hidden'))render();else renderMenu();if(r.msg)toast(r.msg);return}
+  const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(r.msg)toast(r.msg,r.warn?'warn':'')});
+const _closeModal=closeModal;closeModal=function(){if($('#mbox').classList.contains('lookbox'))LOOK.cancel();_closeModal()};
+const _render=render;render=function(){_render.apply(this,arguments);LOOK.fit()};$('#btnRnd').onclick=startRandom;
 $('#isobar').addEventListener('click',e=>{if(e.target.id==='btnValid')win()});
 $('#coachSkip').onclick=stopCoach;
 renderMenu();

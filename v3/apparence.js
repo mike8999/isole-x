@@ -20,21 +20,24 @@ const LOOK=(()=>{
   const XS=[['auto','Selon le thème'],['laiton','Plaque'],['oeuf','Œuf'],['bille','Bille'],['hexa','Écrou'],['etoile','Étoile']];
   const ACCS=['auto','#1e88e5','#e53935','#ff8c42','#f4b400','#2e9e5b','#00a8a8','#6c5ce7','#d6336c'];
   const TOKS=[[1,'Normale'],[1.15,'Grande'],[1.3,'Très grande']];
-  let cfg={theme:null,board:'auto',x:'auto',acc:'auto',tok:1};try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+  const DEF={theme:null,board:'auto',x:'auto',acc:'auto',tok:1};
+  let cfg=Object.assign({},DEF);try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+  let draft=Object.assign({},cfg); // aperçu en cours, enregistré seulement avec le bouton Enregistrer
   let own={};try{own=JSON.parse(localStorage.getItem(OWN)||'{}')}catch(e){}
   const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg));localStorage.setItem(OWN,JSON.stringify(own))}catch(e){}};
   let native='etabli',shop=null;
   const find=k=>THEMES.find(t=>t.k===k);
   const owned=k=>{const t=find(k);return!!t&&(t.price===0||k===native||!!own[k])};
-  const current=()=>cfg.theme&&owned(cfg.theme)?cfg.theme:native;
-  function apply(){
-    const b=document.body;if(!b)return;const th=current();
+  const current=(c=draft)=>c.theme&&owned(c.theme)?c.theme:native;
+  function apply(c=draft){
+    const b=document.body;if(!b)return;const th=current(c);
     if(th===native)b.removeAttribute('data-theme');else b.dataset.theme=th;
-    if(cfg.board&&cfg.board!=='auto')b.dataset.board=cfg.board;else b.removeAttribute('data-board');
-    if(cfg.x&&cfg.x!=='auto')b.dataset.x=cfg.x;else b.removeAttribute('data-x');
-    if(cfg.tok&&cfg.tok!==1){b.dataset.tok='1';b.style.setProperty('--tokz',cfg.tok)}else{b.removeAttribute('data-tok');b.style.removeProperty('--tokz')}
-    if(cfg.acc&&cfg.acc!=='auto')b.style.setProperty('--acc',cfg.acc);else b.style.removeProperty('--acc');
+    if(c.board&&c.board!=='auto')b.dataset.board=c.board;else b.removeAttribute('data-board');
+    if(c.x&&c.x!=='auto')b.dataset.x=c.x;else b.removeAttribute('data-x');
+    if(c.tok&&c.tok!==1){b.dataset.tok='1';b.style.setProperty('--tokz',c.tok)}else{b.removeAttribute('data-tok');b.style.removeProperty('--tokz')}
+    if(c.acc&&c.acc!=='auto')b.style.setProperty('--acc',c.acc);else b.style.removeProperty('--acc');
     const m=document.querySelector('meta[name="theme-color"]');if(m){const t=find(th);m.content=t.sw[0]}
+    requestAnimationFrame(fit);
   }
   /* opts : {coins:()=>n, spend:(prix)=>bool, onChange:()=>{}} ; sans opts.spend, on ne peut pas acheter ici */
   function init(nat,opts){native=nat;shop=opts||null;apply()}
@@ -49,24 +52,44 @@ const LOOK=(()=>{
        return`<button class="lth${on?' on':''}${ok?'':' locked'}" data-lk="theme" data-v="${t.k}"><span class="sw" style="background:${t.sw[0]}"><i style="background:${t.sw[1]}"></i><i class="x" style="background:${t.sw[2]}"></i><i style="background:${t.sw[3]};outline:2px solid ${t.sw[1]}"></i></span>
         <b>${t.n}${t.k===native?' ★':''}</b><small>${t.d}</small>${ok?'':`<span class="lk">${shop&&shop.spend?'🪙 '+t.price:'🔒'}</span>`}</button>`}).join('')}</div>
      ${coins!==null?`<p><small>🪙 ${coins} pièce${coins>1?'s':''} · les thèmes achetés le sont pour tous les jeux du site.</small></p>`:'<p><small>🔒 Les thèmes verrouillés se débloquent avec les pièces gagnées dans Isole x !</small></p>'}
-     <h3>Plateau</h3><div class="lookrow">${BOARDS.map(([k,n])=>`<button class="chip${cfg.board===k?' on':''}" data-lk="board" data-v="${k}">${n}</button>`).join('')}</div>
-     <h3>Forme de l'inconnue</h3><div class="lookrow">${XS.map(([k,n])=>`<button class="chip${cfg.x===k?' on':''}" data-lk="x" data-v="${k}">${n}</button>`).join('')}</div>
-     <h3>Couleur des boutons</h3><div class="lookrow">${ACCS.map(c=>`<button class="lsw${c==='auto'?' auto':''}${cfg.acc===c?' on':''}" data-lk="acc" data-v="${c}" title="${c==='auto'?'Selon la spécialité ou le thème':c}" style="${c==='auto'?'':'background:'+c}"></button>`).join('')}</div>
-     <h3>Taille des jetons</h3><div class="lookrow">${TOKS.map(([v,n])=>`<button class="chip${+cfg.tok===v?' on':''}" data-lk="tok" data-v="${v}">${n}</button>`).join('')}</div>
-     <div class="lookrow" style="margin-top:14px;justify-content:center"><button class="ghostbtn" data-lk="reset" data-v="1">↺ Tout remettre par défaut</button></div>`;
+     <h3>Plateau</h3><div class="lookrow">${BOARDS.map(([k,n])=>`<button class="chip${draft.board===k?' on':''}" data-lk="board" data-v="${k}">${n}</button>`).join('')}</div>
+     <h3>Forme de l'inconnue</h3><div class="lookrow">${XS.map(([k,n])=>`<button class="chip${draft.x===k?' on':''}" data-lk="x" data-v="${k}">${n}</button>`).join('')}</div>
+     <h3>Couleur des boutons</h3><div class="lookrow">${ACCS.map(c=>`<button class="lsw${c==='auto'?' auto':''}${draft.acc===c?' on':''}" data-lk="acc" data-v="${c}" title="${c==='auto'?'Selon la spécialité ou le thème':c}" style="${c==='auto'?'':'background:'+c}"></button>`).join('')}</div>
+     <h3>Taille des jetons</h3><div class="lookrow">${TOKS.map(([v,n])=>`<button class="chip${+draft.tok===v?' on':''}" data-lk="tok" data-v="${v}">${n}</button>`).join('')}</div>
+     <div class="lookrow" style="margin-top:14px;justify-content:center"><button class="ghostbtn" data-lk="reset" data-v="1">↺ Tout remettre par défaut</button></div>
+     <div class="looksave">${changed()?'<small>Modifications non enregistrées</small>':''}<button class="ghostbtn" data-lk="cancel" data-v="1">Annuler</button><button class="bigbtn" data-lk="save" data-v="1">💾 Enregistrer</button></div>`;
   }
-  /* clic dans la fenêtre : renvoie un message éventuel à afficher */
+  const changed=()=>JSON.stringify(draft)!==JSON.stringify(cfg);
+  /* clic dans la fenêtre : renvoie {msg, act} ; act = 'save' ou 'cancel' quand il faut fermer */
   function click(el){
-    const b=el.closest('[data-lk]');if(!b)return null;const k=b.dataset.lk,v=b.dataset.v;let msg=null;
+    const b=el.closest('[data-lk]');if(!b)return null;const k=b.dataset.lk,v=b.dataset.v;let msg='';
+    if(k==='save'){cfg=Object.assign({},draft);save();apply();if(shop&&shop.onChange)shop.onChange();return{act:'save',msg:'✔ Apparence enregistrée'}}
+    if(k==='cancel'){cancel();return{act:'cancel',msg:''}}
     if(k==='theme'){const t=find(v);
       if(!owned(v)){
-        if(!(shop&&shop.spend))return'🔒 Ce thème se débloque avec les pièces gagnées dans Isole x !';
-        if(!shop.spend(t.price))return`Il te faut 🪙 ${t.price} pièces pour ce thème.`;
-        own[v]=1;msg=`🎨 Thème « ${t.n} » débloqué !`}
-      cfg.theme=v===native?null:v}
-    else if(k==='board')cfg.board=v;else if(k==='x')cfg.x=v;else if(k==='acc')cfg.acc=v;else if(k==='tok')cfg.tok=+v;
-    else if(k==='reset')cfg={theme:null,board:'auto',x:'auto',acc:'auto',tok:1};
-    save();apply();if(shop&&shop.onChange)shop.onChange();return msg||'';
+        if(!(shop&&shop.spend))return{msg:'🔒 Ce thème se débloque avec les pièces gagnées dans Isole x !',warn:1};
+        if(!shop.spend(t.price))return{msg:`Il te faut 🪙 ${t.price} pièces pour ce thème.`,warn:1};
+        own[v]=1;try{localStorage.setItem(OWN,JSON.stringify(own))}catch(e){}msg=`🎨 Thème « ${t.n} » débloqué ! Touche Enregistrer pour le garder.`}
+      draft.theme=v===native?null:v}
+    else if(k==='board')draft.board=v;else if(k==='x')draft.x=v;else if(k==='acc')draft.acc=v;else if(k==='tok')draft.tok=+v;
+    else if(k==='reset')draft=Object.assign({},DEF);
+    apply();return{msg};
   }
-  return{init,apply,html,click,owned,current,THEMES,get cfg(){return cfg}};
+  /* annule l'aperçu : revient aux réglages enregistrés */
+  function cancel(){draft=Object.assign({},cfg);apply()}
+  /* ---------- ajustement automatique : rien ne doit être coupé ---------- */
+  const ov=el=>el.scrollWidth>el.clientWidth+1||el.scrollHeight>el.clientHeight+1;
+  function fit(){
+    document.querySelectorAll('#board .content').forEach(el=>{if(!el.offsetParent)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize),n=0;
+      while(ov(el)&&fs>9&&n++<30){fs*=.92;el.style.fontSize=fs+'px'}});
+    const rc=document.querySelector('#reaction');if(rc&&rc.offsetParent){const kids=[...rc.children];let z=+(getComputedStyle(document.body).getPropertyValue('--tokz')||1)||1,n=0;
+      const set=v=>kids.forEach(k=>k.style.zoom=v);set(z);while(ov(rc)&&z>.45&&n++<30){z*=.92;set(z)}}
+    const dk=document.querySelector('#deck');if(dk&&dk.offsetParent){const cards=[...dk.querySelectorAll('.dcard,.dtool')];let z=+(getComputedStyle(document.body).getPropertyValue('--tokz')||1)||1,n=0;
+      const set=v=>cards.forEach(k=>k.style.zoom=v);set(z);const H=innerHeight;while(dk.getBoundingClientRect().bottom>H+1&&z>.6&&n++<20){z*=.92;set(z)}}
+  }
+  /* taille du texte : jamais au point de faire déborder l'écran */
+  function textZoom(z){z=+z||1;if(z<=1)return 1;return Math.max(1,Math.min(z,innerWidth/340,innerHeight/540))}
+  let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(window.applyOpts)try{applyOpts()}catch(e){}fit()},120)});
+  if(window.ResizeObserver)addEventListener('load',()=>{const ro=new ResizeObserver(()=>requestAnimationFrame(fit));['#board','#reaction','#deck'].forEach(q=>{const e=document.querySelector(q);if(e)ro.observe(e)})});
+  return{init,apply,html,click,cancel,fit,textZoom,changed,owned,current,THEMES,get cfg(){return cfg}};
 })();
