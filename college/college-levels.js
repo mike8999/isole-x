@@ -103,13 +103,47 @@ const WORLDS=[
 ]},
 ];
 function chapters(){return WORLDS}
-function levelOpts(ci,li){
+
+
+/* ---------- monde 9 : problèmes à mettre en équation ---------- */
+WORLDS.push({name:'Cascade des problèmes',icon:'💧',theme:'story',color:'#38b6c9',levels:[
+ {story:"Léa a des billes. Elle en gagne <b>7</b> à la récré et en a maintenant <b>19</b>. Combien en avait-elle au départ ?",ch:['x+7=19','x-7=19','7x=19'],why:"Elle <b>gagne</b> 7 billes : on <b>ajoute</b> 7 à ce qu'elle avait.",goal:'x=12',intro:'story'},
+ {story:"<b>3</b> cahiers identiques coûtent <b>12 €</b> en tout. Quel est le prix x d'un cahier ?",ch:['x+3=12','3x=12','x/3=12'],why:"3 cahiers à x € chacun : on paie <b>3 fois</b> x.",goal:'x=4'},
+ {story:"Je pense à un nombre x. Je le <b>multiplie par 4</b>, puis j'<b>ajoute 5</b> : j'obtiens <b>33</b>.",ch:['4(x+5)=33','4x+5=33','4+5x=33'],why:"On multiplie d'abord, puis on ajoute : 4x, puis 4x + 5.",goal:'x=7'},
+ {story:"Pour une sortie, chaque place de cinéma coûte <b>8 €</b>. Le groupe achète aussi un popcorn à <b>5 €</b> et paie <b>29 €</b>. Combien de places x ?",ch:['8+5x=29','8x+5=29','13x=29'],why:"x places à 8 € : 8x. On ajoute le popcorn : 8x + 5.",goal:'x=3'},
+ {story:"Je pense à un nombre x. J'<b>ajoute 6</b>, puis je <b>multiplie le résultat par 3</b> : j'obtiens <b>39</b>.",ch:['3x+6=39','3(x+6)=39','x+6*3=39'],why:"« Le résultat » est x + 6 : on le met dans une parenthèse avant de multiplier par 3.",goal:'x=7'},
+ {story:"Tom a <b>3 ans de plus</b> que Sam. À eux deux, ils ont <b>27 ans</b>. Quel est l'âge x de Sam ?",ch:['x+3=27','x+x+3=27','2x=27+3'],why:"Sam a x ans, Tom a x + 3 ans. Leur somme : x + (x + 3).",goal:'x=12'},
+ {story:"Un rectangle a une longueur égale à sa largeur x <b>plus 4 cm</b>. Son <b>périmètre</b> vaut <b>40 cm</b>. Trouve sa largeur x.",ch:['x+x+4=40','2(x+x+4)=40','2x+4=40'],why:"Périmètre = 2 × (longueur + largeur) = 2 × (x + 4 + x).",goal:'x=8'},
+ {story:"La <b>moitié</b> d'un nombre x, <b>plus 9</b>, est égale à ce nombre lui-même.",ch:['2x+9=x','x/2=x+9','x/2+9=x'],why:"La moitié de x s'écrit x/2. On ajoute 9 et on obtient x.",goal:'x=18'},
+ {story:"Club de sport. Formule A : <b>20 €</b> d'inscription puis <b>2 €</b> par séance. Formule B : <b>6 €</b> par séance. Pour combien de séances x les deux formules coûtent-elles pareil ?",ch:['20+2x=6x','22x=6x','20x+2=6x'],why:"Formule A : 20 + 2x. Formule B : 6x. On cherche quand c'est égal.",goal:'x=5'},
+ {story:"Niveau ultime ! Les angles d'un triangle mesurent <b>x</b>, <b>2x</b> et <b>x + 20</b> degrés. La somme des angles d'un triangle vaut <b>180°</b>.",ch:['2x+x+20=180','x+2x+x+20=180','x+2x=180+20'],why:"Il faut additionner les <b>trois</b> angles : x + 2x + (x + 20) = 180.",goal:'x=40'},
+]});
+/* ---------- monde 10 : seconde ---------- */
+WORLDS.push({name:'Sommet de la seconde',icon:'🏔️',theme:'sec',color:'#6c63ff',levels:[
+ {e:'x+4<9',goal:'x<5',intro:'ineq',tip:"Une <b>inéquation</b> : même règle que pour une équation, ce que tu fais d'un côté, fais-le de l'autre."},
+ {e:'3x≥12',goal:'x≥4',tip:"Diviser par un nombre <b>positif</b> ne change pas le sens."},
+ {e:'-2x>6',goal:'x<-3',intro:'ineqneg',tip:"Attention : multiplier ou diviser par un nombre <b>négatif</b> change le sens de l'inégalité !"},
+ {e:'5-x≤2',goal:'x≥3'},
+ {e:'3x+1>x+7',goal:'x>3'},
+ {zero:'(x-2)(x+3)=0',steps:[{e:'x-2=0',goal:'x=2'},{e:'x+3=0',goal:'x=-3'}],intro:'zero'},
+ {zero:'(2x-6)(x+5)=0',steps:[{e:'2x-6=0',goal:'x=3'},{e:'x+5=0',goal:'x=-5'}]},
+ {zero:'(4x+8)(5-x)=0',steps:[{e:'4x+8=0',goal:'x=-2'},{e:'5-x=0',goal:'x=5'}]},
+ {sys:['x+y=10','x-y=4'],steps:[{e:'x+y=10',t:'y',goal:'y=10-x',tip:"Étape 1 : isole <b>y</b> dans la 1<sup>re</sup> équation."},{e:'x-(10-x)=4',goal:'x=7',tip:"Étape 2 : on a remplacé y par 10 − x dans la 2<sup>e</sup> équation. Trouve x !"},{e:'y=10-7',t:'y',goal:'y=3',tip:"Étape 3 : x = 7, donc y = 10 − 7. Calcule y."}],intro:'system'},
+ {sys:['2x+y=11','x+3y=13'],steps:[{e:'2x+y=11',t:'y',goal:'y=11-2x',tip:"Étape 1 : isole <b>y</b> dans la 1<sup>re</sup> équation."},{e:'x+3(11-2x)=13',goal:'x=4',tip:"Étape 2 : on remplace y par 11 − 2x dans la 2<sup>e</sup> équation. Développe et trouve x !"},{e:'y=11-2*4',t:'y',goal:'y=3',tip:"Étape 3 : x = 4, donc y = 11 − 2 × 4. Calcule y."}]},
+]});
+[0,1,1,1,1,1,1,2,0,1].forEach((k,i)=>{const lv=WORLDS[8].levels[i];lv.ok=k;lv.answer=lv.ch[k]});
+function levelOpts(ci,li,step){
   const ch=WORLDS[ci],lv=ch.levels[li];
-  return{eq:parseEq(lv.e),target:lv.t||'x',goal:lv.goal,tip:lv.tip,deck:lv.deck,nocomp:lv.nocomp,box:lv.box!==undefined?lv.box:li<6,
+  if(lv.steps){const k=step||0,st=lv.steps[k];
+    const pz=t=>esc(t).replace(/-/g,'−').replace(/\*/g,'·').replace(/([=<>≤≥])/,' $1 ');
+    const pre=lv.zero?`${pz(lv.zero)} : un produit est nul si l'un de ses facteurs est nul. Facteur ${k+1} : `:lv.sys?`Système { ${lv.sys.map(pz).join(' ; ')} } — `:'';
+    return{eq:parseEq(st.e),rel:parseRel(st.e),target:st.t||'x',goal:st.goal,tip:pre+(st.tip||`résous ${pz(st.e)}.`),box:false,
+      label:`${li+1}/10 · ${k+1}/${lv.steps.length}`,title:ch.icon+' '+ch.name+(lv.zero?' — produit nul':' — système'),chain:{n:lv.steps.length,k},
+      intro:k===0&&lv.intro?[].concat(lv.intro).filter(x=>!SEEN[x]):null}}
+  return{eq:parseEq(lv.story?lv.answer:lv.e),rel:parseRel(lv.story?lv.answer:lv.e),target:lv.t||'x',goal:lv.goal,tip:lv.story?'📖 '+lv.story:lv.tip,deck:lv.deck,nocomp:lv.nocomp,box:lv.box!==undefined?lv.box:(li<6&&!ch.formula&&ch.theme!=='sec'),
     label:`${li+1}/10`,title:ch.icon+' '+ch.name+(lv.t?' — isoler '+lv.t:''),
     coach:lv.coach&&!SEEN['coach_'+lv.coach]?lv.coach:null,intro:lv.intro?[].concat(lv.intro).filter(k=>!SEEN[k]):null};
 }
-
 /* ---------- générateur aléatoire ciblé par thème ---------- */
 const THEMES=WORLDS.map(w=>({k:w.theme,n:w.name,icon:w.icon}));
 const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -132,6 +166,9 @@ function genTheme(th,d){
     case'pow':{const k=ri(2,9);return pick([()=>({e:`x^2=${k*k}`,goal:`x=${k}`}),()=>({e:`sqrt(x)=${k}`,goal:`x=${k*k}`}),()=>({e:`${c}x^2${sg(b)}=${c*k*k+b}`,goal:`x=${k}`}),
       ()=>({e:`sqrt(x${sg(b)})=${k}`,goal:`x=${k*k-b}`}),()=>({e:`(x${sg(-b)})^2=${k*k}`,goal:`x=${k+b}`})].slice(0,2*d+1))()}
     case'formula':{const lv=pick(WORLDS[6].levels.slice(0,4+3*d));return{e:lv.e,t:lv.t,tip:lv.tip}}
+    case'story':{const lv=pick(WORLDS[8].levels.slice(0,4+3*d));return{e:lv.answer,goal:lv.goal,tip:'📖 '+lv.story}}
+    case'sec':{const r=pick(['<','>','≤','≥']);const k=pick([a,-a]);const val=k*x0+b;const fl=k<0?{'<':'>','>':'<','≤':'≥','≥':'≤'}[r]:r;
+      return pick([()=>({e:`${k}x${sg(b)}${r}${val}`,goal:`x${fl}${x0}`}),()=>({e:`x${sg(b)}${r}${x0+b}`,goal:`x${r}${x0}`})].slice(0,d>0?2:1).reverse())()}
     case'trig':{const lv=pick(WORLDS[7].levels.slice(0,4+3*d));return{e:lv.e,t:lv.t,tip:lv.tip}}
   }
 }

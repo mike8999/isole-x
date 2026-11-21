@@ -1,4 +1,7 @@
 "use strict";
+/* reprise de la progression de la version collège 1 */
+try{if(!localStorage.getItem('isoleX_college2')&&localStorage.getItem('isoleX_college'))
+  ['','_seen','_stats','_badges','_opts'].forEach(k=>{const v=localStorage.getItem('isoleX_college'+k);if(v!==null)localStorage.setItem('isoleX_college2'+k,v)})}catch(e){}
 /* =====================================================================
    ISOLE X ! — v3
    facteur : {t:'n',v} | {t:'s',v} | {t:'g',terms} | {t:'f',fn,n,arg}
@@ -129,7 +132,10 @@ function toTerm(a){
   }
 }
 function parseSum(str){const s=toSum(parseAST(str));norm(s);return s}
-function parseEq(str){const parts=str.split('=');if(parts.length!==2)throw new Error('Il faut exactement un signe =');
+const RELS=['=','<','>','≤','≥'];const MIRROR={'=':'=','<':'>','>':'<','≤':'≥','≥':'≤'};const OPPREL={'=':'=','<':'>','>':'<','≤':'≥','≥':'≤'};
+const relNorm=str=>str.replace(/<=/g,'≤').replace(/>=/g,'≥');
+function parseRel(str){const m=relNorm(str).match(/[=<>≤≥]/g);return m&&m.length===1?m[0]:'='}
+function parseEq(str){str=relNorm(str);const parts=str.split(/[=<>≤≥]/);if(parts.length!==2)throw new Error('Il faut exactement un signe = (ou <, >, ≤, ≥)');
   if(!parts[0].trim()||!parts[1].trim())throw new Error('Il manque un membre de chaque côté du =');return[parseSum(parts[0]),parseSum(parts[1])]}
 function symbolsOf(eq){const s=new Set();walk(eq,z=>{if(z.t==='s'&&z.v!=='π'&&!isImagV(z.v))s.add(z.v)});return[...s]}
 
@@ -183,7 +189,7 @@ function hSum(sum,m){
 }
 const MM={d:false,box:false};
 const mathSum=s=>`<span class="math">${hSum(s,MM)}</span>`;
-const mathEq=eq=>`<span class="math">${hSum(eq[0],MM)}<span class="eqs">=</span>${hSum(eq[1],MM)}</span>`;
+const mathEq=(eq,rel)=>`<span class="math">${hSum(eq[0],MM)}<span class="eqs">${rel||state.rel||'='}</span>${hSum(eq[1],MM)}</span>`;
 
 /* ---------- normalisation automatique ---------- */
 function norm(sum){
@@ -234,14 +240,17 @@ function doDeck(side,op,idx){
   const sig=op+'|'+keyT(card);
   if(state.pending){
     if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Fais <b>${state.pending.label}</b> aussi de l'autre côté.`);
-    applyOp(side,op,card);const lab=state.pending.label;state.pending=null;hideToast();return finishMove(lab+' des deux côtés');
+    applyOp(side,op,card);const lab=state.pending.label;state.pending=null;hideToast();
+    if(state.rel!=='='&&op!=='add'&&card.neg){state.rel=OPPREL[state.rel];if(!SILENT)setTimeout(()=>toast(`⚠️ Tu as ${op==='mul'?'multiplié':'divisé'} par un nombre <b>négatif</b> : le sens de l'inégalité change ! (${MIRROR[state.rel]} devient ${state.rel})`,'flipmsg',5000),60)}
+    return finishMove(lab+' des deux côtés'+(state.rel!=='='&&op!=='add'&&card.neg?' (sens changé)':''),state.rel!=='='&&op!=='add'&&card.neg?'ineqflip':undefined);
   }
+  if(state.rel!=='='&&op!=='add'&&!card.num.concat(card.den).every(f=>f.t==='n'))return fail("Dans une inéquation, on ne multiplie que par un <b>nombre</b> : on ne connaît pas le signe d'une lettre.");
   pushUndo();applyOp(side,op,card);norm(state.eq[side]);
   state.pending={side:1-side,sig,op,idx,label:opLabel(op,card),w:op==='add'?(card.neg?-1:1):op==='mul'?1:-1};render();
   toast(`Maintenant <b>${state.pending.label}</b> de l'autre côté.`);return true;
 }
 function doTool(side,idx){
-  const tool=state.tools[idx];if(tool.fn==='recip'&&!state.eq[side].length)return fail('On ne peut pas inverser 0.');const sig='fn|'+tool.fn+tool.n;
+  const tool=state.tools[idx];if(state.rel!=='=')return fail("Pour une inéquation, utilise seulement les jetons de la pioche (+, ×, ÷).");if(tool.fn==='recip'&&!state.eq[side].length)return fail('On ne peut pas inverser 0.');const sig='fn|'+tool.fn+tool.n;
   if(state.pending){
     if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Applique <b>${state.pending.label}</b> aussi de l'autre côté.`);
     applyFn(side,tool);const lab=state.pending.label;state.pending=null;hideToast();return finishMove(lab+' des deux côtés');
@@ -349,19 +358,19 @@ function copyToDeck(id){
 }
 
 /* ---------- coups, annulation, isolement, victoire ---------- */
-function pushUndo(){if(SILENT)return;state.undo.push({eq:clone(state.eq),pending:clone(state.pending),moves:state.moves,hl:state.history.length,deck:clone(state.deck),flip:state.flip.slice(),tools:clone(state.tools),isoAt:state.isoAt,bonusMax:state.bonusMax});if(state.undo.length>200)state.undo.shift()}
+function pushUndo(){if(SILENT)return;state.undo.push({rel:state.rel,eq:clone(state.eq),pending:clone(state.pending),moves:state.moves,hl:state.history.length,deck:clone(state.deck),flip:state.flip.slice(),tools:clone(state.tools),isoAt:state.isoAt,bonusMax:state.bonusMax});if(state.undo.length>200)state.undo.shift()}
 function undo(){
   if(state.won)return;const u=state.undo.pop();if(!u)return toast("Rien à annuler.");
-  Object.assign(state,{eq:u.eq,pending:u.pending,moves:u.moves,deck:u.deck,flip:u.flip,tools:u.tools,isoAt:u.isoAt,bonusMax:u.bonusMax});state.history.length=u.hl;render();
+  Object.assign(state,{rel:u.rel,eq:u.eq,pending:u.pending,moves:u.moves,deck:u.deck,flip:u.flip,tools:u.tools,isoAt:u.isoAt,bonusMax:u.bonusMax});state.history.length=u.hl;render();
 }
 function finishMove(desc,kind){
   norm(state.eq[0]);norm(state.eq[1]);state.moves++;
-  if(!SILENT){state.history.push({desc,eq:clone(state.eq)});if(window.sfx)sfx(kind==='cancel'||kind==='like'?'merge':'pop')}
+  if(!SILENT){state.history.push({desc,eq:clone(state.eq),rel:state.rel});if(window.sfx)sfx(kind==='cancel'||kind==='like'?'merge':'pop')}
   afterMove();render();if(kind&&!SILENT)maybeIntroAfter(kind);return true;
 }
 function isolated(sd){const sm=state.eq[sd];if(sm.length!==1)return false;const t=sm[0];return !t.neg&&!t.den.length&&t.num.length===1&&t.num[0].t==='s'&&t.num[0].v===state.target}
 function isoSide(){for(const sd of[0,1])if(isolated(sd)&&!hasT(state.eq[1-sd]))return sd;return -1}
-function goalMatch(){const s=isoSide();return s>=0&&canS(state.eq[1-s])===state.goalKey}
+function goalMatch(){const s=isoSide();return s>=0&&canS(state.eq[1-s])===state.goalKey&&(s===0?state.rel:MIRROR[state.rel])===state.goalRel}
 function fullySimplified(){return !findSimp(state.eq[0])&&!findSimp(state.eq[1])}
 function afterMove(){
   if(state.pending)return;
@@ -383,9 +392,9 @@ function scoreOf(){
 }
 
 /* ---------- progression ---------- */
-let PROG={};try{PROG=JSON.parse(localStorage.getItem('isoleX_college')||'{}')}catch(e){}
+let PROG={};try{PROG=JSON.parse(localStorage.getItem('isoleX_college2')||'{}')}catch(e){}
 function saveProg(){try{localStorage.setItem('isoleX_college',JSON.stringify(PROG))}catch(e){}}
-let SEEN={};try{SEEN=JSON.parse(localStorage.getItem('isoleX_college_seen')||'{}')}catch(e){}
+let SEEN={};try{SEEN=JSON.parse(localStorage.getItem('isoleX_college2_seen')||'{}')}catch(e){}
 function saveSeen(){try{localStorage.setItem('isoleX_college_seen',JSON.stringify(SEEN))}catch(e){}}
 const progKey=(ci,li)=>state.spec+'|'+ci+'-'+li;
 
@@ -495,14 +504,14 @@ function simpCount(){const r=runSolver(40);return r.ok?Math.max(0,r.total-state.
 function setup(o){
   clearTimeout(winT);closeModal();hideToast();stopCoach();
   state.target=o.target||'x';state.eq=o.eq;norm(state.eq[0]);norm(state.eq[1]);
-  state.box=o.box!==false;state.goal=o.goal||null;state.goalKey=null;
+  state.rel=o.rel||'=';state.box=o.box!==false;state.goal=o.goal||null;state.goalKey=null;state.goalRel='=';
   if(state.goal){const g=parseEq(state.goal);
-    const side=g[0].length===1&&g[0][0].num.length===1&&g[0][0].num[0].v===state.target?g[1]:g[0];state.goalKey=canS(side);state.goalSum=side}
+    const side=g[0].length===1&&g[0][0].num.length===1&&g[0][0].num[0].v===state.target?g[1]:g[0];state.goalKey=canS(side);state.goalSum=side;const gr=parseRel(state.goal);state.goalRel=side===g[1]?gr:MIRROR[gr]}
   state.deck=o.deck?o.deck.map(d=>{const s=parseSum(d);return s.length===1?s[0]:T([G(s)])}):autoDeck(o.nocomp);
   if(!state.deck.some(c=>keyT(c)==='#1/'))state.deck.push(T([N(1)]));
   state.flip=state.deck.map(()=>false);state.tools=o.tools||autoTools();if(!state.tools.some(t=>t.fn==='recip'))state.tools.push({fn:'recip',n:0});
-  state.pending=null;state.moves=0;state.undo=[];state.won=false;state.usedHint=false;state.tip=o.tip||'';state.isoAt=null;state.bonusMax=0;
-  state.history=[{desc:'Départ',eq:clone(state.eq)}];
+  state.pending=null;state.moves=0;state.undo=[];state.won=false;state.usedHint=false;state.chain=o.chain||null;state.fails=0;state.tip=o.tip||'';state.isoAt=null;state.bonusMax=0;
+  state.history=[{desc:'Départ',eq:clone(state.eq),rel:state.rel}];
   const r=runSolver();state.par=r.ok?(state.goal?r.total:r.iso):(o.par||null);
   $('#lvlNum').textContent=o.label;$('#lvlTitle').textContent=o.title;state.tipClosed=false;
   showScreen('game');render();

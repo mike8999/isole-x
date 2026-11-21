@@ -26,21 +26,21 @@ function render(){
   const iso=isoSide();
   const max=(iso>=0&&!state.goal&&state.isoAt!=null)?state.isoAt+state.bonusMax:state.par;
   $('#moves').innerHTML=`Coup <b>${state.moves}</b> / ${max??'—'}`;
-  $('#goalBig').innerHTML=state.goal?`<span class="glab">🎯 Objectif</span>${mathEq([[T([S(state.target)])],state.goalSum])}`:'';
+  $('#goalBig').innerHTML=state.goal?`<span class="glab">🎯 Objectif</span>${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}`:'';const em=document.querySelector('.eqmed');if(em){em.textContent=state.rel||'=';em.classList.toggle('ineq',(state.rel||'=')!=='=')}
   $('#goalBig').classList.toggle('hidden',!state.goal);
   const tilt=pend?((1-pend.side)===0?-1:1)*(pend.w||1)*2:0;
   boardEl.style.transform=`rotate(${tilt}deg)`;boardEl.classList.toggle('tilted',!!pend);
   const bar=$('#isobar');
   if(iso>=0&&!state.won&&!pend&&!state.coach){
     bar.classList.remove('hidden');
-    if(state.goal)bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé, mais il faut arriver à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum])}. Continue à simplifier !</span>`;
+    if(state.goal)bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé, mais il faut arriver à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}. Continue à simplifier !</span>`;
     else{const left=Math.max(0,state.isoAt+state.bonusMax-state.moves);
       bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé ! ✨ Simplifie au maximum${left?` (encore ${left} coup${left>1?'s':''} bonus)`:''} pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
   }else bar.classList.add('hidden');
   $('#mathline').innerHTML=state.trad?`<span class="lab">Équation :</span>${mathEq(state.eq)}`:'';
   $('#mathline').classList.toggle('hidden',!state.trad);
   $('#history').classList.toggle('hidden',!state.trad);
-  $('#history').innerHTML='<h3>Traduction pas à pas</h3>'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq)}</div>`).join('');
+  $('#history').innerHTML='<h3>Traduction pas à pas</h3>'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq,h.rel)}</div>`).join('');
   $('#history').scrollTop=1e6;
   const tipEl=$('#tip');
   if(state.coach){tipEl.classList.add('hidden')}
@@ -61,17 +61,21 @@ function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [d
 let toastT;
 function toast(msg,cls='',ms=3200){if(SILENT)return;const t=$('#toast');t.innerHTML=msg;t.className='show '+cls;clearTimeout(toastT);toastT=setTimeout(()=>t.className=cls,ms)}
 function hideToast(){if(SILENT)return;clearTimeout(toastT);$('#toast').className=''}
-function fail(msg){if(SILENT)return false;toast(msg,'warn',4000);const b=$('#board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');sfx('fail');petMood('sad');return false}
+function fail(msg){if(SILENT)return false;const wi=WHY.findIndex(w=>w.re.test(msg));state.fails=(state.fails||0)+1;toast(msg+(wi>=0?` <button class="whybtn" data-why="${wi}">Pourquoi ?</button>`:'')+(state.fails===3?'<br><small>💡 Besoin d\'aide ? Touche l\'ampoule.</small>':''),'warn',wi>=0?6500:4000);const b=$('#board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');sfx('fail');petMood('sad');return false}
 function modal(html,cls=''){hideToast();$('#mbox').className='mbox '+cls;$('#mbox').innerHTML=html;$('#modal').classList.remove('hidden');animateScenes($('#mbox'))}
 function closeModal(){$('#modal').classList.add('hidden');$('#mbox').innerHTML=''}
 function starHTML(k){return[1,2,3].map(i=>`<span class="${i<=k?'':'off'}">★</span>`).join('')}
 function onWin(){petMood('happy')}
 function showWin(){
   if(state.mode==='chrono'){chronoSolved();return}
+  if(state.mode==='level'&&state.chain&&state.chain.k<state.chain.n-1){chainStepWin();return}
+  if(state.chain&&CHAIN){state.moves+=CHAIN.moves;state.par=(state.par||0)+CHAIN.par}
+  const sol=solutionLine();let dbonus=0;if(state.mode==='daily')dbonus=dailyWin();
   const sc=scoreOf();let next='';const before=petStage();
   if(state.mode==='level'){const k=progKey(state.ci,state.li),old=PROG[k]||{s:0,p:0};PROG[k]={s:Math.max(old.s,sc.stars),p:Math.max(old.p,sc.points)};saveProg();
     next=nextLevel()?`<button class="bigbtn" data-act="next">Défi suivant ▶</button>`:''}
   else if(state.mode==='random')next=`<button class="bigbtn" data-act="again">Nouvelle équation 🎲</button>`;
+  else if(state.mode==='daily')next=`<button class="bigbtn" data-act="home">Carte ▶</button>`;
   else next=`<button class="bigbtn" data-act="expback">Autre équation 🧪</button>`;
   const S=STATS;S.wins++;S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
   if(state.goal)S.goals++;else if(sc.simp)S.simp++;if(sc.stars===3)S.perfect++;saveStats();
@@ -79,9 +83,10 @@ function showWin(){
   modal(`<div class="winpet">${creatureSVG(after,'happy')}</div><h2>${esc(state.target)} est isolé ! 🎉</h2>${state.par?`<div class="stars">${starHTML(sc.stars)}</div>`:''}
    <div class="pts">${sc.points} points ${sc.simp?'<span class="simp">✨ simplification maximale +50</span>':'<span class="nosimp">pas simplifié au maximum</span>'}</div>
    <div>${state.moves} coup${state.moves>1?'s':''}${state.par?` — maxi ${state.par} pour ★★★`:''}</div>
-   <div class="sol">${mathEq(state.eq)}</div>
+   <div class="sol">${mathEq(state.eq)}</div>${sol?`<div class="solline">${sol}</div>`:''}
+   ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd\'hui : reviens demain !'}</div>`:''}
    ${after>before?`<div class="evo">🎊 Pépix a grandi : il est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
-   ${nb.map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}
+   ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
    <div class="btns"><button class="ghostbtn" data-act="replay">⟲ Rejouer</button><button class="ghostbtn" data-act="menu">Carte</button>${next}</div>`,'win');
   sfx(nb.length||after>before?'badge':'win');confetti(nb.length||after>before?120:70);
 }
@@ -92,6 +97,8 @@ $('#modal').addEventListener('click',e=>{
   if(a==='close'){closeModal();introDone();return}
   if(a==='tuto'){closeModal();SEEN.coach_tuto1=false;startLevel(0,0);return}
   closeModal();
+  if(a==='step'){startLevel(state.ci,state.li,state.chain.k+1);return}
+  if(a==='shop'){showShop();return}
   if(a==='next'){const nx=nextLevel();startLevel(nx[0],nx[1])}
   else if(a==='replay')replay();
   else if(a==='again')startRandom();
@@ -101,7 +108,7 @@ $('#modal').addEventListener('click',e=>{
   else if(a==='home')toHome();
 });
 let lastSetup=null;
-function replay(){if(state.mode==='level')startLevel(state.ci,state.li);else if(state.mode==='chrono')startChrono();else if(lastSetup)setup(Object.assign({},lastSetup,{eq:clone(lastSetup.eq0),coach:null,intro:null}))}
+function replay(){if(state.mode==='level')startLevel(state.ci,state.li);else if(state.mode==='daily')startDaily();else if(state.mode==='chrono')startChrono();else if(lastSetup)setup(Object.assign({},lastSetup,{eq:clone(lastSetup.eq0),coach:null,intro:null}))}
 
 /* ---------- glisser-déposer (souris + tactile) ---------- */
 const boardEl=$('#board'),deckEl=$('#deck');
@@ -197,18 +204,18 @@ function hint(){
 
 /* ---------- progression, créature, badges ---------- */
 let STATS={wins:0,noHint:0,bestNoHint:0,simp:0,goals:0,perfect:0,chronoBest:0};
-try{Object.assign(STATS,JSON.parse(localStorage.getItem('isoleX_college_stats')||'{}'))}catch(e){}
-const saveStats=()=>{try{localStorage.setItem('isoleX_college_stats',JSON.stringify(STATS))}catch(e){}};
-let OPTS={mute:false,teacher:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_college_opts')||'{}'))}catch(e){}
-const saveOpts=()=>{try{localStorage.setItem('isoleX_college_opts',JSON.stringify(OPTS))}catch(e){}};
-let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_college_badges')||'{}')}catch(e){}
-const saveGot=()=>{try{localStorage.setItem('isoleX_college_badges',JSON.stringify(GOT))}catch(e){}};
+try{Object.assign(STATS,JSON.parse(localStorage.getItem('isoleX_college2_stats')||'{}'))}catch(e){}
+const saveStats=()=>{try{localStorage.setItem('isoleX_college2_stats',JSON.stringify(STATS))}catch(e){}};
+let OPTS={mute:false,teacher:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_college2_opts')||'{}'))}catch(e){}
+const saveOpts=()=>{try{localStorage.setItem('isoleX_college2_opts',JSON.stringify(OPTS))}catch(e){}};
+let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_college2_badges')||'{}')}catch(e){}
+const saveGot=()=>{try{localStorage.setItem('isoleX_college2_badges',JSON.stringify(GOT))}catch(e){}};
 const worldStars=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{}).s||0),0);
 const worldPts=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{}).p||0),0);
 const worldDone=i=>WORLDS[i].levels.every((_,li)=>PROG[progKey(i,li)]);
 const totalStars=()=>WORLDS.reduce((a,_,i)=>a+worldStars(i),0);
 const UNLOCK=15;
-const unlocked=i=>OPTS.teacher||i===0||worldStars(i-1)>=UNLOCK;
+const unlocked=i=>OPTS.teacher||i===0||worldStars(UNLOCK_FROM[i]??i-1)>=UNLOCK;
 const PET_STEPS=[0,5,20,50,100,170];
 const PET_NAMES=['un œuf','un bébé','un petit','un ado','un grand','légendaire'];
 const petStage=()=>{const t=totalStars();let s=0;PET_STEPS.forEach((v,i)=>{if(t>=v)s=i});return s};
@@ -223,6 +230,10 @@ const BADGES=[
  {k:'ch5',icon:'⚡',name:'Éclair',d:'5 équations en un défi chrono',ok:()=>STATS.chronoBest>=5},
  {k:'ch12',icon:'🌩️',name:'Tempête',d:'12 équations en un défi chrono',ok:()=>STATS.chronoBest>=12},
  ...WORLDS.map((w,i)=>({k:'world'+i,icon:w.icon,name:'Maître : '+w.name,d:'Réussir les 10 défis du monde',ok:()=>worldDone(i)})),
+ {k:'detective',icon:'🔎',name:'Détective',d:'5 problèmes bien traduits du premier coup',ok:()=>(STATS.storyFirst||0)>=5},
+ {k:'day3',icon:'📅',name:'Fidèle',d:'Défi du jour 3 jours de suite',ok:()=>DAILY.best>=3},
+ {k:'day7',icon:'🗓️',name:'Inarrêtable',d:'Défi du jour 7 jours de suite',ok:()=>DAILY.best>=7},
+ {k:'style',icon:'🛍️',name:'Pépix stylé',d:'Acheter un objet à la boutique',ok:()=>Object.keys(SHOP.owned).length>=1},
  {k:'legend',icon:'👑',name:'Légende de la jungle',d:'Pépix devient légendaire',ok:()=>petStage()>=5},
 ];
 function checkBadges(){const nb=[];BADGES.forEach(b=>{if(!GOT[b.k]&&b.ok()){GOT[b.k]=Date.now();nb.push(b)}});if(nb.length)saveGot();return nb}
@@ -242,14 +253,14 @@ function creatureSVG(stage,mood='idle'){
   return`<svg viewBox="0 0 120 120" class="pet st${stage} ${mood}" aria-label="Pépix"><ellipse cx="60" cy="113" rx="${r*.9}" ry="5" fill="rgba(0,0,0,.25)"/>
    ${stage>=4?`<path d="M${60-r*.9} ${cy}c-22 -8 -26 -26 -14 -34c6 14 14 20 18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/><path d="M${60+r*.9} ${cy}c22 -8 26 -26 14 -34c-6 14 -14 20 -18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/>`:''}
    <ellipse cx="${60-r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="#2a8f3c"/><ellipse cx="${60+r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="#2a8f3c"/>
-   <ellipse cx="60" cy="${cy}" rx="${r}" ry="${r*.92}" fill="${stage>=5?'#5fd35f':'#58c24a'}" stroke="#1f7a32" stroke-width="2.5"/>
-   <ellipse cx="60" cy="${cy+r*.3}" rx="${r*.6}" ry="${r*.48}" fill="#c9f29b"/>
+   <ellipse cx="60" cy="${cy}" rx="${r}" ry="${r*.92}" fill="${(eqItem('color')||{}).col||(stage>=5?'#5fd35f':'#58c24a')}" stroke="${(eqItem('color')||{}).dark||'#1f7a32'}" stroke-width="2.5"/>
+   <ellipse cx="60" cy="${cy+r*.3}" rx="${r*.6}" ry="${r*.48}" fill="${(eqItem('color')||{}).belly||'#c9f29b'}"/>
    ${stage>=1?leaf(60,0):''}${stage>=3?leaf(52,-35,'#9be15d')+leaf(68,35,'#9be15d'):''}
    ${eye(60-ex)}${eye(60+ex)}<circle cx="${60-r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/><circle cx="${60+r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/>
    ${mouth}${mood==='sad'?`<path d="M${60+ex+er} ${ey+er}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}
    ${stage===1?`<path d="M${60-r*1.05} ${cy+r*.35}l${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} v${r*.62} h-${r*2.1}z" fill="#fbf4d6" stroke="#c9b26a" stroke-width="2"/>`:''}
    ${stage>=5?`<path d="M44 ${top-2}l4 -14 8 9 4 -13 4 13 8 -9 4 14z" fill="#ffd23f" stroke="#b8860b" stroke-width="1.5"/><circle cx="22" cy="30" r="2.5" fill="#ffe680"/><circle cx="100" cy="24" r="3" fill="#ffe680"/><circle cx="96" cy="70" r="2" fill="#ffe680"/>`:''}
-  </svg>`;
+   ${accSVG({r,cy,top,ex,ey,er})}</svg>`;
 }
 let petT;
 function petMood(m){const el=$('#pet');if(!el||SILENT)return;el.innerHTML=creatureSVG(petStage(),m);el.className='petmini '+m;clearTimeout(petT);petT=setTimeout(()=>{el.innerHTML=creatureSVG(petStage(),'idle');el.className='petmini'},1400)}
@@ -260,7 +271,7 @@ function sfx(k){if(OPTS.mute||SILENT)return;try{AC=AC||new(window.AudioContext||
   const N=(f,d,type='sine',v=.13,at=0)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t+at);g.gain.exponentialRampToValueAtTime(.001,t+at+d);o.connect(g);g.connect(AC.destination);o.start(t+at);o.stop(t+at+d+.02)};
   switch(k){case'pop':N(520,.09,'triangle');break;case'merge':N(660,.08,'triangle');N(990,.12,'triangle',.11,.07);break;case'fail':N(200,.2,'sawtooth',.06);N(150,.22,'sawtooth',.05,.08);break;
     case'win':[523,659,784,1046].forEach((f,i)=>N(f,.28,'triangle',.12,i*.09));break;case'badge':[784,988,1175,1568,1976].forEach((f,i)=>N(f,.34,'sine',.11,i*.1));break;case'flip':N(420,.05,'square',.04);break;case'tick':N(880,.04,'square',.03);break}}catch(e){}}
-function confetti(n=70){if(SILENT||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const cols=['#ff6b6b','#ffd23f','#7cc242','#4ea8de','#b388eb','#ff8c42'];
+function confetti(n=70){if(SILENT||OPTS.calm||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const cols=['#ff6b6b','#ffd23f','#7cc242','#4ea8de','#b388eb','#ff8c42'];
   for(let i=0;i<n;i++){const d=document.createElement('i');d.className='conf';d.style.background=cols[i%cols.length];d.style.left=(Math.random()*100)+'vw';document.body.appendChild(d);
     const x=(Math.random()-.5)*240,rot=Math.random()*720;d.animate([{transform:'translate(0,-20px) rotate(0)'},{transform:`translate(${x}px,${innerHeight+40}px) rotate(${rot}deg)`}],{duration:1600+Math.random()*1400,easing:'cubic-bezier(.2,.6,.4,1)',delay:Math.random()*300}).onfinish=()=>d.remove()}}
 
@@ -277,12 +288,14 @@ function renderHome(){
   $('#homeBtns').innerHTML=`<button class="hb" data-h="badges">🏅<b>Badges</b><small>${Object.keys(GOT).length}/${BADGES.length}</small></button>
     <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
     <button class="hb" data-h="train">🎲<b>Entraînement</b><small>par thème</small></button>
-    <button class="hb" data-h="exp">🧪<b>Labo libre</b><small>ton équation</small></button>`;
-  document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>({badges:showBadges,chrono:startChrono,train:showTrain,exp:showExp})[b.dataset.h]());
+    <button class="hb" data-h="exp">🧪<b>Labo libre</b><small>ton équation</small></button>
+    <button class="hb${dailyDone()?' done':''}" data-h="daily">📅<b>Défi du jour</b><small>${dailyDone()?'✔ réussi · ':''}série : ${curStreak()} 🔥</small></button>
+    <button class="hb" data-h="shop">🛍️<b>Boutique</b><small>🪙 ${coins()}</small></button>`;
+  document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>({badges:showBadges,chrono:startChrono,train:showTrain,exp:showExp,daily:startDaily,shop:showShop})[b.dataset.h]());
   $('#worlds').innerHTML=WORLDS.map((w,i)=>{const s=worldStars(i),u=unlocked(i);
     return`<button class="wtile${u?'':' locked'}" data-w="${i}" style="--wc:${w.color}"><span class="wnum">${i+1}</span><span class="wicon">${w.icon}</span><span class="wname">${esc(w.name)}</span>
-      <span class="wbar"><i style="width:${Math.round(100*s/30)}%"></i></span><span class="wstar">★ ${s}/30</span>${u?'':`<span class="wlock">🔒 ${UNLOCK} ★ dans le monde ${i}</span>`}</button>`}).join('');
-  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(!unlocked(i)){sfx('fail');toast(`🔒 Gagne ${UNLOCK} étoiles dans le monde ${i} pour ouvrir celui-ci (tu en as ${worldStars(i-1)}).`,'warn');return}toWorld(i)});
+      <span class="wbar"><i style="width:${Math.round(100*s/30)}%"></i></span><span class="wstar">★ ${s}/30</span>${u?'':`<span class="wlock">🔒 ${UNLOCK} ★ dans le monde ${prevWorld(i)+1}</span>`}</button>`}).join('');
+  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(!unlocked(i)){sfx('fail');toast(`🔒 Gagne ${UNLOCK} étoiles dans le monde ${prevWorld(i)+1} pour ouvrir celui-ci (tu en as ${worldStars(prevWorld(i))}).`,'warn');return}toWorld(i)});
   $('#btnMute').textContent=OPTS.mute?'🔇':'🔊';$('#optTeacher').checked=OPTS.teacher;
 }
 function toWorld(i){closeModal();state.ci=i;const w=WORLDS[i];document.documentElement.style.setProperty('--wc',w.color);
@@ -305,18 +318,18 @@ function renderTrain(){
 function genEq(th,d){let g,tries=0;do{g=genTheme(th,d);tries++;try{g.eq=parseEq(g.e);g.ok=true}catch(e){g.ok=false}}while(!g.ok&&tries<10);return g}
 function startRandom(){
   const th=pick([...genThemes]);const g=genEq(th,genDiff);
-  state.mode='random';const o={eq:g.eq,target:g.t||'x',goal:g.goal,tip:g.tip||'',box:genDiff===0,label:'🎲',title:'Entraînement · '+THEMES.find(t=>t.k===th).n+' · '+['Facile','Moyen','Difficile'][genDiff]};
+  state.mode='random';const o={eq:g.eq,rel:parseRel(g.e),target:g.t||'x',goal:g.goal,tip:g.tip||'',box:genDiff===0,label:'🎲',title:'Entraînement · '+THEMES.find(t=>t.k===th).n+' · '+['Facile','Moyen','Difficile'][genDiff]};
   lastSetup=Object.assign({},o,{eq0:clone(g.eq)});setup(o);
 }
 /* ---------- défi chrono ---------- */
 let CHR=null,chrT=null;
 function startChrono(){
-  stopChrono(false);const th=THEMES.filter((t,i)=>unlocked(i)&&t.k!=='formula'&&t.k!=='trig').map(t=>t.k);
+  stopChrono(false);const th=THEMES.filter((t,i)=>unlocked(i)&&!['formula','trig','story'].includes(t.k)).map(t=>t.k);
   CHR={end:Date.now()+120000,solved:0,themes:th.length?th:['add']};state.mode='chrono';nextChrono();
   $('#chrono').classList.remove('hidden');chrT=setInterval(tickChrono,250);tickChrono();
 }
 function nextChrono(){if(!CHR)return;const d=CHR.solved<3?0:CHR.solved<7?1:2;const th=pick(CHR.themes);const g=genEq(th,d);
-  setup({eq:g.eq,target:'x',goal:g.goal,box:d===0,label:'⚡ '+(CHR.solved+1),title:'Défi chrono · '+CHR.solved+' réussie'+(CHR.solved>1?'s':''),tip:''})}
+  setup({eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,box:d===0,label:'⚡ '+(CHR.solved+1),title:'Défi chrono · '+CHR.solved+' réussie'+(CHR.solved>1?'s':''),tip:''})}
 function chronoSolved(){if(!CHR)return;CHR.solved++;sfx('win');confetti(35);if(Date.now()<CHR.end)setTimeout(nextChrono,450)}
 function tickChrono(){if(!CHR)return;const left=Math.max(0,CHR.end-Date.now());const s=Math.ceil(left/1000);
   $('#chrono').textContent=`⏱ ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;$('#chrono').classList.toggle('hurry',s<=15);
@@ -349,7 +362,7 @@ function expPreview(){
 }
 function startExp(){
   try{const eq=parseEq($('#expInput').value);let gv=$('#expGoal').value.trim();if(gv&&!gv.includes('='))gv=expSel+'='+gv;
-    state.mode='exp';const o={eq,target:expSel,goal:gv||null,box:$('#expBox').checked,label:'🧪',title:'🧪 Labo libre · isoler '+expSel,tip:''};
+    state.mode='exp';const o={eq,rel:parseRel($('#expInput').value),target:expSel,goal:gv||null,box:$('#expBox').checked,label:'🧪',title:'🧪 Labo libre · isoler '+expSel,tip:''};
     lastSetup=Object.assign({},o,{eq0:clone(eq)});setup(o);
     if(!state.par)toast("Je n'ai pas trouvé de solution automatique : à toi de jouer, sans maximum de coups.",'',5000);
   }catch(e){$('#expPrev').innerHTML=`<span class="err">⚠ ${esc(e.message)}</span>`}
@@ -365,6 +378,7 @@ const fb=(lab,h,a)=>`<span class="fbox"${a?` data-a="${a}"`:''}><span class="fta
 const pw=(h,n,a)=>`<span class="fbox pow"${a?` data-a="${a}"`:''}><span class="fin">${h}</span><span class="ftab sup">${SUP[n]}</span></span>`;
 const bed=(l,r,a)=>`<div class="sbed"><div class="sp"${a==='L'?' data-a="B"':''}>${l}</div><div class="smid">=</div><div class="sp"${a==='R'?' data-a="B"':''}>${r}</div></div>`;
 const rail=h=>`<div class="srail">${h}</div>`;
+const bedR=(l,r,a,rel)=>bed(l,r,a).replace('<div class="smid">=</div>',`<div class="smid">${rel}</div>`);
 const dk=(h,a,neg)=>`<span class="dcard${neg?' neg':''}"${a?` data-a="${a}"`:''}>${neg?sgn('−'):''}${h}</span>`;
 const SCENES={
  flip:{t:'Touche un jeton : il devient son opposé.',tap:1,b:rail(dk(c(3),'A')),a:rail(dk(c(3),'',1))},
@@ -392,14 +406,19 @@ const SCENES={
  recip:{t:'Outil 1/□ : on inverse les deux côtés.',b:bed(sy('f'),fr(c(1),Xc('','T')),'L')+rail(`<span class="dtool" data-a="A">1/□</span>`),a:bed(fr(c(1),sy('f')),Xc('','T'))+rail(`<span class="dtool">1/□</span>`)},
  deckop:{t:'Dans la pioche, glisse un jeton sur un autre : ils s’additionnent ou se regroupent entre ( ).',b:rail(dk(sy('a'),'A')+dk(sy('b'),'B')),a:rail(dk(sy('a'))+dk(sy('b'))+dk(bx(sy('b')+sgn('+')+sy('a'))))},
  conj:{t:'Multiplie par le conjugué : (1−i)(1+i) = 2.',b:bed(bx(c(1)+sgn('+')+c('i','','s im'))+dot+Xc('','z'),c(2),'L')+rail(dk(bx(c(1)+sgn('−')+c('i','','s im')),'A')),a:bed(c(2)+dot+Xc('','z'),c(2)+dot+bx(c(1)+sgn('−')+c('i','','s im')))},
+ story:{t:'Lis le problème, puis choisis l’équation qui le traduit.',tap:1,b:`<div class="sstory">« Je gagne 7 billes, j'en ai 19 »</div><div class="schoices"><span class="schip">x − 7 = 19</span><span class="schip" data-a="A">x + 7 = 19</span></div>`,a:bed(Xc()+sgn('+')+c(7),c(19))},
+ ineq:{t:'Inéquation : on ajoute la même chose des deux côtés, le sens < ne change pas.',b:bedR(Xc()+sgn('+')+c(4),c(9),'L','<')+rail(dk(c(4),'A',1)),a:bedR(Xc()+sgn('+')+c(4)+sgn('−')+c(4),c(9)+sgn('−')+c(4),'','<')+rail(dk(c(4),'',1))},
+ ineqneg:{t:'Diviser par un nombre négatif : le sens s’inverse, > devient < !',b:bedR(sgn('−')+c(2)+dot+Xc(),c(6),'L','>')+rail(dk(c(2),'A',1)),a:bedR(Xc(),sgn('−')+c(3),'','<')},
+ zero:{t:'Produit nul : A × B = 0 ⇔ A = 0 ou B = 0. On résout deux petites équations.',tap:1,b:bed(bx(Xc()+sgn('−')+c(2),'A')+dot+bx(Xc()+sgn('+')+c(3)),c(0)),a:`<div class="szero">${bed(Xc()+sgn('−')+c(2),c(0))}<span class="sou">ou</span>${bed(Xc()+sgn('+')+c(3),c(0))}</div>`},
+ system:{t:'Système : isole y dans une équation, puis remplace-le dans l’autre.',tap:1,b:`<div class="ssys">{ x + <span class="card s" data-a="A">y</span> = 10 ; x − y = 4 }</div>`,a:bed(sy('y'),c(10)+sgn('−')+sy('x'))+`<div class="ssys">x − (10 − x) = 4</div>`},
  trigo:{t:'cos(A) = AB/AC : multiplie par AC des deux côtés pour libérer AB.',b:bed(fb('cos',sy('A')),fr(Xc('','AB'),sy('AC')),'L')+rail(dk(sy('AC'),'A')),a:bed(sy('AC')+dot+fb('cos',sy('A')),fr(sy('AC')+dot+Xc('','AB'),sy('AC')))+rail(dk(sy('AC')))},
  angle:{t:'Outil arccos (cos⁻¹) : arccos(cos A) = A.',b:bed(fb('cos',Xc('','A')),fr(sy('AB'),sy('AC')),'L')+rail(`<span class="dtool" data-a="A">arccos□</span>`),a:bed(fb('arccos',fb('cos',Xc('','A'))),fb('arccos',fr(sy('AB'),sy('AC'))))+rail(`<span class="dtool">arccos□</span>`)},
 };
-const HELP=[['Les bases',['flip','add','cancel','like','copy']],['Fractions',['frac','mul','gcd','product','neg']],['Boîtes et pioche',['dev','fact','deckop']],['Puissances et racines',['pow2','tool','inv','eval','recip']],['Trigonométrie',['trigo','angle']],['Score',['goal','bonus']]];
+const HELP=[['Les bases',['flip','add','cancel','like','copy']],['Fractions',['frac','mul','gcd','product','neg']],['Boîtes et pioche',['dev','fact','deckop']],['Puissances et racines',['pow2','tool','inv','eval','recip']],['Trigonométrie',['trigo','angle']],['Problèmes et seconde',['story','ineq','ineqneg','zero','system']],['Score',['goal','bonus']]];
 const sceneHTML=k=>`<div class="scard"><div class="scene" data-scene="${k}"></div><div class="scap">${SCENES[k].t}</div></div>`;
 function animateScenes(root){root.querySelectorAll('[data-scene]').forEach(el=>playScene(el,SCENES[el.dataset.scene]))}
 async function playScene(el,sc){
-  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce=OPTS.calm||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
   el.innerHTML=`<div class="stage">${sc.b}</div><div class="shand">👆</div>`;const hand=el.querySelector('.shand');
   const pos=n=>{const r=n.getBoundingClientRect(),o=el.getBoundingClientRect();return{x:r.left-o.left+r.width/2,y:r.top-o.top+r.height/2}};
   while(el.isConnected){
@@ -461,13 +480,161 @@ async function coachLoop(run,step){
   }
 }
 
+/* =====================================================================
+   VERSION 2 : histoires, étapes, explications d'erreurs, boutique,
+   défi du jour, réglages (lisibilité, taille, animations), hors ligne
+   ===================================================================== */
+const UNLOCK_FROM={8:3,9:4};
+const prevWorld=i=>UNLOCK_FROM[i]??i-1;
+/* ---------- problèmes : choisir la bonne équation ---------- */
+let storyTry=0;
+function showStory(ci,li){
+  const lv=WORLDS[ci].levels[li];state.ci=ci;state.li=li;state.mode='level';storyTry=0;
+  const order=lv.ch.map((_,i)=>i);
+  modal(`<div class="winpet">${creatureSVG(petStage(),'idle')}</div><h2>📖 Le problème</h2><div class="storytxt">${lv.story}</div>
+   <div class="kick">Quelle équation traduit ce problème ?</div>
+   <div class="stchoices">${order.map(i=>`<button class="stch" data-story="${i}">${mathEq(parseEq(lv.ch[i]),parseRel(lv.ch[i]))}</button>`).join('')}</div>
+   <div id="storyWhy"></div><div class="btns"><button class="ghostbtn" data-act="menu">Retour</button></div>`,'story');
+}
+function storyPick(i){
+  const lv=WORLDS[state.ci].levels[state.li];const b=document.querySelector(`[data-story="${i}"]`);
+  if(i===lv.ok){b.classList.add('ok');sfx('merge');if(storyTry===0){STATS.storyFirst=(STATS.storyFirst||0)+1;saveStats()}
+    setTimeout(()=>{const o=levelOpts(state.ci,state.li);if(o.intro&&!o.intro.length)o.intro=null;state.chain=null;setup(o)},650);return}
+  storyTry++;b.classList.add('bad');b.disabled=true;sfx('fail');
+  $('#storyWhy').innerHTML=`<div class="whybox">🤔 Pas tout à fait. ${lv.why}</div>`;
+}
+/* ---------- niveaux en plusieurs étapes ---------- */
+let CHAIN=null;
+function startLevel(ci,li,step=0){
+  const lv=WORLDS[ci].levels[li];
+  if(lv.story&&!step)return showStory(ci,li);
+  state.mode='level';state.ci=ci;state.li=li;state.rnd=null;
+  const o=levelOpts(ci,li,step);if(o.intro&&!o.intro.length)o.intro=null;
+  if(o.chain&&o.chain.k===0)CHAIN={moves:0,par:0,sols:[]};
+  setup(o);state.chain=o.chain||null;render();
+}
+const prettySol=g=>g.replace(/-/g,'−').replace(/([=<>≤≥])/,' $1 ').replace(/\*/g,'·');
+function chainStepWin(){
+  const lv=WORLDS[state.ci].levels[state.li],k=state.chain.k;
+  CHAIN.moves+=state.moves;CHAIN.par+=state.par||0;CHAIN.sols.push(lv.steps[k].goal);
+  modal(`<div class="winpet">${creatureSVG(petStage(),'happy')}</div><h2>✔ Étape ${k+1}/${state.chain.n} réussie !</h2>
+<div class="sol">${mathEq(state.eq)}</div><div>${lv.zero?'Le facteur suivant peut aussi être nul…':'On garde ce résultat pour l\'étape suivante.'}</div>
+   <div class="btns"><button class="bigbtn" data-act="step">Étape suivante ▶</button></div>`,'win');sfx('win');confetti(30);
+}
+function solutionLine(){
+  if(state.chain&&CHAIN){const lv=WORLDS[state.ci].levels[state.li];const all=CHAIN.sols.concat(lv.steps[state.chain.k].goal);
+    if(lv.zero)return`Solutions : ${all.map(prettySol).join(' <b>ou</b> ')}`;
+    return`Solution du système : ${all.slice(1).map(prettySol).join(' <b>et</b> ')}`}
+  if(state.rel&&state.rel!=='='){const s=isoSide();if(s<0)return'';const r=s===0?state.rel:MIRROR[state.rel];const v=textSum(state.eq[1-s]).replace(/-/g,'−');
+    const I={'<':`]−∞ ; ${v}[`,'≤':`]−∞ ; ${v}]`,'>':`]${v} ; +∞[`,'≥':`[${v} ; +∞[`}[r];return`Ensemble des solutions : <b>${esc(state.target)} ∈ ${I}</b>`}
+  return'';
+}
+/* ---------- explication des erreurs ---------- */
+const WHY=[
+ {re:/Équilibre la balance|Termine d|opération en cours/,s:'add',t:"Une équation est une <b>balance</b>. Si tu fais une opération d'un seul côté, elle penche : l'égalité devient fausse. Refais <b>exactement</b> la même opération de l'autre côté pour la rééquilibrer."},
+ {re:/Pas du même côté/,s:'add',t:"Un terme ne « saute » pas par-dessus le = tout seul. Pour faire disparaître +3 d'un côté, on ajoute −3 <b>des deux côtés</b>. C'est ce qu'on appelle parfois « passer de l'autre côté »."},
+ {re:/diviseur commun|même carte|étage/,s:'gcd',t:"Dans une fraction, on ne simplifie que par un nombre qui divise <b>à la fois</b> le haut et le bas : 6/4 = 3/2 (on divise par 2), mais 5/3 ne se simplifie pas."},
+ {re:/Seuls deux/,s:'product',t:"Dans un produit, on calcule deux nombres côte à côte (2·3 = 6) ou on regroupe v·v = v². Mais 2·x ne se calcule pas : il reste 2x."},
+ {re:/pas semblables|même somme/,s:'like',t:"On additionne seulement des termes <b>de même nature</b> : des x avec des x (3x + 2x = 5x), des nombres avec des nombres. 3x + 2 ne fait pas 5x !"},
+ {re:/factoriser/,s:'fact',t:"Factoriser, c'est mettre en commun un facteur présent dans <b>chaque</b> terme : 3x + 3·2 = 3(x + 2). Si un terme ne contient pas ce facteur, on ne peut pas."},
+ {re:/développe|Rien à développer/,s:'dev',t:"Développer : on multiplie le facteur devant la parenthèse par <b>chaque</b> terme dedans : 2(x + 3) = 2x + 6. Une fraction au dénominateur s'enlève plutôt en multipliant les deux côtés."},
+ {re:/réciproque|valeur exacte/,s:'inv',t:"Une fonction s'annule avec sa <b>réciproque</b> : √(x²) = x (si x ≥ 0), (√x)² = x. Applique d'abord l'outil réciproque des deux côtés."},
+ {re:/inéquation|signe d'une lettre/,s:'ineqneg',t:"Dans une inéquation, multiplier ou diviser par un nombre <b>négatif</b> retourne le sens. Avec une lettre, on ne sait pas si elle est positive ou négative : on ne peut pas savoir si le sens change."},
+];
+function showWhy(i){const w=WHY[i];modal(`<h2>🤔 Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
+  ${SCENES[w.s]?`<div class="sgrid n1">${sceneHTML(w.s)}</div>`:''}<div class="btns"><button class="bigbtn" data-act="close">J'ai compris</button></div>`,'intro')}
+/* ---------- boutique de Pépix ---------- */
+let SHOP={owned:{},eq:{}};try{Object.assign(SHOP,JSON.parse(localStorage.getItem('isoleX_college2_shop')||'{}'))}catch(e){}
+const saveShop=()=>{try{localStorage.setItem('isoleX_college2_shop',JSON.stringify(SHOP))}catch(e){}};
+const ITEMS=[
+ {k:'hat',slot:'head',icon:'🤠',name:"Chapeau d'explorateur",price:60},
+ {k:'flowers',slot:'head',icon:'🌺',name:'Couronne de fleurs',price:90},
+ {k:'cap',slot:'head',icon:'🧢',name:'Casquette',price:120},
+ {k:'party',slot:'head',icon:'🥳',name:'Chapeau de fête',price:200},
+ {k:'glasses',slot:'eyes',icon:'👓',name:'Lunettes de savant',price:80},
+ {k:'shades',slot:'eyes',icon:'🕶️',name:'Lunettes de soleil',price:150},
+ {k:'bow',slot:'neck',icon:'🎀',name:'Nœud papillon',price:70},
+ {k:'scarf',slot:'neck',icon:'🧣',name:'Écharpe',price:110},
+ {k:'blue',slot:'color',icon:'🔵',name:'Pépix bleu lagon',price:100,col:'#4fb6e8',dark:'#1d6f9c',belly:'#c7ecff'},
+ {k:'pink',slot:'color',icon:'🩷',name:'Pépix rose fruit',price:140,col:'#ff8fb8',dark:'#c2457a',belly:'#ffe0ec'},
+ {k:'purple',slot:'color',icon:'🟣',name:'Pépix violet mystère',price:180,col:'#a68cf0',dark:'#5b3fb8',belly:'#e8e0ff'},
+ {k:'gold',slot:'color',icon:'🟡',name:'Pépix doré',price:300,col:'#ffd23f',dark:'#b8860b',belly:'#fff4c2'},
+];
+const coinsEarned=()=>Math.floor(Object.values(PROG).reduce((a,p)=>a+(p.p||0),0)/10)+(STATS.bonusCoins||0);
+const coins=()=>coinsEarned()-(STATS.spent||0);
+const eqItem=slot=>ITEMS.find(it=>it.k===SHOP.eq[slot]);
+function accSVG(G){const {r,cy,top,ex,ey,er}=G;let h='';const hd=eqItem('head'),ey2=eqItem('eyes'),nk=eqItem('neck');
+  if(nk&&nk.k==='scarf')h+=`<path d="M${60-r*.72} ${cy+r*.5}q${r*.72} ${r*.3} ${r*1.44} 0l-${r*.06} ${r*.22}q-${r*.66} ${r*.28} -${r*1.32} 0z" fill="#e63946" stroke="#9d1d27" stroke-width="1.5"/><path d="M${60+r*.3} ${cy+r*.62}l${r*.18} ${r*.5} ${r*.2} -${r*.06} -${r*.1} -${r*.46}z" fill="#e63946" stroke="#9d1d27" stroke-width="1.2"/>`;
+  if(nk&&nk.k==='bow')h+=`<path d="M60 ${cy+r*.6}l-${r*.3} -${r*.16}v${r*.32}z M60 ${cy+r*.6}l${r*.3} -${r*.16}v${r*.32}z" fill="#ff4d6d" stroke="#a4133c" stroke-width="1.5"/><circle cx="60" cy="${cy+r*.6}" r="${r*.07}" fill="#a4133c"/>`;
+  if(ey2&&ey2.k==='glasses')h+=`<g fill="rgba(255,255,255,.25)" stroke="#3b2a0a" stroke-width="2"><circle cx="${60-ex}" cy="${ey}" r="${er*1.35}"/><circle cx="${60+ex}" cy="${ey}" r="${er*1.35}"/></g><path d="M${60-ex+er*1.35} ${ey}h${2*ex-2.7*er}" stroke="#3b2a0a" stroke-width="2"/>`;
+  if(ey2&&ey2.k==='shades')h+=`<g fill="#1b1b2f" stroke="#000" stroke-width="1.5"><rect x="${60-ex-er*1.5}" y="${ey-er*1.05}" width="${er*3}" height="${er*2}" rx="${er*.8}"/><rect x="${60+ex-er*1.5}" y="${ey-er*1.05}" width="${er*3}" height="${er*2}" rx="${er*.8}"/></g><path d="M${60-ex+er*1.5} ${ey-er*.4}h${2*ex-3*er}" stroke="#000" stroke-width="2"/><path d="M${60-ex-er*.9} ${ey-er*.6}l${er*.6} -${er*.2}" stroke="#fff" stroke-width="1.5" opacity=".7"/>`;
+  if(hd&&hd.k==='hat')h+=`<ellipse cx="60" cy="${top+r*.16}" rx="${r*1.02}" ry="${r*.17}" fill="#a37c42" stroke="#6b4a1f" stroke-width="1.5"/><path d="M${60-r*.58} ${top+r*.12}q${r*.1} -${r*.62} ${r*.58} -${r*.62}t${r*.58} ${r*.62}z" fill="#c8a165" stroke="#6b4a1f" stroke-width="1.5"/><path d="M${60-r*.56} ${top+r*.02}q${r*.56} ${r*.08} ${r*1.12} 0" stroke="#5b3a12" stroke-width="${r*.1}" fill="none"/>`;
+  if(hd&&hd.k==='cap')h+=`<path d="M${60-r*.7} ${top+r*.2}q0 -${r*.62} ${r*.7} -${r*.62}t${r*.7} ${r*.62}z" fill="#4361ee" stroke="#23379c" stroke-width="1.5"/><path d="M${60+r*.2} ${top+r*.2}q${r*.6} -${r*.06} ${r*.9} ${r*.12}q-${r*.4} ${r*.1} -${r*.9} 0z" fill="#3046c4" stroke="#23379c" stroke-width="1.5"/><circle cx="60" cy="${top-r*.42}" r="${r*.07}" fill="#ffd23f"/>`;
+  if(hd&&hd.k==='party')h+=`<path d="M${60-r*.36} ${top+r*.14}L${60+r*.05} ${top-r*.85}L${60+r*.4} ${top+r*.14}z" fill="#ff8c42" stroke="#c65a12" stroke-width="1.5"/><path d="M${60-r*.22} ${top-r*.2}l${r*.5} ${r*.1}M${60-r*.3} ${top-.0*r}l${r*.62} ${r*.1}" stroke="#ffe27a" stroke-width="2.5"/><circle cx="${60+r*.05}" cy="${top-r*.9}" r="${r*.1}" fill="#ffe27a"/>`;
+  if(hd&&hd.k==='flowers'){[-.7,-.36,0,.36,.7].forEach((t,i)=>{const x=60+t*r*.95,y=top+r*.18+Math.abs(t)*r*.22;const cl=['#ff6b9d','#ffd23f','#ff8c42','#ffd23f','#ff6b9d'][i];
+    h+=`<g>${[0,72,144,216,288].map(a=>`<circle cx="${x+Math.cos(a*Math.PI/180)*r*.1}" cy="${y+Math.sin(a*Math.PI/180)*r*.1}" r="${r*.08}" fill="${cl}"/>`).join('')}<circle cx="${x}" cy="${y}" r="${r*.06}" fill="#fff"/></g>`})}
+  return h;
+}
+function showShop(){
+  const c=coins();
+  modal(`<h2>🛍️ La boutique de Pépix</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
+   <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' Pépix doit d\'abord éclore pour porter ses tenues.':''}</small></div></div>
+   <div class="shopgrid">${ITEMS.map(it=>{const own=SHOP.owned[it.k],on=SHOP.eq[it.slot]===it.k;
+     return`<div class="sitem${own?' own':''}${on?' on':''}"><span class="si">${it.icon}</span><b>${esc(it.name)}</b>
+      ${own?`<button class="chip${on?' on':''}" data-shop="wear" data-k="${it.k}">${on?'✔ Porté':'Porter'}</button>`:`<button class="chip" data-shop="buy" data-k="${it.k}"${c<it.price?' disabled':''}>🪙 ${it.price}</button>`}</div>`}).join('')}</div>
+   <div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
+}
+document.getElementById('mbox').addEventListener('click',e=>{
+  const st=e.target.closest('[data-story]');if(st){storyPick(+st.dataset.story);return}
+  const b=e.target.closest('[data-shop]');if(!b)return;const it=ITEMS.find(i=>i.k===b.dataset.k);
+  if(b.dataset.shop==='buy'){if(coins()<it.price)return;STATS.spent=(STATS.spent||0)+it.price;saveStats();SHOP.owned[it.k]=1;SHOP.eq[it.slot]=it.k;saveShop();sfx('badge');confetti(40);checkBadges()}
+  else{SHOP.eq[it.slot]=SHOP.eq[it.slot]===it.k?null:it.k;saveShop();sfx('pop')}
+  showShop();
+});
+/* ---------- défi du jour ---------- */
+let DAILY={last:'',streak:0,best:0};try{Object.assign(DAILY,JSON.parse(localStorage.getItem('isoleX_college2_daily')||'{}'))}catch(e){}
+const saveDaily=()=>{try{localStorage.setItem('isoleX_college2_daily',JSON.stringify(DAILY))}catch(e){}};
+const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d)};
+const dailyDone=()=>DAILY.last===dayKey();
+const curStreak=()=>DAILY.last===dayKey()||DAILY.last===yesterday()?DAILY.streak:0;
+function seeded(str){let h=1779033703;for(const ch of str)h=Math.imul(h^ch.charCodeAt(0),3432918353),h=h<<13|h>>>19;
+  return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return((h^=h>>>16)>>>0)/4294967296}}
+function startDaily(){
+  const R=Math.random;Math.random=seeded('pepix'+dayKey());let g,th;
+  try{const ths=THEMES.filter((t,i)=>unlocked(i)&&!['formula','trig','story'].includes(t.k)).map(t=>t.k);th=pick(ths.length?ths:['add']);g=genEq(th,ths.length>2?2:1)}finally{Math.random=R}
+  state.mode='daily';const o={eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,tip:"📅 L'équation du jour est la même pour toute la classe. Reviens demain pour allonger ta série !",box:false,label:'📅',title:'Défi du jour · '+THEMES.find(t=>t.k===th).n};
+  lastSetup=Object.assign({},o,{eq0:clone(g.eq)});setup(o);state.chain=null;
+}
+function dailyWin(){if(dailyDone())return 0;DAILY.streak=DAILY.last===yesterday()?DAILY.streak+1:1;DAILY.last=dayKey();DAILY.best=Math.max(DAILY.best,DAILY.streak);saveDaily();
+  const bonus=20+10*Math.min(DAILY.streak,7);STATS.bonusCoins=(STATS.bonusCoins||0)+bonus;saveStats();return bonus}
+/* ---------- réglages et accessibilité ---------- */
+function applyOpts(){document.body.classList.toggle('dys',!!OPTS.dys);document.body.classList.toggle('calm',!!OPTS.calm);
+  document.documentElement.style.setProperty('--zoom',OPTS.size||1);$('#app').style.zoom=OPTS.size||1}
+let installEvt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
+function showSettings(){
+  const sz=OPTS.size||1;
+  modal(`<h2>⚙️ Réglages</h2><div class="setlist">
+   <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d'espace entre les lettres.</small></span></label>
+   <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
+   <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
+   <div class="setrow"><span><b>Taille du texte</b></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
+   <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l\'appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l\'écran d\'accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l\'application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
+   </div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
+  document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
+  document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{OPTS.size=+b.dataset.size;saveOpts();applyOpts();showSettings()});
+  const bi=$('#btnInstall');if(bi)bi.onclick=async()=>{installEvt.prompt();await installEvt.userChoice;installEvt=null;showSettings()};
+}
+if('serviceWorker'in navigator&&/^https:|^http:\/\/localhost/.test(location.href))navigator.serviceWorker.register('sw.js').catch(()=>{});
+
 /* ---------- boutons ---------- */
 $('#btnBack').onclick=backFromGame;$('#btnWorldBack').onclick=toHome;$('#btnTrainBack').onclick=toHome;
 $('#btnUndo').onclick=undo;$('#btnHint').onclick=()=>{state.usedHint=true;hint()};
 $('#btnReset').onclick=replay;
 $('#btnTrad').onclick=()=>{state.trad=!state.trad;$('#btnTrad').classList.toggle('on',state.trad);render()};
+$('#toast').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(b)showWhy(+b.dataset.why)});$('#btnSettings').onclick=showSettings;
 $('#btnHelp').onclick=showHelp;$('#btnHelpHome').onclick=showHelp;
-$('#btnHist').onclick=()=>modal('<h2>Traduction pas à pas</h2><div class="histlist">'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq)}</div>`).join('')+'</div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>');
+$('#btnHist').onclick=()=>modal('<h2>Traduction pas à pas</h2><div class="histlist">'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq,h.rel)}</div>`).join('')+'</div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>');
 $('#tip').addEventListener('click',e=>{if(e.target.id==='tipX'){state.tipClosed=true;render()}});
 $('#isobar').addEventListener('click',e=>{if(e.target.id==='btnValid')win()});
 $('#btnGen').onclick=startRandom;
@@ -480,5 +647,5 @@ $('#optTeacher').onchange=e=>{OPTS.teacher=e.target.checked;saveOpts();renderHom
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!$('#game').classList.contains('hidden')){e.preventDefault();undo()}});
 window.addEventListener('resize',()=>{if(state.coach)coachShow()});
 document.documentElement.style.setProperty('--acc','#ff8c42');
-renderHome();
+applyOpts();renderHome();
 if(location.hash==='#labo')showExp();
