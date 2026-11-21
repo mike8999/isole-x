@@ -713,7 +713,7 @@ function showLook(){if(!$('#mbox').classList.contains('lookbox'))lookFrom=['home
 document.getElementById('mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;
   const r=LOOK.click(e.target);if(!r)return;
   if(r.act){closeModal();sfx(r.act==='save'?'badge':'pop');if(lookFrom==='home')toHome();else showScreen(lookFrom);if(lookFrom==='game')render();if(r.msg)toast(r.msg);return}
-  sfx(r.msg&&r.msg.startsWith('🎨')?'badge':'pop');const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(r.msg)toast(r.msg,r.warn?'warn':'')});
+  sfx(r.msg&&r.msg.startsWith('🎨')?'badge':'pop');const sc=LOOK.scrollEl().scrollTop;showLook();LOOK.scrollEl().scrollTop=sc;if(r.msg)toast(r.msg,r.warn?'warn':'')});
 /* fermer la fenêtre Apparence sans enregistrer annule l'aperçu */
 const _closeModal=closeModal;closeModal=function(){if($('#mbox').classList.contains('lookbox'))LOOK.cancel();_closeModal()};
 /* après chaque affichage : ajuster la taille pour que rien ne soit coupé */
