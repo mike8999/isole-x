@@ -216,7 +216,12 @@ function startRandom(){
 /* ---------- événements ---------- */
 $('#reaction').addEventListener('click',e=>{const u=e.target.closest('[data-up]'),d=e.target.closest('[data-dn]');if(u)bump(+u.dataset.up,1);else if(d)bump(+d.dataset.dn,-1)});
 $('#btnBack').onclick=toMenu;$('#btnUndo').onclick=undo;$('#btnHint').onclick=hint;$('#btnReset').onclick=()=>startLevel(st.ti,st.li,st.mode);
-$('#btnHelp').onclick=showHelp;$('#btnHelpMenu').onclick=showHelp;$('#btnRnd').onclick=startRandom;
+$('#btnHelp').onclick=showHelp;$('#btnHelpMenu').onclick=showHelp;
+/* apparence : thèmes (les thèmes à pièces se débloquent dans Isole x !) */
+LOOK.init('etabli');
+function showLook(){modal(LOOK.html(),'lookbox')}
+$('#btnLookMenu').onclick=showLook;
+$('#mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;const msg=LOOK.click(e.target);const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(msg)toast(msg,'warn')});$('#btnRnd').onclick=startRandom;
 $('#isobar').addEventListener('click',e=>{if(e.target.id==='btnValid')win()});
 $('#coachSkip').onclick=stopCoach;
 renderMenu();

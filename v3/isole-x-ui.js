@@ -641,11 +641,13 @@ function showSettings(){
    <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d'espace entre les lettres.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
+   <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l'inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
    <div class="setrow"><span><b>Taille du texte</b></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
    <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l\'appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l\'écran d\'accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l\'application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
    </div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
   document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
   document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{OPTS.size=+b.dataset.size;saveOpts();applyOpts();showSettings()});
+  $('#btnLookSet').onclick=showLook;
   const bi=$('#btnInstall');if(bi)bi.onclick=async()=>{installEvt.prompt();await installEvt.userChoice;installEvt=null;showSettings()};
 }
 if('serviceWorker'in navigator&&/^https:|^http:\/\/localhost/.test(location.href))navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -723,12 +725,18 @@ function confirmLoad(d){pendingSave=d;
 function checkSaveLink(){const m=location.hash.match(/reprendre=([0-9A-Za-z]+)/);if(!m)return;history.replaceState(null,'',location.href.split('#')[0]);
   try{confirmLoad(readSaveCode(m[1]))}catch(e){toast('Ce lien de sauvegarde est abîmé : '+e.message,'warn',6000)}}
 
+/* ---------- apparence : thèmes et réglages fins ---------- */
+function showLook(){modal(LOOK.html(),'lookbox')}
+document.getElementById('mbox').addEventListener('click',e=>{if(!e.target.closest('[data-lk]')||!$('#mbox').classList.contains('lookbox'))return;
+  const msg=LOOK.click(e.target);sfx(msg&&msg.startsWith('🎨')?'badge':'pop');const sc=$('#mbox').scrollTop;showLook();$('#mbox').scrollTop=sc;if(msg)toast(msg,msg.startsWith('🎨')?'':'warn')});
+LOOK.init('etabli',{coins:()=>coins(),spend:pr=>{if(coins()<pr)return false;STATS.spent=(STATS.spent||0)+pr;saveStats();return true},onChange:()=>{if(!$('#home').classList.contains('hidden'))renderHome()}});
+
 /* ---------- boutons ---------- */
 $('#btnBack').onclick=backFromGame;$('#btnWorldBack').onclick=toMenu;$('#btnLand').onclick=toHome;$('#btnMenuTrain').onclick=showTrain;$('#btnTrainBack').onclick=toMenu;
 $('#btnUndo').onclick=undo;$('#btnHint').onclick=()=>{state.usedHint=true;hint()};
 $('#btnReset').onclick=replay;
 $('#btnTrad').onclick=()=>{state.trad=!state.trad;$('#btnTrad').classList.toggle('on',state.trad);render()};
-$('#toast').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(b)showWhy(+b.dataset.why)});$('#btnSettings').onclick=showSettings;$('#btnSave').onclick=()=>showSave('save');
+$('#toast').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(b)showWhy(+b.dataset.why)});$('#btnSettings').onclick=showSettings;$('#btnLook').onclick=showLook;$('#btnSave').onclick=()=>showSave('save');
 $('#btnHelp').onclick=showHelp;$('#btnHelpHome').onclick=showHelp;
 $('#btnHist').onclick=()=>modal('<h2>Traduction pas à pas</h2><div class="histlist">'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq,h.rel)}</div>`).join('')+'</div><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>');
 $('#tip').addEventListener('click',e=>{if(e.target.id==='tipX'){state.tipClosed=true;render()}});
