@@ -393,9 +393,14 @@ function scoreOf(){
 
 /* ---------- progression ---------- */
 let PROG={};try{PROG=JSON.parse(localStorage.getItem('isoleX_college2')||'{}')}catch(e){}
-function saveProg(){try{localStorage.setItem('isoleX_college',JSON.stringify(PROG))}catch(e){}}
+/* correctif : récupère les étoiles enregistrées au mauvais endroit (bug du 21/11/2026) */
+try{const old=JSON.parse(localStorage.getItem('isoleX_college')||'{}');for(const k in old){const o=old[k],n=PROG[k];if(!n||o.s>n.s||o.p>n.p)PROG[k]={s:Math.max(o.s,n?n.s:0),p:Math.max(o.p,n?n.p:0)}}}catch(e){}
+function saveProg(){try{localStorage.setItem('isoleX_college2',JSON.stringify(PROG))}catch(e){}}
+saveProg();
 let SEEN={};try{SEEN=JSON.parse(localStorage.getItem('isoleX_college2_seen')||'{}')}catch(e){}
-function saveSeen(){try{localStorage.setItem('isoleX_college_seen',JSON.stringify(SEEN))}catch(e){}}
+try{const old=JSON.parse(localStorage.getItem('isoleX_college_seen')||'{}');for(const k in old)if(old[k])SEEN[k]=true}catch(e){}
+function saveSeen(){try{localStorage.setItem('isoleX_college2_seen',JSON.stringify(SEEN))}catch(e){}}
+saveSeen();
 const progKey=(ci,li)=>state.spec+'|'+ci+'-'+li;
 
 /* ---------- pioche automatique ---------- */
