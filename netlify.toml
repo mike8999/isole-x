@@ -1,0 +1,18 @@
+# Isole x ! — site statique : aucune compilation, on publie le dépôt tel quel
+[build]
+  publish = "."
+  command = ""
+
+# Le service worker et les pages doivent toujours être revérifiés (mises à jour immédiates)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/*/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/*/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
