@@ -5,51 +5,51 @@
 const CHEM=[
 {k:'comb',name:'Combustions',icon:'🔥',acc:'#e4572e',levels:[
  {r:'H2 + O2 -> H2O',s:[2,1,2],n:"Combustion du dihydrogène (pile, fusée)",coach:true},
- {r:'C + O2 -> CO',s:[2,1,2],n:"Combustion incomplète du carbone : formation de monoxyde de carbone"},
+ {r:'C + O2 -> CO',s:[2,1,2],n:"Combustion incomplète du carbone : formation de monoxyde de carbone"},
  {r:'CH4 + O2 -> CO2 + H2O',s:[1,2,1,2],n:"Combustion du méthane (gaz naturel, chaudière)"},
  {r:'C3H8 + O2 -> CO2 + H2O',s:[1,5,3,4],n:"Combustion du propane (bouteille de gaz)"},
- {r:'C2H5OH + O2 -> CO2 + H2O',s:[1,3,2,3],n:"Combustion de l'éthanol (bioéthanol)"},
- {r:'C4H10 + O2 -> CO2 + H2O',s:[2,13,8,10],n:"Combustion du butane : astuce, commence par C puis H, et équilibre O en dernier"},
+ {r:'C2H5OH + O2 -> CO2 + H2O',s:[1,3,2,3],n:"Combustion de l’éthanol (bioéthanol)"},
+ {r:'C4H10 + O2 -> CO2 + H2O',s:[2,13,8,10],n:"Combustion du butane : astuce, commence par C puis H, et équilibre O en dernier"},
  {r:'C6H12O6 + O2 -> CO2 + H2O',s:[1,6,6,6],n:"Combustion du glucose (respiration, bois)"},
- {r:'CH4 + O2 -> CO + H2O',s:[2,3,2,4],n:"Combustion incomplète du méthane : danger CO !"},
- {r:'C2H2 + O2 -> CO2 + H2O',s:[2,5,4,2],n:"Combustion de l'acétylène (poste de soudure)"},
- {r:'C8H18 + O2 -> CO2 + H2O',s:[2,25,16,18],n:"Combustion de l'octane (essence) : niveau ultime !"},
+ {r:'CH4 + O2 -> CO + H2O',s:[2,3,2,4],n:"Combustion incomplète du méthane (danger : CO)"},
+ {r:'C2H2 + O2 -> CO2 + H2O',s:[2,5,4,2],n:"Combustion de l’acétylène (poste de soudure)"},
+ {r:'C8H18 + O2 -> CO2 + H2O',s:[2,25,16,18],n:"Combustion de l’octane (essence) : niveau ultime"},
 ]},
 {k:'redox',name:'Oxydoréduction',icon:'⚡',acc:'#1e88e5',levels:[
- {r:'H2O -> H2 + O2',s:[2,2,1],n:"Électrolyse de l'eau : production d'hydrogène"},
- {r:'Fe + O2 -> Fe2O3',s:[4,3,2],n:"Corrosion du fer : la rouille"},
- {r:'Zn + Ag^+ -> Zn^2+ + Ag',s:[1,2,1,2],n:"Pile zinc-argent : les charges électriques doivent aussi être équilibrées",intro:'charge'},
- {r:'Cu^2+ + e- -> Cu',s:[1,2,1],n:"Demi-équation : réduction des ions cuivre",intro:'electron'},
- {r:'Al -> Al^3+ + e-',s:[1,1,3],n:"Demi-équation : oxydation de l'aluminium"},
- {r:'H2 -> H^+ + e-',s:[1,2,2],n:"Pile à combustible : réaction à l'anode"},
- {r:'O2 + H^+ + e- -> H2O',s:[1,4,4,2],n:"Pile à combustible : réaction à la cathode"},
- {r:'Ag^+ + Cu -> Ag + Cu^2+',s:[2,1,2,1],n:"Dépôt d'argent sur un fil de cuivre"},
- {r:'Al + Cu^2+ -> Al^3+ + Cu',s:[2,3,2,3],n:"L'aluminium réduit les ions cuivre"},
- {r:'MnO4^- + H^+ + Fe^2+ -> Mn^2+ + Fe^3+ + H2O',s:[1,8,5,1,5,4],n:"Dosage par le permanganate : niveau ultime !"},
+ {r:'H2O -> H2 + O2',s:[2,2,1],n:"Électrolyse de l’eau : production d’hydrogène"},
+ {r:'Fe + O2 -> Fe2O3',s:[4,3,2],n:"Corrosion du fer : la rouille"},
+ {r:'Zn + Ag^+ -> Zn^2+ + Ag',s:[1,2,1,2],n:"Pile zinc-argent : les charges électriques doivent aussi être équilibrées",intro:'charge'},
+ {r:'Cu^2+ + e- -> Cu',s:[1,2,1],n:"Demi-équation : réduction des ions cuivre",intro:'electron'},
+ {r:'Al -> Al^3+ + e-',s:[1,1,3],n:"Demi-équation : oxydation de l’aluminium"},
+ {r:'H2 -> H^+ + e-',s:[1,2,2],n:"Pile à combustible : réaction à l’anode"},
+ {r:'O2 + H^+ + e- -> H2O',s:[1,4,4,2],n:"Pile à combustible : réaction à la cathode"},
+ {r:'Ag^+ + Cu -> Ag + Cu^2+',s:[2,1,2,1],n:"Dépôt d’argent sur un fil de cuivre"},
+ {r:'Al + Cu^2+ -> Al^3+ + Cu',s:[2,3,2,3],n:"L’aluminium réduit les ions cuivre"},
+ {r:'MnO4^- + H^+ + Fe^2+ -> Mn^2+ + Fe^3+ + H2O',s:[1,8,5,1,5,4],n:"Dosage par le permanganate : niveau ultime"},
 ]},
 {k:'acid',name:'Acides et bases',icon:'🧪',acc:'#2e9e5b',levels:[
- {r:'H2SO4 + OH^- -> SO4^2- + H2O',s:[1,2,1,2],n:"Neutralisation de l'acide sulfurique par les ions hydroxyde"},
+ {r:'H2SO4 + OH^- -> SO4^2- + H2O',s:[1,2,1,2],n:"Neutralisation de l’acide sulfurique par les ions hydroxyde"},
  {r:'HCl + Ca(OH)2 -> CaCl2 + H2O',s:[2,1,1,2],n:"Acide chlorhydrique + chaux éteinte"},
- {r:'Pb^2+ + I^- -> PbI2',s:[1,2,1],n:"Précipité jaune d'iodure de plomb : la « pluie d'or »"},
+ {r:'Pb^2+ + I^- -> PbI2',s:[1,2,1],n:"Précipité jaune d’iodure de plomb : la « pluie d’or »"},
  {r:'H2SO4 + NaOH -> Na2SO4 + H2O',s:[1,2,1,2],n:"Acide sulfurique + soude"},
- {r:'Cu^2+ + OH^- -> Cu(OH)2',s:[1,2,1],n:"Précipité bleu d'hydroxyde de cuivre (test des ions Cu²⁺)"},
+ {r:'Cu^2+ + OH^- -> Cu(OH)2',s:[1,2,1],n:"Précipité bleu d’hydroxyde de cuivre (test des ions Cu²⁺)"},
  {r:'Mg + H^+ -> Mg^2+ + H2',s:[1,2,1,1],n:"Attaque du magnésium par un acide"},
- {r:'Fe^3+ + OH^- -> Fe(OH)3',s:[1,3,1],n:"Précipité rouille d'hydroxyde de fer III"},
+ {r:'Fe^3+ + OH^- -> Fe(OH)3',s:[1,3,1],n:"Précipité rouille d’hydroxyde de fer III"},
  {r:'CaCO3 + H^+ -> Ca^2+ + CO2 + H2O',s:[1,2,1,1,1],n:"Détartrage du calcaire par un acide"},
  {r:'H3PO4 + NaOH -> Na3PO4 + H2O',s:[1,3,1,3],n:"Acide phosphorique + soude"},
- {r:'Al(OH)3 + H^+ -> Al^3+ + H2O',s:[1,3,1,3],n:"Dissolution de l'hydroxyde d'aluminium : niveau ultime !"},
+ {r:'Al(OH)3 + H^+ -> Al^3+ + H2O',s:[1,3,1,3],n:"Dissolution de l’hydroxyde d’aluminium : niveau ultime"},
 ]},
 {k:'mat',name:'Matériaux et énergie',icon:'🏭',acc:'#f4b400',levels:[
  {r:'Mg + O2 -> MgO',s:[2,1,2],n:"Combustion du magnésium (alliages légers)"},
- {r:'N2 + H2 -> NH3',s:[1,3,2],n:"Synthèse de l'ammoniac (engrais)"},
+ {r:'N2 + H2 -> NH3',s:[1,3,2],n:"Synthèse de l’ammoniac (engrais)"},
  {r:'Li + O2 -> Li2O',s:[4,1,2],n:"Oxydation du lithium (batteries)"},
- {r:'C6H12O6 -> C2H5OH + CO2',s:[1,2,2],n:"Fermentation : production de bioéthanol"},
+ {r:'C6H12O6 -> C2H5OH + CO2',s:[1,2,2],n:"Fermentation : production de bioéthanol"},
  {r:'SiO2 + C -> Si + CO',s:[1,2,1,2],n:"Production du silicium (panneaux photovoltaïques)"},
- {r:'Fe2O3 + CO -> Fe + CO2',s:[1,3,2,3],n:"Haut fourneau : production de la fonte"},
- {r:'Al2O3 -> Al + O2',s:[2,4,3],n:"Électrolyse de l'alumine : production de l'aluminium"},
- {r:'CH4 + H2O -> CO + H2',s:[1,1,1,3],n:"Vaporeformage : production d'hydrogène"},
- {r:'Fe3O4 + H2 -> Fe + H2O',s:[1,4,3,4],n:"Réduction de la magnétite par l'hydrogène (acier vert)"},
- {r:'CO2 + H2O -> C6H12O6 + O2',s:[6,6,1,6],n:"Photosynthèse : niveau ultime !"},
+ {r:'Fe2O3 + CO -> Fe + CO2',s:[1,3,2,3],n:"Haut fourneau : production de la fonte"},
+ {r:'Al2O3 -> Al + O2',s:[2,4,3],n:"Électrolyse de l’alumine : production de l’aluminium"},
+ {r:'CH4 + H2O -> CO + H2',s:[1,1,1,3],n:"Vaporeformage : production d’hydrogène"},
+ {r:'Fe3O4 + H2 -> Fe + H2O',s:[1,4,3,4],n:"Réduction de la magnétite par l’hydrogène (acier vert)"},
+ {r:'CO2 + H2O -> C6H12O6 + O2',s:[6,6,1,6],n:"Photosynthèse : niveau ultime"},
 ]},
 ];
 const COLORS={H:'#f1f1f1',C:'#2b2b2b',O:'#e53935',N:'#3f51b5',S:'#fdd835',Cl:'#43a047',Na:'#8e24aa',Ca:'#9e9e9e',Fe:'#ef6c00',Cu:'#b87333',Zn:'#78909c',Al:'#b0bec5',Mg:'#66bb6a',Ag:'#cfd8dc',Mn:'#ab47bc',Pb:'#546e7a',I:'#6a1b9a',P:'#ff9800',Li:'#ec407a',Si:'#8d6e63'};
@@ -60,7 +60,7 @@ function parseSpecies(str){
   let charge=0,body=str;const m=str.match(/\^(\d*)([+-])$/);if(m){charge=(m[1]?+m[1]:1)*(m[2]==='+'?1:-1);body=str.slice(0,m.index)}
   let i=0;function group(){const at={};while(i<body.length&&body[i]!==')'){
       if(body[i]==='('){i++;const g=group();i++;const n=num();for(const k in g)at[k]=(at[k]||0)+g[k]*n;continue}
-      const mm=body.slice(i).match(/^([A-Z][a-z]?)/);if(!mm)throw new Error('Formule : '+str);i+=mm[1].length;const n=num();at[mm[1]]=(at[mm[1]]||0)+n}return at}
+      const mm=body.slice(i).match(/^([A-Z][a-z]?)/);if(!mm)throw new Error('Formule : '+str);i+=mm[1].length;const n=num();at[mm[1]]=(at[mm[1]]||0)+n}return at}
   function num(){const mm=body.slice(i).match(/^\d+/);if(!mm)return 1;i+=mm[0].length;return+mm[0]}
   const atoms=group();
   const html=body.replace(/(\d+)/g,'<sub>$1</sub>')+(charge?`<sup>${Math.abs(charge)>1?Math.abs(charge):''}${charge>0?'+':'−'}</sup>`:'');
@@ -117,7 +117,7 @@ function render(){
   const ok=balanced(st.sp,st.co),g=gcdA(st.co);
   $('#moves').innerHTML=`Coup <b>${st.moves}</b> / ${st.par+2}`;
   const bar=$('#isobar');
-  if(ok&&g>1&&!st.won){bar.classList.remove('hidden');bar.innerHTML=`<span>✅ Équilibrée ! ✨ Mais tous les coefficients sont divisibles par <b>${g}</b> : simplifie-les pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
+  if(ok&&g>1&&!st.won){bar.classList.remove('hidden');bar.innerHTML=`<span>Équilibrée. Mais tous les coefficients sont divisibles par <b>${g}</b> : simplifie-les pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
   else bar.classList.add('hidden');
   coachCheck();
 }
@@ -131,12 +131,12 @@ function row(k,l,r,lab,charge){
 }
 function hint(){
   if(st.won)return;const c=counts(st.sp,st.co),sol=st.lv.s;
-  if(balanced(st.sp,st.co)){const g=gcdA(st.co);toast(`💡 Divise tous les coefficients par ${g} : utilise les ▼.`,'hintt',5000);return}
+  if(balanced(st.sp,st.co)){const g=gcdA(st.co);toast(`💡 Divise tous les coefficients par ${g} : utilise les ▼.`,'hintt',5000);return}
   const m=Math.max(...st.co.map((v,i)=>Math.ceil(v/sol[i])));const tgt=sol.map(v=>v*m);
   const cand=st.sp.map((p,i)=>i).filter(i=>st.co[i]<tgt[i]);
   for(const k in c.el){const [l,r]=c.el[k];if(l===r)continue;const i=cand.find(i=>st.sp[i].atoms[k]);
-    if(i!==undefined){flash(i);toast(`💡 <b>${k}</b> : ${l} à gauche, ${r} à droite. Augmente le coefficient de <b>${st.sp[i].html}</b>.`,'hintt',5500);return}}
-  if(cand.length){const i=cand[0];flash(i);toast(c.ch[0]!==c.ch[1]?`💡 Charges : ${c.ch[0]} à gauche, ${c.ch[1]} à droite. Augmente <b>${st.sp[i].html}</b>.`:`💡 Augmente le coefficient de <b>${st.sp[i].html}</b>.`,'hintt',5500)}
+    if(i!==undefined){flash(i);toast(`💡 <b>${k}</b> : ${l} à gauche, ${r} à droite. Augmente le coefficient de <b>${st.sp[i].html}</b>.`,'hintt',5500);return}}
+  if(cand.length){const i=cand[0];flash(i);toast(c.ch[0]!==c.ch[1]?`💡 Charges : ${c.ch[0]} à gauche, ${c.ch[1]} à droite. Augmente <b>${st.sp[i].html}</b>.`:`💡 Augmente le coefficient de <b>${st.sp[i].html}</b>.`,'hintt',5500)}
 }
 function hintIdx(){const sol=st.lv.s;const m=Math.max(...st.co.map((v,i)=>Math.ceil(v/sol[i])));const tgt=sol.map(v=>v*m);const c=counts(st.sp,st.co);const cand=st.sp.map((p,i)=>i).filter(i=>st.co[i]<tgt[i]);
   for(const k in c.el){const [l,r]=c.el[k];if(l===r)continue;const i=cand.find(i=>st.sp[i].atoms[k]);if(i!==undefined)return i}return cand[0]}
@@ -153,7 +153,7 @@ function showWin(){
   const sc=score();
   if(st.mode==='level'){const k=st.ti+'-'+st.li,o=PROG[k]||{s:0,p:0};PROG[k]={s:Math.max(o.s,sc.stars),p:Math.max(o.p,sc.points)};saveProg()}
   const nx=st.mode==='level'?nextLevel():null;
-  modal(`<h2>Équation équilibrée ! ⚖</h2><div class="stars">${starHTML(sc.stars)}</div>
+  modal(`<h2>Équation équilibrée ! ⚖</h2><div class="stars">${starHTML(sc.stars)}</div>
    <div class="pts">${sc.points} points ${sc.simp?'<span class="simp">✨ plus petits coefficients +50</span>':''}</div>
    <div>${st.moves} coup${st.moves>1?'s':''} — maxi ${st.par+2} pour ★★★</div>
    <div class="sol chem">${eqHTML()}</div>
@@ -169,21 +169,21 @@ $('#modal').addEventListener('click',e=>{const b=e.target.closest('[data-act]');
 
 /* ---------- aide animée ---------- */
 const SC={
- bump:{t:'Touche ▲ : une molécule de plus.',h:`<div class="cs"><div class="mini"><span class="mbtn pulse">▲</span><span class="mcoef roll"><span>1</span><span>2</span></span><span class="mf">H<sub>2</sub>O</span></div></div>`},
- atoms:{t:'Chaque atome : autant à gauche qu’à droite.',h:`<div class="cs"><div class="mrow"><span class="atom" style="--a:#e53935">O</span><span class="mcnt">2</span><svg class="scale tilt" viewBox="0 0 80 40"><path d="M40 8v26M28 36h24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g class="beam"><path d="M8 9h64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M8 9l-6 12h12zM72 9l-6 12h12z" fill="currentColor" opacity=".55"/></g></svg><span class="mcnt roll2"><span>1</span><span>2</span></span><span class="cstat roll3"><span>✗</span><span>✓</span></span></div></div>`},
+ bump:{t:'Touche ▲ : une molécule de plus.',h:`<div class="cs"><div class="mini"><span class="mbtn pulse">▲</span><span class="mcoef roll"><span>1</span><span>2</span></span><span class="mf">H<sub>2</sub>O</span></div></div>`},
+ atoms:{t:'Chaque atome : autant à gauche qu’à droite.',h:`<div class="cs"><div class="mrow"><span class="atom" style="--a:#e53935">O</span><span class="mcnt">2</span><svg class="scale tilt" viewBox="0 0 80 40"><path d="M40 8v26M28 36h24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g class="beam"><path d="M8 9h64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M8 9l-6 12h12zM72 9l-6 12h12z" fill="currentColor" opacity=".55"/></g></svg><span class="mcnt roll2"><span>1</span><span>2</span></span><span class="cstat roll3"><span>✗</span><span>✓</span></span></div></div>`},
  charge:{t:'Les charges électriques doivent aussi être égales.',h:`<div class="cs"><div class="mini"><span class="mf">Zn</span> + <span class="mcoef roll"><span>1</span><span>2</span></span><span class="mf">Ag<sup>+</sup></span> ⟶ <span class="mf">Zn<sup>2+</sup></span> + <span class="mf">2 Ag</span></div><div class="mrow"><span class="atom q">±</span><span class="mcnt roll"><span>+1</span><span>+2</span></span><svg class="scale" viewBox="0 0 80 40"><path d="M40 8v26M28 36h24M8 9h64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span class="mcnt">+2</span><span class="cstat roll3"><span>✗</span><span>✓</span></span></div></div>`},
  electron:{t:'Un électron e⁻ compte pour une charge −1.',h:`<div class="cs"><div class="mini"><span class="mf">Cu<sup>2+</sup></span> + <span class="mcoef roll"><span>1</span><span>2</span></span><span class="mf">e<sup>−</sup></span> ⟶ <span class="mf">Cu</span></div><div class="mrow"><span class="atom q">±</span><span class="mcnt roll"><span>+1</span><span>0</span></span><span class="mcnt">0</span><span class="cstat roll3"><span>✗</span><span>✓</span></span></div></div>`},
- simp:{t:'✨ Les plus petits coefficients possibles : +50 points.',h:`<div class="cs"><div class="mini"><span class="mcoef roll"><span>4</span><span>2</span></span><span class="mf">H<sub>2</sub></span> + <span class="mcoef roll"><span>2</span><span>1</span></span><span class="mf">O<sub>2</sub></span> ⟶ <span class="mcoef roll"><span>4</span><span>2</span></span><span class="mf">H<sub>2</sub>O</span></div></div>`},
+ simp:{t:'✨ Les plus petits coefficients possibles : +50 points.',h:`<div class="cs"><div class="mini"><span class="mcoef roll"><span>4</span><span>2</span></span><span class="mf">H<sub>2</sub></span> + <span class="mcoef roll"><span>2</span><span>1</span></span><span class="mf">O<sub>2</sub></span> ⟶ <span class="mcoef roll"><span>4</span><span>2</span></span><span class="mf">H<sub>2</sub>O</span></div></div>`},
 };
 const sc=k=>`<div class="scard"><div class="scene chemscene">${SC[k].h}</div><div class="scap">${SC[k].t}</div></div>`;
 let introKeys=null;
-function showIntro(keys){introKeys=keys;modal(`<h2>Nouveau !</h2><div class="sgrid n${keys.length}">${keys.map(sc).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">À moi !</button></div>`,'intro')}
+function showIntro(keys){introKeys=keys;modal(`<h2>Nouveau !</h2><div class="sgrid n${keys.length}">${keys.map(sc).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">Je joue</button></div>`,'intro')}
 function showHelp(){modal(`<h2>Aide animée</h2><div class="sgrid">${Object.keys(SC).map(sc).join('')}</div><div class="btns"><button class="ghostbtn" data-act="tuto">▶ Revoir le tutoriel</button><button class="bigbtn" data-act="close">Fermer</button></div>`,'help')}
 
 /* ---------- tutoriel guidé ---------- */
 const COACH=[
- {cap:'Compte les <b>O</b> : 2 à gauche, 1 à droite. Touche <b>▲</b> sous H₂O',el:()=>document.querySelector('[data-up="2"]'),done:()=>st.co[2]>=2},
- {cap:'Maintenant les <b>H</b> : 2 à gauche, 4 à droite. Touche <b>▲</b> sous H₂',el:()=>document.querySelector('[data-up="0"]'),done:()=>st.co[0]>=2||st.won},
+ {cap:'Compte les <b>O</b> : 2 à gauche, 1 à droite. Touche <b>▲</b> sous H₂O',el:()=>document.querySelector('[data-up="2"]'),done:()=>st.co[2]>=2},
+ {cap:'Maintenant les <b>H</b> : 2 à gauche, 4 à droite. Touche <b>▲</b> sous H₂',el:()=>document.querySelector('[data-up="0"]'),done:()=>st.co[0]>=2||st.won},
 ];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function startCoach(){st.coach={step:0,run:0};$('#coach').classList.remove('hidden');coachShow()}

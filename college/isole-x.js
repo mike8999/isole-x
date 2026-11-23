@@ -87,13 +87,13 @@ function lex(s){
     if(c==='π'){out.push({k:'name',v:'π'});i++;continue}
     if(isL(c)){let j=i+1;while(j<s.length&&(isL(s[j])||/[0-9']/.test(s[j])))j++;out.push({k:'name',v:s.slice(i,j)});i=j;continue}
     if('+-*/^()=√∛'.includes(c)){out.push({k:c});i++;continue}
-    throw new Error(`Caractère inconnu : « ${c} »`);
+    throw new Error(`Caractère inconnu : « ${c} »`);
   }
   return out;
 }
 function parseAST(str){
   const tk=lex(str);let p=0;const peek=()=>tk[p];
-  const eat=k=>{const t=tk[p];if(!t||t.k!==k)throw new Error(`« ${k} » attendu`);p++;return t};
+  const eat=k=>{const t=tk[p];if(!t||t.k!==k)throw new Error(`« ${k} » attendu`);p++;return t};
   const startsAtom=t=>t&&(t.k==='num'||t.k==='name'||t.k==='('||t.k==='√'||t.k==='∛');
   function expr(){let a=term();while(peek()&&(peek().k==='+'||peek().k==='-')){const op=tk[p++].k;a={k:op==='+'?'add':'sub',a,b:term()}}return a}
   function term(){let a=unary();for(;;){const t=peek();if(t&&t.k==='*'){p++;a={k:'mul',a,b:unary()}}else if(t&&t.k==='/'){p++;a={k:'div',a,b:unary()}}else if(startsAtom(t)){a={k:'mul',a,b:power()}}else break}return a}
@@ -105,11 +105,11 @@ function parseAST(str){
     if(t.k==='√'||t.k==='∛')return{k:'fn',f:t.k==='√'?'root2':'root3',a:atom()};
     if(t.k==='name'){if(FNAMES[t.v]&&peek()&&peek().k==='('){p++;const e=expr();eat(')');return{k:'fn',f:FNAMES[t.v],a:e}}
       return{k:'sym',v:t.v==='pi'?'π':t.v}}
-    throw new Error(`« ${t.k} » inattendu`);
+    throw new Error(`« ${t.k} » inattendu`);
   }
-  const e=expr();if(p<tk.length)throw new Error(`« ${tk[p].v||tk[p].k} » inattendu`);return e;
+  const e=expr();if(p<tk.length)throw new Error(`« ${tk[p].v||tk[p].k} » inattendu`);return e;
 }
-function rat(str){if(!/^\d*\.?\d+$/.test(str))throw new Error('Nombre invalide : '+str);const [a,b='']=str.split('.');const q=Math.pow(10,b.length),p=parseInt((a||'')+b,10);const g=gcd(p,q);return{p:p/g,q:q/g}}
+function rat(str){if(!/^\d*\.?\d+$/.test(str))throw new Error('Nombre invalide : '+str);const [a,b='']=str.split('.');const q=Math.pow(10,b.length),p=parseInt((a||'')+b,10);const g=gcd(p,q);return{p:p/g,q:q/g}}
 const negT=t=>(t.neg=!t.neg,t);
 const mulT=(x,y)=>({id:uid(),neg:x.neg!==y.neg,num:x.num.concat(y.num),den:x.den.concat(y.den)});
 const recT=x=>({id:uid(),neg:x.neg,num:x.den,den:x.num});
@@ -126,7 +126,7 @@ function toTerm(a){
       if(a.a.k==='sym'&&a.a.v==='e')return T([F('exp',0,toSum(a.e))]);
       if(a.a.k==='num'&&a.a.v==='10'&&a.e.k!=='num')return T([F('p10',0,toSum(a.e))]);
       let e=a.e,ng=false;if(e.k==='neg'){ng=true;e=e.a}
-      if(e.k!=='num'||!/^\d+$/.test(e.v))throw new Error('Exposant non entier : utilise sqrt( ) ou e^( )');
+      if(e.k!=='num'||!/^\d+$/.test(e.v))throw new Error('Exposant non entier : utilise sqrt( ) ou e^( )');
       const n=+e.v;const t=n===0?T([N(1)]):n===1?asTerm(a.a):T([F('pow',n,toSum(a.a))]);return ng?recT(t):t}
     default:return asTerm(a);
   }
@@ -239,25 +239,25 @@ function doDeck(side,op,idx){
   const card=clone(state.deck[idx]);if(state.flip[idx])card.neg=!card.neg;
   const sig=op+'|'+keyT(card);
   if(state.pending){
-    if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Fais <b>${state.pending.label}</b> aussi de l'autre côté.`);
+    if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Fais <b>${state.pending.label}</b> aussi de l’autre côté.`);
     applyOp(side,op,card);const lab=state.pending.label;state.pending=null;hideToast();
-    if(state.rel!=='='&&op!=='add'&&card.neg){state.rel=OPPREL[state.rel];if(!SILENT)setTimeout(()=>toast(`⚠️ Tu as ${op==='mul'?'multiplié':'divisé'} par un nombre <b>négatif</b> : le sens de l'inégalité change ! (${MIRROR[state.rel]} devient ${state.rel})`,'flipmsg',5000),60)}
+    if(state.rel!=='='&&op!=='add'&&card.neg){state.rel=OPPREL[state.rel];if(!SILENT)setTimeout(()=>toast(`⚠️ Tu as ${op==='mul'?'multiplié':'divisé'} par un nombre <b>négatif</b> : le sens de l’inégalité change ! (${MIRROR[state.rel]} devient ${state.rel})`,'flipmsg',5000),60)}
     return finishMove(lab+' des deux côtés'+(state.rel!=='='&&op!=='add'&&card.neg?' (sens changé)':''),state.rel!=='='&&op!=='add'&&card.neg?'ineqflip':undefined);
   }
-  if(state.rel!=='='&&op!=='add'&&!card.num.concat(card.den).every(f=>f.t==='n'))return fail("Dans une inéquation, on ne multiplie que par un <b>nombre</b> : on ne connaît pas le signe d'une lettre.");
+  if(state.rel!=='='&&op!=='add'&&!card.num.concat(card.den).every(f=>f.t==='n'))return fail("Dans une inéquation, on ne multiplie que par un <b>nombre</b> : on ne connaît pas le signe d’une lettre.");
   pushUndo();applyOp(side,op,card);norm(state.eq[side]);
   state.pending={side:1-side,sig,op,idx,label:opLabel(op,card),w:op==='add'?(card.neg?-1:1):op==='mul'?1:-1};render();
-  toast(`Maintenant <b>${state.pending.label}</b> de l'autre côté.`);return true;
+  toast(`Maintenant <b>${state.pending.label}</b> de l’autre côté.`);return true;
 }
 function doTool(side,idx){
   const tool=state.tools[idx];if(state.rel!=='=')return fail("Pour une inéquation, utilise seulement les jetons de la pioche (+, ×, ÷).");if(tool.fn==='recip'&&!state.eq[side].length)return fail('On ne peut pas inverser 0.');const sig='fn|'+tool.fn+tool.n;
   if(state.pending){
-    if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Applique <b>${state.pending.label}</b> aussi de l'autre côté.`);
+    if(side!==state.pending.side||sig!==state.pending.sig)return fail(`Équilibre la balance ! Applique <b>${state.pending.label}</b> aussi de l’autre côté.`);
     applyFn(side,tool);const lab=state.pending.label;state.pending=null;hideToast();return finishMove(lab+' des deux côtés');
   }
   pushUndo();applyFn(side,tool);
   state.pending={side:1-side,sig,op:'fn',tidx:idx,label:toolTxt(tool),w:tool.fn==='recip'?-1:1};render();
-  toast(`Applique <b>${state.pending.label}</b> de l'autre côté aussi.`);return true;
+  toast(`Applique <b>${state.pending.label}</b> de l’autre côté aussi.`);return true;
 }
 
 function removeF(l){const a=l.term[l.row];a.splice(a.indexOf(l.f),1)}
@@ -283,17 +283,17 @@ function combineLn(sum,A,B){
 function boardDrop(src,tgt){
   if(src===tgt)return false;
   const a=locate(src),b=locate(tgt);if(!a||!b)return false;
-  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
-  if(a.side!==b.side)return fail("Pas du même côté du = ! Pour agir des deux côtés, utilise la pioche.");
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
+  if(a.side!==b.side)return fail("Pas du même côté du = ! Pour agir des deux côtés, utilise la pioche.");
   if(a.term===b.term&&a.kind==='factor'&&b.kind==='factor'){
     if(a.row!==b.row){
-      if(keyF(a.f)===keyF(b.f)){pushUndo();const tx=textF(a.f);removeF(a);removeF(b);return finishMove(`Simplification : ${tx}/${tx} = 1`,'cancel')}
+      if(keyF(a.f)===keyF(b.f)){pushUndo();const tx=textF(a.f);removeF(a);removeF(b);return finishMove(`Simplification : ${tx}/${tx} = 1`,'cancel')}
       if(a.f.t==='n'&&b.f.t==='n'){const g=gcd(a.f.v,b.f.v);
         if(g>1){pushUndo();a.f.v/=g;b.f.v/=g;return finishMove(`Simplification par ${g}`,'gcd')}
-        return fail(`${a.f.v} et ${b.f.v} n'ont pas de diviseur commun.`)}
-      return fail("Glisse une carte sur <b>la même carte</b> de l'autre étage (haut ↔ bas).");
+        return fail(`${a.f.v} et ${b.f.v} n’ont pas de diviseur commun.`)}
+      return fail("Glisse une carte sur <b>la même carte</b> de l’autre étage (haut ↔ bas).");
     }
-    if(a.f.t==='n'&&b.f.t==='n'){pushUndo();const tx=a.f.v+'·'+b.f.v;b.f.v*=a.f.v;removeF(a);return finishMove(`Calcul : ${tx} = ${b.f.v}`,'product')}
+    if(a.f.t==='n'&&b.f.t==='n'){pushUndo();const tx=a.f.v+'·'+b.f.v;b.f.v*=a.f.v;removeF(a);return finishMove(`Calcul : ${tx} = ${b.f.v}`,'product')}
     if(a.f.t==='s'&&b.f.t==='s'&&isImagV(a.f.v)&&a.f.v===b.f.v){pushUndo();removeF(a);removeF(b);a.term.neg=!a.term.neg;return finishMove(`${a.f.v}·${a.f.v} = −1`,'i2')}
     if(a.f.t==='f'&&b.f.t==='f'&&a.f.fn==='exp'&&b.f.fn==='exp'){pushUndo();const nf=F('exp',0,reid(a.f.arg).concat(reid(b.f.arg)));a.term[a.row].splice(a.term[a.row].indexOf(b.f),1,nf);removeF(a);return finishMove('e^a·e^b = e^(a+b)')}
     const ba=powBase(a.f),bb=powBase(b.f);
@@ -308,7 +308,7 @@ function boardDrop(src,tgt){
   if(lnTerm(A)&&lnTerm(B)&&A.num[0].fn===B.num[0].fn&&(a.kind==='term'||a.f===A.num[0])){
     pushUndo();combineLn(a.sum,A,B);return finishMove('ln(a) + ln(b) = ln(a·b)','lncomb')}
   if(like(A,B)){pushUndo();const tA=textT(A,true),tB=textT(B,true);const r=combine(a.sum,A,B);
-    return finishMove(r===0?`Annulation : ${tA} et ${tB}`:`Réduction : ${tA} et ${tB}`,r===0?'cancel':'like')}
+    return finishMove(r===0?`Annulation : ${tA} et ${tB}`:`Réduction : ${tA} et ${tB}`,r===0?'cancel':'like')}
   if(a.kind==='factor'&&a.row==='num'){const m=B.num.find(f=>keyF(f)===keyF(a.f));
     if(m){pushUndo();const tx=textF(a.f);factorize(a.sum,A,a.f,B,m);return finishMove('Factorisation par '+tx,'fact')}
     return fail(`Pour factoriser, les deux termes doivent contenir <b>${esc(textF(a.f))}</b>.`)}
@@ -320,16 +320,16 @@ function powBase(f){
   return{k:keyF(f),n:1,base:f};
 }
 function expandPow(id){
-  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const l=locate(id);if(!l||l.kind!=='factor'||l.f.t!=='f'||l.f.fn!=='pow')return false;
   const f=l.f,b=powBase(f);const base=b.base.t==='g'?b.base:b.base;pushUndo();
   const row=l.term[l.row],k=row.indexOf(f);const rest=f.n===2?reid(base):F('pow',f.n-1,[T([reid(base)])]);
   row.splice(k,1,reid(base),rest);return finishMove(`${textF(f)} = ${textF(base)}·${textF(rest)}`,'powsplit');
 }
 function develop(gid){
-  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const l=locate(gid);if(!l||l.kind!=='factor')return false;
-  if(l.row==='den')return fail("On ne développe pas au dénominateur : multiplie plutôt les deux côtés par cette parenthèse.");
+  if(l.row==='den')return fail("On ne développe pas au dénominateur : multiplie plutôt les deux côtés par cette parenthèse.");
   const T0=l.term,others=T0.num.filter(f=>f!==l.f);
   if(!others.length&&!T0.den.length&&!T0.neg)return fail('Rien à développer ici.');
   pushUndo();
@@ -337,14 +337,14 @@ function develop(gid){
   l.sum.splice(l.sum.indexOf(T0),1,...nts);return finishMove('Développement','dev');
 }
 function simplifyFn(id){
-  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const l=locate(id);if(!l||l.kind!=='factor'||l.f.t!=='f')return false;const f=l.f,row=l.term[l.row],k=row.indexOf(f);
   const rp=rootProd(f);if(rp){pushUndo();row.splice(k,1,G([T([reid(rp)])]));return finishMove(`${fnLab(f)}(${textF(rp)}·${textF(rp)}) = ${textF(rp)}`,'inv')}
   const g=innerFn(f);
-  if(g&&isInv(f,g)){pushUndo();row.splice(k,1,G(reid(g.arg)));return finishMove(`${fnLab(f)} et ${fnLab(g)} s'annulent`,'inv')}
+  if(g&&isInv(f,g)){pushUndo();row.splice(k,1,G(reid(g.arg)));return finishMove(`${fnLab(f)} et ${fnLab(g)} s’annulent`,'inv')}
   const v=numVal(f.arg);
-  if(v){const r=evalFn(f,v);if(r){pushUndo();row.splice(k,1,G(resTerms(r)));return finishMove(`Calcul : ${textF(f)}`,'eval')}
-    return fail(`${esc(textF(f))} n'a pas de valeur exacte simple : on la garde telle quelle.`)}
+  if(v){const r=evalFn(f,v);if(r){pushUndo();row.splice(k,1,G(resTerms(r)));return finishMove(`Calcul : ${textF(f)}`,'eval')}
+    return fail(`${esc(textF(f))} n’a pas de valeur exacte simple : on la garde telle quelle.`)}
   return fail("Pour simplifier une fonction, il faut sa réciproque juste dedans (ex. √(x²), ln(e^x)) ou un nombre.");
 }
 function copyToDeck(id){
@@ -354,7 +354,7 @@ function copyToDeck(id){
   if(i>=0){toast('Ce jeton est déjà dans la pioche.');flashDeck(i);return true}
   if(state.deck.length>=14)return fail('La pioche est pleine.');
   state.deck.push(card);state.flip.push(false);renderDeck();flashDeck(state.deck.length-1);
-  toast('Jeton ajouté à la pioche : <b>'+esc(textT(card,false))+'</b>');return true;
+  toast('Jeton ajouté à la pioche : <b>'+esc(textT(card,false))+'</b>');return true;
 }
 
 /* ---------- coups, annulation, isolement, victoire ---------- */
@@ -418,22 +418,22 @@ function autoTools(){const m=new Map();walk(state.eq,z=>{if(z.t==='f'&&hasT(z)){
 
 /* ---------- indices et résolution automatique ---------- */
 function deckHas(t){const c=clone(t);c.neg=false;const k=keyT(c);return state.deck.findIndex(d=>keyT(d)===k)}
-function deckNote(t){return deckHas(t)<0?" Ce jeton n'est pas dans la pioche : glisse d'abord le terme du plateau <b>dans la pioche</b>.":''}
+function deckNote(t){return deckHas(t)<0?" Ce jeton n’est pas dans la pioche : glisse d’abord le terme du plateau <b>dans la pioche</b>.":''}
 function findSimp(sum){
   for(const t of sum){
-    for(const a of t.num)for(const b of t.den)if(keyF(a)===keyF(b))return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]};
-    for(const a of t.num)for(const b of t.den)if(a.t==='n'&&b.t==='n'&&gcd(a.v,b.v)>1)return{msg:`${a.v} et ${b.v} sont divisibles par ${gcd(a.v,b.v)} : glisse l'un sur l'autre.`,ids:[a.id,b.id]};
-    for(const r of['num','den']){const im=t[r].filter(f=>f.t==='s'&&isImagV(f.v));if(im.length>1)return{msg:'i·i = −1 : glisse un i sur l\'autre.',ids:[im[0].id,im[1].id]}}
+    for(const a of t.num)for(const b of t.den)if(keyF(a)===keyF(b))return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]};
+    for(const a of t.num)for(const b of t.den)if(a.t==='n'&&b.t==='n'&&gcd(a.v,b.v)>1)return{msg:`${a.v} et ${b.v} sont divisibles par ${gcd(a.v,b.v)} : glisse l’un sur l’autre.`,ids:[a.id,b.id]};
+    for(const r of['num','den']){const im=t[r].filter(f=>f.t==='s'&&isImagV(f.v));if(im.length>1)return{msg:'i·i = −1 : glisse un i sur l’autre.',ids:[im[0].id,im[1].id]}}
     for(const r of['num','den']){const fs=t[r].filter(f=>f.t!=='n'&&!(f.t==='s'&&isImagV(f.v)));for(let i=0;i<fs.length;i++)for(let j=i+1;j<fs.length;j++){const x=powBase(fs[i]),y=powBase(fs[j]);
-      if(x&&y&&x.k===y.k)return{msg:`Deux jetons identiques : glisse l'un sur l'autre (${esc(textF(x.base))}·${esc(textF(x.base))} = ${esc(textF(x.base))}²).`,ids:[fs[i].id,fs[j].id]}}}
+      if(x&&y&&x.k===y.k)return{msg:`Deux jetons identiques : glisse l’un sur l’autre (${esc(textF(x.base))}·${esc(textF(x.base))} = ${esc(textF(x.base))}²).`,ids:[fs[i].id,fs[j].id]}}}
     for(const r of['num','den'])for(const f of t[r]){
       if(f.t==='f'){if(canTapFn(f))return{msg:`Touche <b>${esc(fnLab(f))}</b> pour simplifier.`,ids:[f.id],act:'tap'};const h=findSimp(f.arg);if(h)return h}
       if(f.t==='g'){const h=findSimp(f.terms);if(h)return h}
     }
   }
   for(let i=0;i<sum.length;i++)for(let j=i+1;j<sum.length;j++)if(like(sum[i],sum[j]))
-    return{msg:`${esc(textT(sum[i],true))} et ${esc(textT(sum[j],true))} sont semblables : glisse l'un sur l'autre.`,ids:[sum[j].id,sum[i].id]};
-  for(const t of sum)for(const r of['num','den']){const ns=t[r].filter(f=>f.t==='n');if(ns.length>1)return{msg:'Calcule ce produit : glisse un nombre sur l\'autre.',ids:[ns[0].id,ns[1].id]}}
+    return{msg:`${esc(textT(sum[i],true))} et ${esc(textT(sum[j],true))} sont semblables : glisse l’un sur l’autre.`,ids:[sum[j].id,sum[i].id]};
+  for(const t of sum)for(const r of['num','den']){const ns=t[r].filter(f=>f.t==='n');if(ns.length>1)return{msg:'Calcule ce produit : glisse un nombre sur l’autre.',ids:[ns[0].id,ns[1].id]}}
   return null;
 }
 function findGroupDev(sum){for(const t of sum){const g=t.num.find(f=>f.t==='g');if(g&&(t.num.length>1||t.den.length||t.neg))return g;
@@ -445,37 +445,37 @@ function computeHint(){
   const iso=isoSide();
   if(iso>=0){const o=1-iso;const h=findSimp(E[o]);if(h)return h;
     if(state.goal&&!goalMatch()){const g=findGroupDev(E[o]);if(g){const t=E[o].find(t=>t.num.includes(g))||findTermOf(E[o],g);
-      if(t&&t.neg&&t.num.length===1&&!t.den.length)return{msg:'Distribue le signe − : touche la parenthèse. −(a − b) devient −a + b.',ids:[g.id],act:'dev'};
-      return{msg:'Développe pour arriver au résultat demandé : touche la parenthèse.',ids:[g.id],act:'dev'}}return{msg:'Compare avec le résultat demandé 🎯.',ids:[]}}
-    return{msg:'C\'est le plus simple possible : valide !',ids:[],act:'validate'}}
+      if(t&&t.neg&&t.num.length===1&&!t.den.length)return{msg:'Distribue le signe − : touche la parenthèse. −(a − b) devient −a + b.',ids:[g.id],act:'dev'};
+      return{msg:'Développe pour arriver au résultat demandé : touche la parenthèse.',ids:[g.id],act:'dev'}}return{msg:'Compare avec le résultat demandé 🎯.',ids:[]}}
+    return{msg:'C’est le plus simple possible : valide !',ids:[],act:'validate'}}
   const both=hasT(E[0])&&hasT(E[1]);const sd=hasT(E[0])?0:1;const sum=E[sd];
   let h=findSimp(sum)||(both?findSimp(E[1-sd]):null);if(h)return h;
   if(both){
     for(const s of[0,1])for(const t of E[s])if(hasT(t)&&t.den.length){const f=t.den.find(f=>!hasT(f));if(f)return{msg:`Multiplie les deux côtés par <b>${esc(textF(f))}</b> pour enlever la fraction.`+deckNote(T([f])),ids:[f.id],deck:T([f]),act:'mul'}}
-    for(const s of[0,1])for(const t of E[s])if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&hasT(f));if(g&&(t.num.length>1||t.den.length||t.neg))return{msg:'Développe d\'abord : touche la boîte.',ids:[g.id],act:'dev'}}
-    const o=E[1-sd].find(hasT);return{msg:`Il y a des ${tg} des deux côtés. Ajoute l'opposé de <b>${esc(textT(o,true))}</b> des deux côtés.`+deckNote(o),ids:[o.id],deck:o,act:'add'};
+    for(const s of[0,1])for(const t of E[s])if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&hasT(f));if(g&&(t.num.length>1||t.den.length||t.neg))return{msg:'Développe d’abord : touche la boîte.',ids:[g.id],act:'dev'}}
+    const o=E[1-sd].find(hasT);return{msg:`Il y a des ${tg} des deux côtés. Ajoute l’opposé de <b>${esc(textT(o,true))}</b> des deux côtés.`+deckNote(o),ids:[o.id],deck:o,act:'add'};
   }
   if(sum.length>1){
-    for(const t of sum)if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&(hasT(f)||hasImag(f)));if(g&&(t.num.length>1||t.den.length||t.neg)&&(hasT(g)?sum.every(hasT):true))return{msg:'Développe : touche la boîte.',ids:[g.id],act:'dev'}}
-    const L=sum.filter(lnTerm);for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++)if(L[i].num[0].fn===L[j].num[0].fn)return{msg:'ln(a) + ln(b) = ln(a·b) : glisse l\'un sur l\'autre.',ids:[L[i].id,L[j].id]};
+    for(const t of sum)if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&(hasT(f)||hasImag(f)));if(g&&(t.num.length>1||t.den.length||t.neg)&&(hasT(g)?sum.every(hasT):true))return{msg:'Développe : touche la boîte.',ids:[g.id],act:'dev'}}
+    const L=sum.filter(lnTerm);for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++)if(L[i].num[0].fn===L[j].num[0].fn)return{msg:'ln(a) + ln(b) = ln(a·b) : glisse l’un sur l’autre.',ids:[L[i].id,L[j].id]};
     const o=sum.find(t=>!hasT(t));
-    if(o){const op=clone(o);op.neg=!op.neg;return{msg:`Fais disparaître <b>${esc(textT(o,true))}</b> : ajoute ${esc(textT(op,true))} des deux côtés.`+deckNote(o),ids:[o.id],deck:o,act:'add'}}
-    for(const t of sum)if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&hasT(f));if(g&&(t.num.length>1||t.den.length||t.neg))return{msg:'Développe : touche la boîte.',ids:[g.id],act:'dev'}}
-    return{msg:`Tous les termes contiennent ${tg} : factorise ! Glisse ${tg} d'un terme sur l'autre.`,ids:sum.map(t=>t.id),act:'fact'};
+    if(o){const op=clone(o);op.neg=!op.neg;return{msg:`Fais disparaître <b>${esc(textT(o,true))}</b> : ajoute ${esc(textT(op,true))} des deux côtés.`+deckNote(o),ids:[o.id],deck:o,act:'add'}}
+    for(const t of sum)if(hasT(t)){const g=t.num.find(f=>f.t==='g'&&hasT(f));if(g&&(t.num.length>1||t.den.length||t.neg))return{msg:'Développe : touche la boîte.',ids:[g.id],act:'dev'}}
+    return{msg:`Tous les termes contiennent ${tg} : factorise ! Glisse ${tg} d’un terme sur l’autre.`,ids:sum.map(t=>t.id),act:'fact'};
   }
   const t=sum[0];if(!t)return{msg:'…',ids:[]};
   const gi=t.num.filter(f=>f.t==='g'&&!hasT(f)&&hasImag(f));
   if(gi.length>1)return{msg:'Développe ce produit de nombres complexes.',ids:[gi[0].id],act:'dev'};
   if(gi.length===1){const c=conjCard(gi[0]);return{msg:`Multiplie les deux côtés par le conjugué <b>${esc(textT(c,false))}</b>.`,ids:[gi[0].id],deck:c,act:'mul',addCard:true}}
-  if(t.den.length){const f=t.den.find(f=>!hasT(f))||t.den[0];return{msg:`Il y a une division par <b>${esc(textF(f))}</b> : multiplie les deux côtés par ${esc(textF(f))} (zone ×).`+deckNote(T([f])),ids:[f.id],deck:T([f]),act:'mul'}}
+  if(t.den.length){const f=t.den.find(f=>!hasT(f))||t.den[0];return{msg:`Il y a une division par <b>${esc(textF(f))}</b> : multiplie les deux côtés par ${esc(textF(f))} (zone ×).`+deckNote(T([f])),ids:[f.id],deck:T([f]),act:'mul'}}
   const f=t.num.find(f=>!hasT(f));
-  if(f){if(f.t==='s'&&isImagV(f.v))return{msg:`Multiplie les deux côtés par <b>${f.v}</b> : ${f.v}·${f.v} = −1 !`,ids:[f.id],deck:T([S(f.v)]),act:'mul'};
-    const nf=t.neg?'−'+textF(f):textF(f);return{msg:`${tg} est multiplié par <b>${esc(nf)}</b> : divise les deux côtés par ${esc(nf)}${t.neg?' (jeton retourné)':''}.`+deckNote(T([f])),ids:[f.id],deck:T([f]),act:'div',flip:t.neg}}
-  if(t.neg)return{msg:`Il reste un signe − : multiplie les deux côtés par −1 (retourne le jeton 1).`,ids:[t.id],deck:T([N(1)]),act:'neg'};
+  if(f){if(f.t==='s'&&isImagV(f.v))return{msg:`Multiplie les deux côtés par <b>${f.v}</b> : ${f.v}·${f.v} = −1 !`,ids:[f.id],deck:T([S(f.v)]),act:'mul'};
+    const nf=t.neg?'−'+textF(f):textF(f);return{msg:`${tg} est multiplié par <b>${esc(nf)}</b> : divise les deux côtés par ${esc(nf)}${t.neg?' (jeton retourné)':''}.`+deckNote(T([f])),ids:[f.id],deck:T([f]),act:'div',flip:t.neg}}
+  if(t.neg)return{msg:`Il reste un signe − : multiplie les deux côtés par −1 (retourne le jeton 1).`,ids:[t.id],deck:T([N(1)]),act:'neg'};
   const fn=t.num.find(f=>f.t==='f');
-  if(fn){const tool={fn:INV[fn.fn],n:fn.n};return{msg:`${tg} est dans <b>${esc(fnLab(fn))}</b> : applique sa réciproque <b>${toolTxt(tool)}</b> aux deux côtés (outil de la pioche).`,ids:[fn.id],tool,act:'tool'}}
+  if(fn){const tool={fn:INV[fn.fn],n:fn.n};return{msg:`${tg} est dans <b>${esc(fnLab(fn))}</b> : applique sa réciproque <b>${toolTxt(tool)}</b> aux deux côtés (outil de la pioche).`,ids:[fn.id],tool,act:'tool'}}
   const g=t.num.find(f=>f.t==='g');if(g)return{msg:'Touche la boîte pour développer.',ids:[g.id],act:'dev'};
-  return{msg:'Tu y es presque !',ids:[]};
+  return{msg:'Tu y es presque !',ids:[]};
 }
 function doHint(h){
   const both=(fnc)=>{const a=fnc(0);if(a===false)return false;return fnc(1)};

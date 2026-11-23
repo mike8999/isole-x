@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Isole x ! — l'atelier STI2D</title>
+<title>Isole x ! — l’atelier STI2D</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#5b3a1c">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="fablab.css?v=4.0">
-<link rel="stylesheet" href="atelier.css?v=4.0">
-<link rel="stylesheet" href="apparence.css?v=b1">
+<link rel="stylesheet" href="fablab.css?v=4.0u">
+<link rel="stylesheet" href="atelier.css?v=4.0u">
+<link rel="stylesheet" href="apparence.css?v=b1u">
 </head>
 <body class="bench">
 <div id="app">
@@ -20,9 +20,9 @@
   <!-- ===== ACCUEIL : VOLT ET SPÉCIALITÉS ===== -->
   <div id="home" class="screen scrollscreen bench">
     <div class="wrap">
-      <a class="backlink" href="index.html">◀ Accueil de l'atelier</a>
-      <div class="brand"><span class="brass">x</span><h1>Isole x !</h1></div>
-      <p class="lead">Déplace les jetons pour laisser l'inconnue toute seule. Ce que tu fais d'un côté du =, fais-le de l'autre ! Gagne des étoiles pour améliorer Volt, ton robot, et débloquer les chapitres.</p>
+      <a class="backlink" href="index.html">◀ Accueil de l’atelier</a>
+      <div class="brand"><span class="brass">x</span><h1>Isole x !</h1></div>
+      <p class="lead">Déplace les jetons pour laisser l’inconnue toute seule. Ce que tu fais d’un côté du =, fais-le de l’autre ! Gagne des étoiles pour améliorer Volt, ton robot, et débloquer les chapitres.</p>
       <div class="hometop"><div id="petCard"></div><div id="homeBtns"></div></div>
       <div class="maplab">Choisis ta spécialité</div>
       <div class="group"><div class="grouplab">Enseignement de spécialité SI</div><div class="specs" id="specSI"></div></div>
@@ -30,10 +30,10 @@
       <div class="homefoot">
         <button class="ghostbtn" id="btnHelpHome">▶ Aide animée</button>
         <button class="hbtn" id="btnMute" title="Sons activés / coupés">🔊</button>
-        <button class="ghostbtn" id="btnSave">💾 Sauvegarde</button>
-        <button class="ghostbtn" id="btnLook">🎨 Apparence</button>
-        <button class="ghostbtn" id="btnSettings">⚙️ Réglages</button>
-        <label class="check"><input type="checkbox" id="optTeacher"> Mode professeur : tous les chapitres ouverts</label>
+        <button class="ghostbtn" id="btnSave">Sauvegarde</button>
+        <button class="ghostbtn" id="btnLook">Apparence</button>
+        <button class="ghostbtn" id="btnSettings">Réglages</button>
+        <label class="check"><input type="checkbox" id="optTeacher"> Mode professeur : tous les chapitres ouverts</label>
       </div>
     </div>
   </div>
@@ -47,7 +47,7 @@
         <button class="ghostbtn" id="btnMenuTrain">🎲 Entraînement</button>
       </div>
       <div id="worlds"></div>
-      <p class="lead small">Chaque chapitre s'ouvre quand tu as la moitié des étoiles du précédent. Formules, problèmes et inéquations s'ouvrent après le chapitre 3.</p>
+      <p class="lead small">Chaque chapitre s’ouvre quand tu as la moitié des étoiles du précédent. Formules, problèmes et inéquations s’ouvrent après le chapitre 3.</p>
     </div>
   </div>
 
@@ -56,7 +56,7 @@
     <div class="wrap">
       <div class="menutop"><button class="hbtn" id="btnWorldBack" title="Chapitres">◀</button><div id="worldHead"></div></div>
       <div id="stones"></div>
-      <p class="lead small">Premiers défis : découverte, les parenthèses sont des <b>boîtes</b> à ouvrir. Ensuite, ça se corse à chaque défi ! 🎯 = résultat précis à atteindre. 👑 = défi ultime.</p>
+      <p class="lead small">Premiers défis : découverte, les parenthèses sont des <b>boîtes</b> à ouvrir. Ensuite, ça se corse à chaque défi ! 🎯 = résultat précis à atteindre. 👑 = défi ultime.</p>
     </div>
   </div>
 
@@ -85,11 +85,11 @@
       <div class="chap">
         <h2>1. Écris ton équation</h2>
         <input id="expInput" class="expin" type="text" autocomplete="off" spellcheck="false" placeholder="ex. 3x + 2 = 11   ·   U = R*I   ·   e^(2x) = 9   ·   2x − 3 < 7">
-        <div class="exphelp">Opérations : + − * / ^ · fonctions : sqrt( ) cbrt( ) e^( ) ln( ) log( ) 10^( ) sin( ) cos( ) tan( ) arcsin( )… · nombres π (pi) et i · écris <b>a*b</b> pour un produit de lettres · inéquations avec <, >, <=, >=.</div>
+        <div class="exphelp">Opérations : + − * / ^ · fonctions : sqrt( ) cbrt( ) e^( ) ln( ) log( ) 10^( ) sin( ) cos( ) tan( ) arcsin( )… · nombres π (pi) et i · écris <b>a*b</b> pour un produit de lettres · inéquations avec <, >, <=, >=.</div>
         <div class="gen" id="expEx"></div>
       </div>
       <div class="chap">
-        <h2>2. Vérifie et choisis l'inconnue</h2>
+        <h2>2. Vérifie et choisis l’inconnue</h2>
         <div class="expprev" id="expPrev"></div>
         <div class="gen" id="expUnk"></div>
       </div>
@@ -97,7 +97,7 @@
         <h2>3. Options</h2>
         <div class="gen">
           <label class="check"><input type="checkbox" id="expBox" checked> Effet boîte sur les parenthèses</label>
-          <label class="check grow">🎯 Résultat à atteindre (facultatif) : <input id="expGoal" class="expin small" type="text" placeholder="ex. 3"></label>
+          <label class="check grow">🎯 Résultat à atteindre (facultatif) : <input id="expGoal" class="expin small" type="text" placeholder="ex. 3"></label>
         </div>
         <div class="btns left"><button class="bigbtn" id="btnExpGo" disabled>Lancer ▶</button></div>
       </div>
@@ -143,11 +143,11 @@
 <div id="coach" class="hidden"><div id="coachCap"></div><button id="coachSkip">Passer le tutoriel ✕</button><div id="coachHand">👆</div></div>
 <div id="toast"></div>
 <div id="modal" class="modal hidden"><div class="mbox" id="mbox"></div></div>
-<script src="qrcode.js?v=4.0"></script>
-<script src="isole-x.js?v=4.9"></script>
-<script src="isole-x-levels.js?v=5.1"></script>
-<script src="apparence.js?v=b2"></script>
-<script src="isole-x-ui.js?v=5.1"></script>
-<script src="idees.js?v=1" data-jeu="Atelier STI2D"></script>
+<script src="qrcode.js?v=4.0u"></script>
+<script src="isole-x.js?v=4.9u"></script>
+<script src="isole-x-levels.js?v=5.1u"></script>
+<script src="apparence.js?v=b2u"></script>
+<script src="isole-x-ui.js?v=5.1u"></script>
+<script src="idees.js?v=1u" data-jeu="Atelier STI2D"></script>
 </body>
 </html>

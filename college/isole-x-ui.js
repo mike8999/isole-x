@@ -33,11 +33,11 @@ function render(){
   const bar=$('#isobar');
   if(iso>=0&&!state.won&&!pend&&!state.coach){
     bar.classList.remove('hidden');
-    if(state.goal){const hh=computeHint();bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé, mais il faut arriver exactement à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}.${hh&&hh.act==='dev'?` <b>💡 ${hh.msg}</b>`:' Continue à simplifier !'}</span>`}
+    if(state.goal){const hh=computeHint();bar.innerHTML=`<span><b>${esc(state.target)}</b> est isolé, mais il faut arriver exactement à 🎯 ${mathEq([[T([S(state.target)])],state.goalSum],state.goalRel)}.${hh&&hh.act==='dev'?` <b>💡 ${hh.msg}</b>`:' Continue à simplifier !'}</span>`}
     else{const left=Math.max(0,state.isoAt+state.bonusMax-state.moves);
-      bar.innerHTML=`<span>✅ <b>${esc(state.target)}</b> est isolé ! ✨ Simplifie au maximum${left?` (encore ${left} coup${left>1?'s':''} bonus)`:''} pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
+      bar.innerHTML=`<span><b>${esc(state.target)}</b> est isolé. Simplifie au maximum${left?` (encore ${left} coup${left>1?'s':''} bonus)`:''} pour <b>+50 points</b>.</span><button class="bigbtn" id="btnValid">Valider</button>`}
   }else bar.classList.add('hidden');
-  $('#mathline').innerHTML=state.trad?`<span class="lab">Équation :</span>${mathEq(state.eq)}`:'';
+  $('#mathline').innerHTML=state.trad?`<span class="lab">Équation :</span>${mathEq(state.eq)}`:'';
   $('#mathline').classList.toggle('hidden',!state.trad);
   $('#history').classList.toggle('hidden',!state.trad);
   $('#history').innerHTML='<h3>Traduction pas à pas</h3>'+state.history.map((h,i)=>`<div class="hstep"><div class="d">${i}. ${esc(h.desc)}</div>${mathEq(h.eq,h.rel)}</div>`).join('');
@@ -52,7 +52,7 @@ function renderDeck(){
   if(SILENT)return;const pend=state.pending;const MBd={d:false,box:state.box};
   const cards=state.deck.map((c,i)=>{const f=state.flip[i];
     return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}${c.user?`<span class="ddel" data-del="${i}" title="Retirer ce jeton">✕</span>`:''}</div>`}).join('');
-  const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
+  const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
   $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+(tools?'<span class="tsep"></span>'+tools:'');
 }
 function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [data-deck="${i}"]`);if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
@@ -61,7 +61,7 @@ function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [d
 let toastT;
 function toast(msg,cls='',ms=3200){if(SILENT)return;const t=$('#toast');t.innerHTML=msg;t.className='show '+cls;clearTimeout(toastT);toastT=setTimeout(()=>t.className=cls,ms)}
 function hideToast(){if(SILENT)return;clearTimeout(toastT);$('#toast').className=''}
-function fail(msg){if(SILENT)return false;const wi=WHY.findIndex(w=>w.re.test(msg));state.fails=(state.fails||0)+1;toast(msg+(wi>=0?` <button class="whybtn" data-why="${wi}">Pourquoi ?</button>`:'')+(state.fails===3?'<br><small>💡 Besoin d\'aide ? Touche l\'ampoule.</small>':''),'warn',wi>=0?6500:4000);const b=$('#board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');sfx('fail');petMood('sad');return false}
+function fail(msg){if(SILENT)return false;const wi=WHY.findIndex(w=>w.re.test(msg));state.fails=(state.fails||0)+1;toast(msg+(wi>=0?` <button class="whybtn" data-why="${wi}">Pourquoi ?</button>`:'')+(state.fails===3?'<br><small>💡 Besoin d’aide ? Touche l’ampoule.</small>':''),'warn',wi>=0?6500:4000);const b=$('#board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');sfx('fail');petMood('sad');return false}
 function modal(html,cls=''){hideToast();$('#mbox').className='mbox '+cls;$('#mbox').innerHTML=html;$('#modal').classList.remove('hidden');animateScenes($('#mbox'))}
 function closeModal(){$('#modal').classList.add('hidden');$('#mbox').innerHTML=''}
 function starHTML(k){return[1,2,3].map(i=>`<span class="${i<=k?'':'off'}">★</span>`).join('')}
@@ -80,15 +80,15 @@ function showWin(){
   const S=STATS;S.wins++;S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
   if(state.goal)S.goals++;else if(sc.simp)S.simp++;if(sc.stars===3)S.perfect++;saveStats();
   const nb=checkBadges(),after=petStage();
-  modal(`<div class="winpet">${creatureSVG(after,'happy')}</div><h2>${esc(state.target)} est isolé ! 🎉</h2>${state.par?`<div class="stars">${starHTML(sc.stars)}</div>`:''}
+  modal(`<div class="winpet">${creatureSVG(after,'happy')}</div><h2>${esc(state.target)} est isolé !</h2>${state.par?`<div class="stars">${starHTML(sc.stars)}</div>`:''}
    <div class="pts">${sc.points} points ${sc.simp?'<span class="simp">✨ simplification maximale +50</span>':'<span class="nosimp">pas simplifié au maximum</span>'}</div>
    <div>${state.moves} coup${state.moves>1?'s':''}${state.par?` — maxi ${state.par} pour ★★★`:''}</div>
    <div class="sol">${mathEq(state.eq)}</div>${sol?`<div class="solline">${sol}</div>`:''}
-   ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd\'hui : reviens demain !'}</div>`:''}
-   ${after>before?`<div class="evo">🎊 Pépix a grandi : il est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
-   ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
+   ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd’hui : reviens demain !'}</div>`:''}
+   ${after>before?`<div class="evo">🎊 Pépix a grandi : il est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
+   ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
    <div class="btns"><button class="ghostbtn" data-act="replay">⟲ Rejouer</button><button class="ghostbtn" data-act="menu">Carte</button>${next}</div>`,'win');
-  sfx(nb.length||after>before?'badge':'win');confetti(nb.length||after>before?120:70);
+  sfx(nb.length||after>before?'badge':'win');if(nb.length)confetti(120);
 }
 function nextLevel(){const ch=WORLDS[state.ci];if(state.li+1<ch.levels.length)return[state.ci,state.li+1];if(state.ci+1<WORLDS.length&&unlocked(state.ci+1))return[state.ci+1,0];return null}
 $('#modal').addEventListener('click',e=>{
@@ -149,7 +149,7 @@ function onUp(e){
   const d=drag;if(!d)return;const tgt=d.moved?dropTarget(e.clientX,e.clientY):null;endDrag();drag=null;
   if(!d.moved){
     if(d.kind==='deck'){state.flip[d.src]=!state.flip[d.src];renderDeck();coachCheck()}
-    else if(d.kind==='tool')toast("Glisse l'outil sur un côté du plateau : il s'appliquera à tout ce côté.");
+    else if(d.kind==='tool')toast("Glisse l’outil sur un côté du plateau : il s’appliquera à tout ce côté.");
     else if(d.fn)tapFn(d.fn);
     else if(d.dev)develop(d.dev);
     return;
@@ -170,30 +170,30 @@ function tapFn(id){
     if(lastTap.id===id&&now-lastTap.t<450){clearTimeout(tapTimer);lastTap={id:null,t:0};expandPow(id);return}
     lastTap={id,t:now};clearTimeout(tapTimer);
     if(canTapFn(f)){tapTimer=setTimeout(()=>simplifyFn(id),460);return}
-    tapTimer=setTimeout(()=>toast(`Double-touche <b>${esc(textF(f))}</b> pour l'écrire en produit.`),460);return;
+    tapTimer=setTimeout(()=>toast(`Double-touche <b>${esc(textF(f))}</b> pour l’écrire en produit.`),460);return;
   }
   simplifyFn(id);
 }
 $('#game').addEventListener('dblclick',e=>e.preventDefault());
 /* ---------- opérations intermédiaires dans la pioche ---------- */
 function combineDeck(a,b){
-  if(state.pending)return fail(`Termine d'abord : <b>${state.pending.label}</b> de l'autre côté.`);
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const ca=clone(state.deck[a]),cb=clone(state.deck[b]);if(state.flip[a])ca.neg=!ca.neg;if(state.flip[b])cb.neg=!cb.neg;
   const va=numVal([ca]),vb=numVal([cb]);let card;
   if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
   else card=T([G([reid(cb),reid(ca)])]);
   const neg=card.neg;card.neg=false;card.user=true;
   if(state.deck.some(c=>keyT(c)===keyT(card))){toast('Ce jeton existe déjà dans la pioche.');return}
-  if(state.deck.length>=14)return fail('La pioche est pleine : retire un jeton avec ✕.');
+  if(state.deck.length>=14)return fail('La pioche est pleine : retire un jeton avec ✕.');
   state.deck.push(card);state.flip.push(neg);renderDeck();flashDeck(state.deck.length-1);
-  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (opération dans la pioche, ça ne compte pas comme un coup).`);
+  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (opération dans la pioche, ça ne compte pas comme un coup).`);
 }
 function removeDeckCard(i){if(state.pending)return fail('Termine d’abord l’opération en cours.');state.deck.splice(i,1);state.flip.splice(i,1);renderDeck()}
 
 /* ---------- indice ---------- */
 function hint(){
   if(state.won)return;
-  if(state.pending){if(state.pending.op==='fn')toast(`Applique <b>${state.pending.label}</b> de l'autre côté aussi.`,'hintt');else{flashDeck(state.pending.idx);toast(`Fais la même chose de l'autre côté : <b>${state.pending.label}</b>.`,'hintt')}return}
+  if(state.pending){if(state.pending.op==='fn')toast(`Applique <b>${state.pending.label}</b> de l’autre côté aussi.`,'hintt');else{flashDeck(state.pending.idx);toast(`Fais la même chose de l’autre côté : <b>${state.pending.label}</b>.`,'hintt')}return}
   const h=computeHint();
   if(h.act==='validate'){toast('💡 '+h.msg,'hintt');return}
   h.ids.forEach(id=>{document.querySelectorAll(`#board [data-fid="${id}"],#board [data-tid="${id}"]`).forEach(el=>{el.classList.remove('hint');void el.offsetWidth;el.classList.add('hint')})});
@@ -231,10 +231,10 @@ const BADGES=[
  {k:'perf10',icon:'💎',name:'Sans faute',d:'10 défis réussis avec ★★★',ok:()=>STATS.perfect>=10},
  {k:'nohint5',icon:'🧠',name:'Cerveau de la jungle',d:'5 défis de suite sans indice',ok:()=>STATS.bestNoHint>=5},
  {k:'simp10',icon:'✨',name:'Simplificateur',d:'10 simplifications maximales',ok:()=>STATS.simp>=10},
- {k:'goal10',icon:'🎯',name:"Tireur d'élite",d:'10 résultats précis atteints',ok:()=>STATS.goals>=10},
+ {k:'goal10',icon:'🎯',name:"Tireur d’élite",d:'10 résultats précis atteints',ok:()=>STATS.goals>=10},
  {k:'ch5',icon:'⚡',name:'Éclair',d:'5 équations en un défi chrono',ok:()=>STATS.chronoBest>=5},
  {k:'ch12',icon:'🌩️',name:'Tempête',d:'12 équations en un défi chrono',ok:()=>STATS.chronoBest>=12},
- ...WORLDS.map((w,i)=>({k:'world'+i,icon:w.icon,name:'Maître : '+w.name,d:'Réussir les 10 défis du monde',ok:()=>worldDone(i)})),
+ ...WORLDS.map((w,i)=>({k:'world'+i,icon:w.icon,name:'Maître : '+w.name,d:'Réussir les 10 défis du monde',ok:()=>worldDone(i)})),
  {k:'detective',icon:'🔎',name:'Détective',d:'5 problèmes bien traduits du premier coup',ok:()=>(STATS.storyFirst||0)>=5},
  {k:'day3',icon:'📅',name:'Fidèle',d:'Défi du jour 3 jours de suite',ok:()=>DAILY.best>=3},
  {k:'day7',icon:'🗓️',name:'Inarrêtable',d:'Défi du jour 7 jours de suite',ok:()=>DAILY.best>=7},
@@ -289,12 +289,12 @@ function renderHome(){
   const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1];
   $('#petCard').innerHTML=`<div class="bigpet">${creatureSVG(st,'idle')}</div><div class="petinfo"><div class="petname">Pépix <span>${PET_NAMES[st]}</span></div>
     <div class="petbar"><i style="width:${nxt?Math.round(100*(t-PET_STEPS[st])/(nxt-PET_STEPS[st])):100}%"></i></div>
-    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour qu'il grandisse`:' · niveau maximum !'}</div></div>`;
+    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour qu’il grandisse`:' · niveau maximum !'}</div></div>`;
   $('#homeBtns').innerHTML=`<button class="hb" data-h="badges">🏅<b>Badges</b><small>${Object.keys(GOT).length}/${BADGES.length}</small></button>
-    <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
+    <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
     <button class="hb" data-h="train">🎲<b>Entraînement</b><small>par thème</small></button>
     <button class="hb" data-h="exp">🧪<b>Labo libre</b><small>ton équation</small></button>
-    <button class="hb${dailyDone()?' done':''}" data-h="daily">📅<b>Défi du jour</b><small>${dailyDone()?'✔ réussi · ':''}série : ${curStreak()} 🔥</small></button>
+    <button class="hb${dailyDone()?' done':''}" data-h="daily">📅<b>Défi du jour</b><small>${dailyDone()?'✔ réussi · ':''}série : ${curStreak()} 🔥</small></button>
     <button class="hb" data-h="shop">🛍️<b>Boutique</b><small>🪙 ${coins()}</small></button>`;
   document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>({badges:showBadges,chrono:startChrono,train:showTrain,exp:showExp,daily:startDaily,shop:showShop})[b.dataset.h]());
   $('#worlds').innerHTML=WORLDS.map((w,i)=>{const s=worldStars(i),u=unlocked(i);
@@ -335,16 +335,16 @@ function startChrono(){
 }
 function nextChrono(){if(!CHR)return;const d=CHR.solved<3?0:CHR.solved<7?1:2;const th=pick(CHR.themes);const g=genEq(th,d);
   setup({eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,box:d===0,label:'⚡ '+(CHR.solved+1),title:'Défi chrono · '+CHR.solved+' réussie'+(CHR.solved>1?'s':''),tip:''})}
-function chronoSolved(){if(!CHR)return;CHR.solved++;sfx('win');confetti(35);if(Date.now()<CHR.end)setTimeout(nextChrono,450)}
+function chronoSolved(){if(!CHR)return;CHR.solved++;sfx('win');if(Date.now()<CHR.end)setTimeout(nextChrono,450)}
 function tickChrono(){if(!CHR)return;const left=Math.max(0,CHR.end-Date.now());const s=Math.ceil(left/1000);
   $('#chrono').textContent=`⏱ ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;$('#chrono').classList.toggle('hurry',s<=15);
   if(s<=5&&s>0&&Math.abs(left%1000-0)<260)sfx('tick');if(left<=0)stopChrono(true)}
 function stopChrono(show){if(!CHR){clearInterval(chrT);return}clearInterval(chrT);const n=CHR.solved;CHR=null;$('#chrono').classList.add('hidden');if(!show)return;
   state.won=true;const rec=n>STATS.chronoBest;STATS.chronoBest=Math.max(STATS.chronoBest,n);saveStats();const nb=checkBadges();
-  modal(`<div class="winpet">${creatureSVG(petStage(),n?'happy':'sad')}</div><h2>⏱ Temps écoulé !</h2><div class="pts">${n} équation${n>1?'s':''} résolue${n>1?'s':''} en 2 minutes</div>
-   <div>${rec?'🏆 Nouveau record !':'Record : '+STATS.chronoBest}</div>${nb.map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}
+  modal(`<div class="winpet">${creatureSVG(petStage(),n?'happy':'sad')}</div><h2>⏱ Temps écoulé !</h2><div class="pts">${n} équation${n>1?'s':''} résolue${n>1?'s':''} en 2 minutes</div>
+   <div>${rec?'🏆 Nouveau record !':'Record : '+STATS.chronoBest}</div>${nb.map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}
    <div class="btns"><button class="ghostbtn" data-act="home">Carte</button><button class="bigbtn" data-act="chrono">Rejouer ⚡</button></div>`,'win');
-  sfx(rec||nb.length?'badge':'win');if(n)confetti(rec?120:50);
+  sfx(rec||nb.length?'badge':'win');if(rec)confetti(120);
 }
 
 /* ---------- mode expérimental ---------- */
@@ -369,7 +369,7 @@ function startExp(){
   try{const eq=parseEq($('#expInput').value);let gv=$('#expGoal').value.trim();if(gv&&!gv.includes('='))gv=expSel+'='+gv;
     state.mode='exp';const o={eq,rel:parseRel($('#expInput').value),target:expSel,goal:gv||null,box:$('#expBox').checked,label:'🧪',title:'🧪 Labo libre · isoler '+expSel,tip:''};
     lastSetup=Object.assign({},o,{eq0:clone(eq)});setup(o);
-    if(!state.par)toast("Je n'ai pas trouvé de solution automatique : à toi de jouer, sans maximum de coups.",'',5000);
+    if(!state.par)toast("Je n’ai pas trouvé de solution automatique : à toi de jouer, sans maximum de coups.",'',5000);
   }catch(e){$('#expPrev').innerHTML=`<span class="err">⚠ ${esc(e.message)}</span>`}
 }
 
@@ -386,38 +386,38 @@ const rail=h=>`<div class="srail">${h}</div>`;
 const bedR=(l,r,a,rel)=>bed(l,r,a).replace('<div class="smid">=</div>',`<div class="smid">${rel}</div>`);
 const dk=(h,a,neg)=>`<span class="dcard${neg?' neg':''}"${a?` data-a="${a}"`:''}>${neg?sgn('−'):''}${h}</span>`;
 const SCENES={
- flip:{t:'Touche un jeton : il devient son opposé.',tap:1,b:rail(dk(c(3),'A')),a:rail(dk(c(3),'',1))},
- add:{t:'Glisse un jeton sur « + Ajouter »… des deux côtés !',b:bed(Xc()+sgn('+')+c(3),c(7),'L')+rail(dk(c(3),'A',1)),a:bed(Xc()+sgn('+')+c(3)+sgn('−')+c(3),c(7)+sgn('−')+c(3))+rail(dk(c(3),'',1))},
- cancel:{t:'a et −a s’annulent : glisse l’un sur l’autre.',b:bed(Xc()+sgn('+')+tm(c(3),'B')+sgn('−')+tm(c(3),'A'),c(7)),a:bed(Xc(),c(7)+sgn('−')+c(3))},
+ flip:{t:'Touche un jeton : il devient son opposé.',tap:1,b:rail(dk(c(3),'A')),a:rail(dk(c(3),'',1))},
+ add:{t:'Glisse un jeton sur « + Ajouter »… des deux côtés !',b:bed(Xc()+sgn('+')+c(3),c(7),'L')+rail(dk(c(3),'A',1)),a:bed(Xc()+sgn('+')+c(3)+sgn('−')+c(3),c(7)+sgn('−')+c(3))+rail(dk(c(3),'',1))},
+ cancel:{t:'a et −a s’annulent : glisse l’un sur l’autre.',b:bed(Xc()+sgn('+')+tm(c(3),'B')+sgn('−')+tm(c(3),'A'),c(7)),a:bed(Xc(),c(7)+sgn('−')+c(3))},
  goal:{t:'🎯 Arrive exactement au résultat demandé.',b:bed(Xc(),tm(c(7),'B')+sgn('−')+tm(c(3),'A')),a:bed(Xc(),c(4)+' <span class="sbadge">🎯</span>')},
- bonus:{t:'✨ x est isolé ? Simplifie encore : +50 points !',b:bed(Xc(),fr(c(12,'A'),c(3,'B'))),a:bed(Xc(),c(4)+' <span class="sbadge">✨+50</span>')},
- like:{t:'Termes semblables : ils se regroupent.',b:bed(tm(c(3)+dot+Xc(),'B')+sgn('−')+tm(Xc(),'A'),c(8)),a:bed(c(2)+dot+Xc(),c(8))},
- copy:{t:'Glisse un terme dans la pioche : il devient un jeton.',b:bed(tm(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b')),'A'),c(9))+`<div class="srail" data-a="B">${dk(c(5))}</div>`,a:bed(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b')),c(9))+rail(dk(c(5))+dk(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b'))))},
- frac:{t:'Même jeton en haut et en bas : ça fait 1.',b:bed(fr(c(3,'A')+dot+Xc(),c(3,'B')),c(4)),a:bed(Xc(),c(4))},
- mul:{t:'« × Multiplier » : tout le côté est multiplié.',b:bed(fr(Xc(),c(5)),c(2),'L')+rail(dk(c(5),'A')),a:bed(fr(c(5)+dot+Xc(),c(5)),c(5)+dot+c(2))+rail(dk(c(5)))},
+ bonus:{t:'✨ x est isolé ? Simplifie encore : +50 points !',b:bed(Xc(),fr(c(12,'A'),c(3,'B'))),a:bed(Xc(),c(4)+' <span class="sbadge">✨+50</span>')},
+ like:{t:'Termes semblables : ils se regroupent.',b:bed(tm(c(3)+dot+Xc(),'B')+sgn('−')+tm(Xc(),'A'),c(8)),a:bed(c(2)+dot+Xc(),c(8))},
+ copy:{t:'Glisse un terme dans la pioche : il devient un jeton.',b:bed(tm(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b')),'A'),c(9))+`<div class="srail" data-a="B">${dk(c(5))}</div>`,a:bed(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b')),c(9))+rail(dk(c(5))+dk(fr(bx(sy('a')+sgn('+')+sy('b')),sy('a')+dot+sy('b'))))},
+ frac:{t:'Même jeton en haut et en bas : ça fait 1.',b:bed(fr(c(3,'A')+dot+Xc(),c(3,'B')),c(4)),a:bed(Xc(),c(4))},
+ mul:{t:'« × Multiplier » : tout le côté est multiplié.',b:bed(fr(Xc(),c(5)),c(2),'L')+rail(dk(c(5),'A')),a:bed(fr(c(5)+dot+Xc(),c(5)),c(5)+dot+c(2))+rail(dk(c(5)))},
  gcd:{t:'Simplifie par un diviseur commun.',b:bed(Xc(),fr(c(10,'A'),c(4,'B'))),a:bed(Xc(),fr(c(5),c(2)))},
- product:{t:'Calcule : glisse un nombre sur l’autre.',b:bed(Xc(),c(3,'A')+dot+c(4,'B')),a:bed(Xc(),c(12))},
+ product:{t:'Calcule : glisse un nombre sur l’autre.',b:bed(Xc(),c(3,'A')+dot+c(4,'B')),a:bed(Xc(),c(12))},
  neg:{t:'× (−1) fait disparaître le signe −.',b:bed(sgn('−')+Xc(),c(7),'L')+rail(dk(c(1),'A',1)),a:bed(Xc(),sgn('−')+c(7))+rail(dk(c(1),'',1))},
- dev:{t:'Touche la boîte : on développe.',tap:1,b:bed(c(2)+dot+bx(Xc()+sgn('+')+c(3),'A'),c(10)),a:bed(c(2)+dot+Xc()+sgn('+')+c(2)+dot+c(3),c(10))},
- fact:{t:'Même jeton dans deux termes : factorise.',b:bed(tm(c(3,'A')+dot+Xc())+sgn('+')+tm(c(3)+dot+c(2),'B'),c(12)),a:bed(c(3)+dot+bx(Xc()+sgn('+')+c(2)),c(12))},
- tool:{t:'Un outil s’applique à tout un côté… des deux côtés !',b:bed(pw(Xc(),2),c(9),'L')+rail(`<span class="dtool" data-a="A">√□</span>`),a:bed(fb('√',pw(Xc(),2)),fb('√',c(9)))+rail(`<span class="dtool">√□</span>`)},
- inv:{t:'Une fonction et sa réciproque s’annulent : touche-la.',tap:1,b:bed(fb('√',pw(Xc(),2),'A'),c(3)),a:bed(Xc(),c(3))},
- eval:{t:'Fonction d’un nombre : touche-la pour calculer.',tap:1,b:bed(Xc(),fb('√',c(9),'A')),a:bed(Xc(),c(3))},
- explog:{t:'ln et exp sont réciproques : ln(eˣ) = x.',tap:1,b:bed(fb('ln',fb('exp',Xc()),'A'),fb('ln',c(5))),a:bed(Xc(),fb('ln',c(5)))},
- trig:{t:'arcsin(½) = π/6 : touche pour calculer.',tap:1,b:bed(Xc(),fb('arcsin',fr(c(1),c(2)),'A')),a:bed(Xc(),fr(sy('π'),c(6)))},
+ dev:{t:'Touche la boîte : on développe.',tap:1,b:bed(c(2)+dot+bx(Xc()+sgn('+')+c(3),'A'),c(10)),a:bed(c(2)+dot+Xc()+sgn('+')+c(2)+dot+c(3),c(10))},
+ fact:{t:'Même jeton dans deux termes : factorise.',b:bed(tm(c(3,'A')+dot+Xc())+sgn('+')+tm(c(3)+dot+c(2),'B'),c(12)),a:bed(c(3)+dot+bx(Xc()+sgn('+')+c(2)),c(12))},
+ tool:{t:'Un outil s’applique à tout un côté… des deux côtés !',b:bed(pw(Xc(),2),c(9),'L')+rail(`<span class="dtool" data-a="A">√□</span>`),a:bed(fb('√',pw(Xc(),2)),fb('√',c(9)))+rail(`<span class="dtool">√□</span>`)},
+ inv:{t:'Une fonction et sa réciproque s’annulent : touche-la.',tap:1,b:bed(fb('√',pw(Xc(),2),'A'),c(3)),a:bed(Xc(),c(3))},
+ eval:{t:'Fonction d’un nombre : touche-la pour calculer.',tap:1,b:bed(Xc(),fb('√',c(9),'A')),a:bed(Xc(),c(3))},
+ explog:{t:'ln et exp sont réciproques : ln(eˣ) = x.',tap:1,b:bed(fb('ln',fb('exp',Xc()),'A'),fb('ln',c(5))),a:bed(Xc(),fb('ln',c(5)))},
+ trig:{t:'arcsin(½) = π/6 : touche pour calculer.',tap:1,b:bed(Xc(),fb('arcsin',fr(c(1),c(2)),'A')),a:bed(Xc(),fr(sy('π'),c(6)))},
  lncomb:{t:'ln a + ln b = ln(a·b).',b:bed(tm(fb('ln',Xc()),'A')+sgn('+')+tm(fb('ln',c(2)),'B'),c(1)),a:bed(fb('ln',c(2)+dot+Xc()),c(1))},
- i2:{t:'i · i = −1 : glisse un i sur l’autre.',b:bed(c('i','A','s im')+dot+c('i','B','s im')+dot+Xc('','z'),c(3)),a:bed(sgn('−')+Xc('','z'),c(3))},
- pow2:{t:'Deux jetons identiques côte à côte : v·v = v². Double-touche v² pour revenir à v·v.',b:bed(sy('m')+dot+sy('v','A')+dot+sy('v','B'),sy('Ec')),a:bed(sy('m')+dot+pw(sy('v'),2),sy('Ec'))},
- recip:{t:'Outil 1/□ : on inverse les deux côtés.',b:bed(sy('f'),fr(c(1),Xc('','T')),'L')+rail(`<span class="dtool" data-a="A">1/□</span>`),a:bed(fr(c(1),sy('f')),Xc('','T'))+rail(`<span class="dtool">1/□</span>`)},
- deckop:{t:'Dans la pioche, glisse un jeton sur un autre : ils s’additionnent ou se regroupent entre ( ).',b:rail(dk(sy('a'),'A')+dk(sy('b'),'B')),a:rail(dk(sy('a'))+dk(sy('b'))+dk(bx(sy('b')+sgn('+')+sy('a'))))},
- conj:{t:'Multiplie par le conjugué : (1−i)(1+i) = 2.',b:bed(bx(c(1)+sgn('+')+c('i','','s im'))+dot+Xc('','z'),c(2),'L')+rail(dk(bx(c(1)+sgn('−')+c('i','','s im')),'A')),a:bed(c(2)+dot+Xc('','z'),c(2)+dot+bx(c(1)+sgn('−')+c('i','','s im')))},
- story:{t:'Lis le problème, puis choisis l’équation qui le traduit.',tap:1,b:`<div class="sstory">« Je gagne 7 billes, j'en ai 19 »</div><div class="schoices"><span class="schip">x − 7 = 19</span><span class="schip" data-a="A">x + 7 = 19</span></div>`,a:bed(Xc()+sgn('+')+c(7),c(19))},
- ineq:{t:'Inéquation : on ajoute la même chose des deux côtés, le sens < ne change pas.',b:bedR(Xc()+sgn('+')+c(4),c(9),'L','<')+rail(dk(c(4),'A',1)),a:bedR(Xc()+sgn('+')+c(4)+sgn('−')+c(4),c(9)+sgn('−')+c(4),'','<')+rail(dk(c(4),'',1))},
- ineqneg:{t:'Diviser par un nombre négatif : le sens s’inverse, > devient < !',b:bedR(sgn('−')+c(2)+dot+Xc(),c(6),'L','>')+rail(dk(c(2),'A',1)),a:bedR(Xc(),sgn('−')+c(3),'','<')},
- zero:{t:'Produit nul : A × B = 0 ⇔ A = 0 ou B = 0. On résout deux petites équations.',tap:1,b:bed(bx(Xc()+sgn('−')+c(2),'A')+dot+bx(Xc()+sgn('+')+c(3)),c(0)),a:`<div class="szero">${bed(Xc()+sgn('−')+c(2),c(0))}<span class="sou">ou</span>${bed(Xc()+sgn('+')+c(3),c(0))}</div>`},
- system:{t:'Système : isole y dans une équation, puis remplace-le dans l’autre.',tap:1,b:`<div class="ssys">{ x + <span class="card s" data-a="A">y</span> = 10 ; x − y = 4 }</div>`,a:bed(sy('y'),c(10)+sgn('−')+sy('x'))+`<div class="ssys">x − (10 − x) = 4</div>`},
- trigo:{t:'cos(A) = AB/AC : multiplie par AC des deux côtés pour libérer AB.',b:bed(fb('cos',sy('A')),fr(Xc('','AB'),sy('AC')),'L')+rail(dk(sy('AC'),'A')),a:bed(sy('AC')+dot+fb('cos',sy('A')),fr(sy('AC')+dot+Xc('','AB'),sy('AC')))+rail(dk(sy('AC')))},
- angle:{t:'Outil arccos (cos⁻¹) : arccos(cos A) = A.',b:bed(fb('cos',Xc('','A')),fr(sy('AB'),sy('AC')),'L')+rail(`<span class="dtool" data-a="A">arccos□</span>`),a:bed(fb('arccos',fb('cos',Xc('','A'))),fb('arccos',fr(sy('AB'),sy('AC'))))+rail(`<span class="dtool">arccos□</span>`)},
+ i2:{t:'i · i = −1 : glisse un i sur l’autre.',b:bed(c('i','A','s im')+dot+c('i','B','s im')+dot+Xc('','z'),c(3)),a:bed(sgn('−')+Xc('','z'),c(3))},
+ pow2:{t:'Deux jetons identiques côte à côte : v·v = v². Double-touche v² pour revenir à v·v.',b:bed(sy('m')+dot+sy('v','A')+dot+sy('v','B'),sy('Ec')),a:bed(sy('m')+dot+pw(sy('v'),2),sy('Ec'))},
+ recip:{t:'Outil 1/□ : on inverse les deux côtés.',b:bed(sy('f'),fr(c(1),Xc('','T')),'L')+rail(`<span class="dtool" data-a="A">1/□</span>`),a:bed(fr(c(1),sy('f')),Xc('','T'))+rail(`<span class="dtool">1/□</span>`)},
+ deckop:{t:'Dans la pioche, glisse un jeton sur un autre : ils s’additionnent ou se regroupent entre ( ).',b:rail(dk(sy('a'),'A')+dk(sy('b'),'B')),a:rail(dk(sy('a'))+dk(sy('b'))+dk(bx(sy('b')+sgn('+')+sy('a'))))},
+ conj:{t:'Multiplie par le conjugué : (1−i)(1+i) = 2.',b:bed(bx(c(1)+sgn('+')+c('i','','s im'))+dot+Xc('','z'),c(2),'L')+rail(dk(bx(c(1)+sgn('−')+c('i','','s im')),'A')),a:bed(c(2)+dot+Xc('','z'),c(2)+dot+bx(c(1)+sgn('−')+c('i','','s im')))},
+ story:{t:'Lis le problème, puis choisis l’équation qui le traduit.',tap:1,b:`<div class="sstory">« Je gagne 7 billes, j’en ai 19 »</div><div class="schoices"><span class="schip">x − 7 = 19</span><span class="schip" data-a="A">x + 7 = 19</span></div>`,a:bed(Xc()+sgn('+')+c(7),c(19))},
+ ineq:{t:'Inéquation : on ajoute la même chose des deux côtés, le sens < ne change pas.',b:bedR(Xc()+sgn('+')+c(4),c(9),'L','<')+rail(dk(c(4),'A',1)),a:bedR(Xc()+sgn('+')+c(4)+sgn('−')+c(4),c(9)+sgn('−')+c(4),'','<')+rail(dk(c(4),'',1))},
+ ineqneg:{t:'Diviser par un nombre négatif : le sens s’inverse, > devient < !',b:bedR(sgn('−')+c(2)+dot+Xc(),c(6),'L','>')+rail(dk(c(2),'A',1)),a:bedR(Xc(),sgn('−')+c(3),'','<')},
+ zero:{t:'Produit nul : A × B = 0 ⇔ A = 0 ou B = 0. On résout deux petites équations.',tap:1,b:bed(bx(Xc()+sgn('−')+c(2),'A')+dot+bx(Xc()+sgn('+')+c(3)),c(0)),a:`<div class="szero">${bed(Xc()+sgn('−')+c(2),c(0))}<span class="sou">ou</span>${bed(Xc()+sgn('+')+c(3),c(0))}</div>`},
+ system:{t:'Système : isole y dans une équation, puis remplace-le dans l’autre.',tap:1,b:`<div class="ssys">{ x + <span class="card s" data-a="A">y</span> = 10 ; x − y = 4 }</div>`,a:bed(sy('y'),c(10)+sgn('−')+sy('x'))+`<div class="ssys">x − (10 − x) = 4</div>`},
+ trigo:{t:'cos(A) = AB/AC : multiplie par AC des deux côtés pour libérer AB.',b:bed(fb('cos',sy('A')),fr(Xc('','AB'),sy('AC')),'L')+rail(dk(sy('AC'),'A')),a:bed(sy('AC')+dot+fb('cos',sy('A')),fr(sy('AC')+dot+Xc('','AB'),sy('AC')))+rail(dk(sy('AC')))},
+ angle:{t:'Outil arccos (cos⁻¹) : arccos(cos A) = A.',b:bed(fb('cos',Xc('','A')),fr(sy('AB'),sy('AC')),'L')+rail(`<span class="dtool" data-a="A">arccos□</span>`),a:bed(fb('arccos',fb('cos',Xc('','A'))),fb('arccos',fr(sy('AB'),sy('AC'))))+rail(`<span class="dtool">arccos□</span>`)},
 };
 const HELP=[['Les bases',['flip','add','cancel','like','copy']],['Fractions',['frac','mul','gcd','product','neg']],['Boîtes et pioche',['dev','fact','deckop']],['Puissances et racines',['pow2','tool','inv','eval','recip']],['Trigonométrie',['trigo','angle']],['Problèmes et seconde',['story','ineq','ineqneg','zero','system']],['Score',['goal','bonus']]];
 const sceneHTML=k=>`<div class="scard"><div class="scene" data-scene="${k}"></div><div class="scap">${SCENES[k].t}</div></div>`;
@@ -444,7 +444,7 @@ async function playScene(el,sc){
 let introQueue=null;
 function showIntro(keys){
   keys=[].concat(keys).filter(k=>SCENES[k]);if(!keys.length)return;introQueue=keys;
-  modal(`<h2>Nouveau !</h2><div class="sgrid n${keys.length}">${keys.map(sceneHTML).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">À moi !</button></div>`,'intro');
+  modal(`<h2>Nouveau !</h2><div class="sgrid n${keys.length}">${keys.map(sceneHTML).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">À moi !</button></div>`,'intro');
 }
 function introDone(){if(introQueue){introQueue.forEach(k=>SEEN[k]=true);saveSeen();introQueue=null}}
 function maybeIntroAfter(kind){if(kind==='bonus'&&!SEEN.bonus&&!state.coach&&!state.won)setTimeout(()=>{if(!state.won&&isoSide()>=0&&$('#modal').classList.contains('hidden'))showIntro(['bonus'])},350)}
@@ -455,11 +455,11 @@ function showHelp(){
 
 /* ---------- tutoriel guidé (main animée sur la vraie interface) ---------- */
 const COACH={tuto1:[
-  {cap:'Touche le jeton <b>3</b> : il devient <b>−3</b>',tap:()=>deckCard('3'),done:()=>state.flip[deckIdx('3')]||state.pending||state.moves>0},
-  {cap:'Glisse <b>−3</b> à gauche, sur « + Ajouter »',drag:()=>[deckCard('3'),panelAt(0)],done:()=>(state.pending&&state.pending.side===1)||state.moves>0},
-  {cap:'Pareil à droite : la balance reste juste ⚖',drag:()=>[deckCard('3'),panelAt(1)],done:()=>!state.pending&&state.moves>0},
-  {cap:'Glisse <b>−3</b> sur <b>3</b> : ils s’annulent !',drag:()=>[termAt(0,-1),termAt(0,1)],done:()=>isoSide()>=0||state.won},
-  {cap:'✨ Bonus : glisse <b>−3</b> sur <b>7</b> pour simplifier',drag:()=>[termAt(1,-1),termAt(1,0)],done:()=>state.won},
+  {cap:'Touche le jeton <b>3</b> : il devient <b>−3</b>',tap:()=>deckCard('3'),done:()=>state.flip[deckIdx('3')]||state.pending||state.moves>0},
+  {cap:'Glisse <b>−3</b> à gauche, sur « + Ajouter »',drag:()=>[deckCard('3'),panelAt(0)],done:()=>(state.pending&&state.pending.side===1)||state.moves>0},
+  {cap:'Pareil à droite : la balance reste juste ⚖',drag:()=>[deckCard('3'),panelAt(1)],done:()=>!state.pending&&state.moves>0},
+  {cap:'Glisse <b>−3</b> sur <b>3</b> : ils s’annulent !',drag:()=>[termAt(0,-1),termAt(0,1)],done:()=>isoSide()>=0||state.won},
+  {cap:'✨ Bonus : glisse <b>−3</b> sur <b>7</b> pour simplifier',drag:()=>[termAt(1,-1),termAt(1,0)],done:()=>state.won},
 ]};
 const deckIdx=v=>state.deck.findIndex(c=>keyT(c)==='#'+v+'/');
 const deckCard=v=>document.querySelector(`#deck [data-deck="${deckIdx(v)}"]`);
@@ -497,7 +497,7 @@ function showStory(ci,li){
   const lv=WORLDS[ci].levels[li];state.ci=ci;state.li=li;state.mode='level';storyTry=0;
   const order=lv.ch.map((_,i)=>i);
   modal(`<div class="winpet">${creatureSVG(petStage(),'idle')}</div><h2>📖 Le problème</h2><div class="storytxt">${lv.story}</div>
-   <div class="kick">Quelle équation traduit ce problème ?</div>
+   <div class="kick">Quelle équation traduit ce problème ?</div>
    <div class="stchoices">${order.map(i=>`<button class="stch" data-story="${i}">${mathEq(parseEq(lv.ch[i]),parseRel(lv.ch[i]))}</button>`).join('')}</div>
    <div id="storyWhy"></div><div class="btns"><button class="ghostbtn" data-act="menu">Retour</button></div>`,'story');
 }
@@ -522,37 +522,37 @@ const prettySol=g=>g.replace(/-/g,'−').replace(/([=<>≤≥])/,' $1 ').replace
 function chainStepWin(){
   const lv=WORLDS[state.ci].levels[state.li],k=state.chain.k;
   CHAIN.moves+=state.moves;CHAIN.par+=state.par||0;CHAIN.sols.push(lv.steps[k].goal);
-  modal(`<div class="winpet">${creatureSVG(petStage(),'happy')}</div><h2>✔ Étape ${k+1}/${state.chain.n} réussie !</h2>
-<div class="sol">${mathEq(state.eq)}</div><div>${lv.zero?'Le facteur suivant peut aussi être nul…':'On garde ce résultat pour l\'étape suivante.'}</div>
-   <div class="btns"><button class="bigbtn" data-act="step">Étape suivante ▶</button></div>`,'win');sfx('win');confetti(30);
+  modal(`<div class="winpet">${creatureSVG(petStage(),'happy')}</div><h2>✔ Étape ${k+1}/${state.chain.n} réussie !</h2>
+<div class="sol">${mathEq(state.eq)}</div><div>${lv.zero?'Le facteur suivant peut aussi être nul…':'On garde ce résultat pour l’étape suivante.'}</div>
+   <div class="btns"><button class="bigbtn" data-act="step">Étape suivante ▶</button></div>`,'win');sfx('win');
 }
 function solutionLine(){
   if(state.chain&&CHAIN){const lv=WORLDS[state.ci].levels[state.li];const all=CHAIN.sols.concat(lv.steps[state.chain.k].goal);
-    if(lv.zero)return`Solutions : ${all.map(prettySol).join(' <b>ou</b> ')}`;
-    return`Solution du système : ${all.slice(1).map(prettySol).join(' <b>et</b> ')}`}
+    if(lv.zero)return`Solutions : ${all.map(prettySol).join(' <b>ou</b> ')}`;
+    return`Solution du système : ${all.slice(1).map(prettySol).join(' <b>et</b> ')}`}
   if(state.rel&&state.rel!=='='){const s=isoSide();if(s<0)return'';const r=s===0?state.rel:MIRROR[state.rel];const v=textSum(state.eq[1-s]).replace(/-/g,'−');
-    const I={'<':`]−∞ ; ${v}[`,'≤':`]−∞ ; ${v}]`,'>':`]${v} ; +∞[`,'≥':`[${v} ; +∞[`}[r];return`Ensemble des solutions : <b>${esc(state.target)} ∈ ${I}</b>`}
+    const I={'<':`]−∞ ; ${v}[`,'≤':`]−∞ ; ${v}]`,'>':`]${v} ; +∞[`,'≥':`[${v} ; +∞[`}[r];return`Ensemble des solutions : <b>${esc(state.target)} ∈ ${I}</b>`}
   return'';
 }
 /* ---------- explication des erreurs ---------- */
 const WHY=[
- {re:/Équilibre la balance|Termine d|opération en cours/,s:'add',t:"Une équation est une <b>balance</b>. Si tu fais une opération d'un seul côté, elle penche : l'égalité devient fausse. Refais <b>exactement</b> la même opération de l'autre côté pour la rééquilibrer."},
- {re:/Pas du même côté/,s:'add',t:"Un terme ne « saute » pas par-dessus le = tout seul. Pour faire disparaître +3 d'un côté, on ajoute −3 <b>des deux côtés</b>. C'est ce qu'on appelle parfois « passer de l'autre côté »."},
- {re:/diviseur commun|même carte|étage/,s:'gcd',t:"Dans une fraction, on ne simplifie que par un nombre qui divise <b>à la fois</b> le haut et le bas : 6/4 = 3/2 (on divise par 2), mais 5/3 ne se simplifie pas."},
- {re:/Seuls deux/,s:'product',t:"Dans un produit, on calcule deux nombres côte à côte (2·3 = 6) ou on regroupe v·v = v². Mais 2·x ne se calcule pas : il reste 2x."},
- {re:/pas semblables|même somme/,s:'like',t:"On additionne seulement des termes <b>de même nature</b> : des x avec des x (3x + 2x = 5x), des nombres avec des nombres. 3x + 2 ne fait pas 5x !"},
- {re:/factoriser/,s:'fact',t:"Factoriser, c'est mettre en commun un facteur présent dans <b>chaque</b> terme : 3x + 3·2 = 3(x + 2). Si un terme ne contient pas ce facteur, on ne peut pas."},
- {re:/développe|Rien à développer/,s:'dev',t:"Développer : on multiplie le facteur devant la parenthèse par <b>chaque</b> terme dedans : 2(x + 3) = 2x + 6. Une fraction au dénominateur s'enlève plutôt en multipliant les deux côtés."},
- {re:/réciproque|valeur exacte/,s:'inv',t:"Une fonction s'annule avec sa <b>réciproque</b> : √(x²) = x (si x ≥ 0), (√x)² = x. Applique d'abord l'outil réciproque des deux côtés."},
- {re:/inéquation|signe d'une lettre/,s:'ineqneg',t:"Dans une inéquation, multiplier ou diviser par un nombre <b>négatif</b> retourne le sens. Avec une lettre, on ne sait pas si elle est positive ou négative : on ne peut pas savoir si le sens change."},
+ {re:/Équilibre la balance|Termine d|opération en cours/,s:'add',t:"Une équation est une <b>balance</b>. Si tu fais une opération d’un seul côté, elle penche : l’égalité devient fausse. Refais <b>exactement</b> la même opération de l’autre côté pour la rééquilibrer."},
+ {re:/Pas du même côté/,s:'add',t:"Un terme ne « saute » pas par-dessus le = tout seul. Pour faire disparaître +3 d’un côté, on ajoute −3 <b>des deux côtés</b>. C’est ce qu’on appelle parfois « passer de l’autre côté »."},
+ {re:/diviseur commun|même carte|étage/,s:'gcd',t:"Dans une fraction, on ne simplifie que par un nombre qui divise <b>à la fois</b> le haut et le bas : 6/4 = 3/2 (on divise par 2), mais 5/3 ne se simplifie pas."},
+ {re:/Seuls deux/,s:'product',t:"Dans un produit, on calcule deux nombres côte à côte (2·3 = 6) ou on regroupe v·v = v². Mais 2·x ne se calcule pas : il reste 2x."},
+ {re:/pas semblables|même somme/,s:'like',t:"On additionne seulement des termes <b>de même nature</b> : des x avec des x (3x + 2x = 5x), des nombres avec des nombres. 3x + 2 ne fait pas 5x !"},
+ {re:/factoriser/,s:'fact',t:"Factoriser, c’est mettre en commun un facteur présent dans <b>chaque</b> terme : 3x + 3·2 = 3(x + 2). Si un terme ne contient pas ce facteur, on ne peut pas."},
+ {re:/développe|Rien à développer/,s:'dev',t:"Développer : on multiplie le facteur devant la parenthèse par <b>chaque</b> terme dedans : 2(x + 3) = 2x + 6. Une fraction au dénominateur s’enlève plutôt en multipliant les deux côtés."},
+ {re:/réciproque|valeur exacte/,s:'inv',t:"Une fonction s’annule avec sa <b>réciproque</b> : √(x²) = x (si x ≥ 0), (√x)² = x. Applique d’abord l’outil réciproque des deux côtés."},
+ {re:/inéquation|signe d'une lettre/,s:'ineqneg',t:"Dans une inéquation, multiplier ou diviser par un nombre <b>négatif</b> retourne le sens. Avec une lettre, on ne sait pas si elle est positive ou négative : on ne peut pas savoir si le sens change."},
 ];
-function showWhy(i){const w=WHY[i];modal(`<h2>🤔 Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
-  ${SCENES[w.s]?`<div class="sgrid n1">${sceneHTML(w.s)}</div>`:''}<div class="btns"><button class="bigbtn" data-act="close">J'ai compris</button></div>`,'intro')}
+function showWhy(i){const w=WHY[i];modal(`<h2>🤔 Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
+  ${SCENES[w.s]?`<div class="sgrid n1">${sceneHTML(w.s)}</div>`:''}<div class="btns"><button class="bigbtn" data-act="close">J’ai compris</button></div>`,'intro')}
 /* ---------- boutique de Pépix ---------- */
 let SHOP={owned:{},eq:{}};try{Object.assign(SHOP,JSON.parse(localStorage.getItem('isoleX_college2_shop')||'{}'))}catch(e){}
 const saveShop=()=>{try{localStorage.setItem('isoleX_college2_shop',JSON.stringify(SHOP))}catch(e){}};
 const ITEMS=[
- {k:'hat',slot:'head',icon:'🤠',name:"Chapeau d'explorateur",price:60},
+ {k:'hat',slot:'head',icon:'🤠',name:"Chapeau d’explorateur",price:60},
  {k:'flowers',slot:'head',icon:'🌺',name:'Couronne de fleurs',price:90},
  {k:'cap',slot:'head',icon:'🧢',name:'Casquette',price:120},
  {k:'party',slot:'head',icon:'🥳',name:'Chapeau de fête',price:200},
@@ -583,7 +583,7 @@ function accSVG(G){const {r,cy,top,ex,ey,er}=G;let h='';const hd=eqItem('head'),
 function showShop(){
   const c=coins();
   modal(`<h2>🛍️ La boutique de Pépix</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
-   <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' Pépix doit d\'abord éclore pour porter ses tenues.':''}</small></div></div>
+   <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' Pépix doit d’abord éclore pour porter ses tenues.':''}</small></div></div>
    <div class="shopgrid">${ITEMS.map(it=>{const own=SHOP.owned[it.k],on=SHOP.eq[it.slot]===it.k;
      return`<div class="sitem${own?' own':''}${on?' on':''}"><span class="si">${it.icon}</span><b>${esc(it.name)}</b>
       ${own?`<button class="chip${on?' on':''}" data-shop="wear" data-k="${it.k}">${on?'✔ Porté':'Porter'}</button>`:`<button class="chip" data-shop="buy" data-k="${it.k}"${c<it.price?' disabled':''}>🪙 ${it.price}</button>`}</div>`}).join('')}</div>
@@ -592,7 +592,7 @@ function showShop(){
 document.getElementById('mbox').addEventListener('click',e=>{
   const st=e.target.closest('[data-story]');if(st){storyPick(+st.dataset.story);return}
   const b=e.target.closest('[data-shop]');if(!b)return;const it=ITEMS.find(i=>i.k===b.dataset.k);
-  if(b.dataset.shop==='buy'){if(coins()<it.price)return;STATS.spent=(STATS.spent||0)+it.price;saveStats();SHOP.owned[it.k]=1;SHOP.eq[it.slot]=it.k;saveShop();sfx('badge');confetti(40);checkBadges()}
+  if(b.dataset.shop==='buy'){if(coins()<it.price)return;STATS.spent=(STATS.spent||0)+it.price;saveStats();SHOP.owned[it.k]=1;SHOP.eq[it.slot]=it.k;saveShop();sfx('badge');checkBadges()}
   else{SHOP.eq[it.slot]=SHOP.eq[it.slot]===it.k?null:it.k;saveShop();sfx('pop')}
   showShop();
 });
@@ -608,7 +608,7 @@ function seeded(str){let h=1779033703;for(const ch of str)h=Math.imul(h^ch.charC
 function startDaily(){
   const R=Math.random;Math.random=seeded('pepix'+dayKey());let g,th;
   try{th=pick(['add','mul','frac','mix','dev']);g=genEq(th,1)}finally{Math.random=R}
-  state.mode='daily';const o={eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,tip:"📅 L'équation du jour est la même pour toute la classe. Reviens demain pour allonger ta série !",box:false,label:'📅',title:'Défi du jour · '+THEMES.find(t=>t.k===th).n};
+  state.mode='daily';const o={eq:g.eq,rel:parseRel(g.e),target:'x',goal:g.goal,tip:"📅 L’équation du jour est la même pour toute la classe. Reviens demain pour allonger ta série !",box:false,label:'📅',title:'Défi du jour · '+THEMES.find(t=>t.k===th).n};
   lastSetup=Object.assign({},o,{eq0:clone(g.eq)});setup(o);state.chain=null;
 }
 function dailyWin(){if(dailyDone())return 0;DAILY.streak=DAILY.last===yesterday()?DAILY.streak+1:1;DAILY.last=dayKey();DAILY.best=Math.max(DAILY.best,DAILY.streak);saveDaily();
@@ -620,12 +620,12 @@ let installEvt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventD
 function showSettings(){
   const sz=OPTS.size||1;
   modal(`<h2>⚙️ Réglages</h2><div class="setlist">
-   <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d'espace entre les lettres.</small></span></label>
+   <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d’espace entre les lettres.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
-   <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l'inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
+   <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l’inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
    <div class="setrow"><span><b>Taille du texte</b><small>Sur un petit écran, elle est limitée automatiquement pour que rien ne soit coupé.</small></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
-   <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l\'appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l\'écran d\'accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l\'application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
+   <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l’appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l’écran d’accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l’application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
    </div><p class="lookver" style="text-align:center">Version du ${LOOK.BUILD}</p><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
   document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
   document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{OPTS.size=+b.dataset.size;saveOpts();applyOpts();showSettings()});
@@ -658,9 +658,9 @@ function makeSaveCode(){
 function readSaveCode(code){
   const s=code.toUpperCase().replace(/[\s\-_.]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1').replace(/U/g,'V');
   if(s.length<3)throw new Error('Code trop court.');
-  const bits=[];for(const ch of s){const v=B32.indexOf(ch);if(v<0)throw new Error(`Caractère inconnu : « ${ch} ».`);for(let i=4;i>=0;i--)bits.push((v>>i)&1)}
-  const body=bits.slice(0,-10),c=bits.slice(-10).reduce((a,x)=>a*2+x,0);if(crc10(body)!==c)throw new Error('Ce code contient une erreur : vérifie chaque caractère.');
-  const r=bitR(body);const zv=()=>r.get(1)?r.vint()+1:0;if(r.get(3)!==2)throw new Error('Code d\'une version inconnue.');
+  const bits=[];for(const ch of s){const v=B32.indexOf(ch);if(v<0)throw new Error(`Caractère inconnu : « ${ch} ».`);for(let i=4;i>=0;i--)bits.push((v>>i)&1)}
+  const body=bits.slice(0,-10),c=bits.slice(-10).reduce((a,x)=>a*2+x,0);if(crc10(body)!==c)throw new Error('Ce code contient une erreur : vérifie chaque caractère.');
+  const r=bitR(body);const zv=()=>r.get(1)?r.vint()+1:0;if(r.get(3)!==2)throw new Error('Code d’une version inconnue.');
   const d={stats:{},owned:{},eq:{},daily:{last:'',streak:0,best:0},prog:{}};
   ['chronoBest','bestNoHint','storyFirst','bonusCoins','spent'].forEach(k=>d.stats[k]=zv());
   if(r.get(1)){ITEMS.forEach(it=>{if(r.get(1))d.owned[it.k]=1});SLOT_KEYS.forEach(sl=>{const its=ITEMS.filter(i=>i.slot===sl);const v=r.get(3);d.eq[sl]=v?(its[v-1]||{}).k||null:null})}
@@ -687,25 +687,25 @@ function showSave(tab='save'){
    ${tab==='save'?`<p>Ta progression reste sur cet appareil. Pour la retrouver <b>sur un autre ordinateur ou une tablette</b>, note ce code ou prends le QR code en photo.</p>
     <div class="savebox"><div class="savecode" id="saveCode">${code}</div>${qr?`<div class="saveqr">${qr}</div>`:''}</div>
     <div class="kicker">${saveSummary(readSaveCode(code))}</div>
-    <p><small>Le code change quand tu progresses : refais une sauvegarde à la fin de chaque séance. Il ne contient ni ton nom ni aucune donnée personnelle.${qr?' Scanne le QR code avec l\'appareil photo d\'une tablette : le jeu s\'ouvre et reprend ta partie.':''}</small></p>
+    <p><small>Le code change quand tu progresses : refais une sauvegarde à la fin de chaque séance. Il ne contient ni ton nom ni aucune donnée personnelle.${qr?' Scanne le QR code avec l’appareil photo d’une tablette : le jeu s’ouvre et reprend ta partie.':''}</small></p>
     <div class="btns"><button class="ghostbtn" id="btnCopySave">📋 Copier le code</button><button class="bigbtn" data-act="close">Fermer</button></div>`
-   :`<p>Tape ton code de sauvegarde. <b>Attention :</b> la progression actuelle de cet appareil sera remplacée.</p>
+   :`<p>Tape ton code de sauvegarde. <b>Attention :</b> la progression actuelle de cet appareil sera remplacée.</p>
     <input id="loadCode" class="loadcode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX">
     <div id="loadMsg" class="profmsg"></div>
     <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="btnLoadSave">Reprendre ▶</button></div>`}`,'badgesbox');
   document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>showSave(b.dataset.stab));
-  const cp=$('#btnCopySave');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(code);cp.textContent='✔ Copié !'}catch(e){const r=document.createRange();r.selectNodeContents($('#saveCode'));getSelection().removeAllRanges();getSelection().addRange(r);cp.textContent='Sélectionné : fais Ctrl+C'}};
+  const cp=$('#btnCopySave');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(code);cp.textContent='✔ Copié !'}catch(e){const r=document.createRange();r.selectNodeContents($('#saveCode'));getSelection().removeAllRanges();getSelection().addRange(r);cp.textContent='Sélectionné : fais Ctrl+C'}};
   const go=$('#btnLoadSave');if(go){const inp=$('#loadCode');setTimeout(()=>inp.focus(),50);
     const run=()=>{try{const d=readSaveCode(inp.value);confirmLoad(d)}catch(e){$('#loadMsg').textContent=e.message;sfx('fail')}};go.onclick=run;inp.onkeydown=e=>{if(e.key==='Enter')run()}}
 }
 let pendingSave=null;
 function confirmLoad(d){pendingSave=d;
-  modal(`<h2>💾 Reprendre cette partie ?</h2><div class="pts">${saveSummary(d)}</div><p>La progression actuelle de cet appareil sera <b>remplacée</b>.</p>
+  modal(`<h2>💾 Reprendre cette partie ?</h2><div class="pts">${saveSummary(d)}</div><p>La progression actuelle de cet appareil sera <b>remplacée</b>.</p>
    <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="btnDoLoad">Oui, reprendre</button></div>`,'intro');
-  $('#btnDoLoad').onclick=()=>{applySave(pendingSave);pendingSave=null;closeModal();toHome();sfx('badge');confetti(60);toast('✔ Partie reprise : bon retour dans la jungle !')};
+  $('#btnDoLoad').onclick=()=>{applySave(pendingSave);pendingSave=null;closeModal();toHome();sfx('badge');toast('✔ Partie reprise : bon retour dans la jungle !')};
 }
 function checkSaveLink(){const m=location.hash.match(/reprendre=([0-9A-Za-z]+)/);if(!m)return;history.replaceState(null,'',location.href.split('#')[0]);
-  try{confirmLoad(readSaveCode(m[1]))}catch(e){toast('Ce lien de sauvegarde est abîmé : '+e.message,'warn',6000)}}
+  try{confirmLoad(readSaveCode(m[1]))}catch(e){toast('Ce lien de sauvegarde est abîmé : '+e.message,'warn',6000)}}
 
 /* ---------- apparence : thèmes et réglages fins ---------- */
 let lookFrom='home';
@@ -740,14 +740,14 @@ $('#btnMute').onclick=()=>{OPTS.mute=!OPTS.mute;saveOpts();$('#btnMute').textCon
 $('#optTeacher').onchange=e=>{if(!e.target.checked){TEACHER=false;renderHome();return}e.target.checked=false;askProfCode()};
 function askProfCode(){
   const wait=Math.ceil((profLockUntil-Date.now())/1000);
-  if(wait>0){toast(`🔒 Trop d'essais : attends ${wait} s.`,'warn');return}
+  if(wait>0){toast(`🔒 Trop d’essais : attends ${wait} s.`,'warn');return}
   modal(`<h2>🔒 Mode professeur</h2><p>Tape le code professeur pour ouvrir tous les mondes.<br><small>Il se désactive tout seul quand on ferme la page.</small></p>
    <input id="profCode" class="profcode" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••">
    <div id="profMsg" class="profmsg"></div>
    <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="profOk">Valider</button></div>`,'intro');
   const inp=$('#profCode');setTimeout(()=>inp.focus(),50);
-  const go=()=>{if(profHash(inp.value.trim())===PROF_H){profFails=0;TEACHER=true;closeModal();renderHome();sfx('badge');toast('🔓 Mode professeur activé : tous les mondes sont ouverts jusqu\'à la fermeture de la page.')}
-    else{profFails++;inp.value='';sfx('fail');if(profFails>=3){profFails=0;profLockUntil=Date.now()+60000;closeModal();toast("🔒 Code incorrect 3 fois : réessaie dans 1 minute.",'warn')}
+  const go=()=>{if(profHash(inp.value.trim())===PROF_H){profFails=0;TEACHER=true;closeModal();renderHome();sfx('badge');toast('🔓 Mode professeur activé : tous les mondes sont ouverts jusqu’à la fermeture de la page.')}
+    else{profFails++;inp.value='';sfx('fail');if(profFails>=3){profFails=0;profLockUntil=Date.now()+60000;closeModal();toast("🔒 Code incorrect 3 fois : réessaie dans 1 minute.",'warn')}
       else $('#profMsg').textContent=`Code incorrect (${3-profFails} essai${3-profFails>1?'s':''} restant${3-profFails>1?'s':''}).`}};
   $('#profOk').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
 }

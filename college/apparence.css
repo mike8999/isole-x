@@ -261,3 +261,6 @@ body[data-theme] #tip .math{color:var(--ink)}
 /* message « est isolé » : la règle de largeur ne doit viser que le texte, pas chaque morceau de formule */
 #isobar .math span,#isobar .math{flex:none!important;min-width:0!important}
 #isobar .math{display:inline-flex;vertical-align:middle;margin:0 .2em}
+
+/* focus clavier visible partout */
+:where(button,a,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #ffb000;outline-offset:2px;box-shadow:0 0 0 5px rgba(0,0,0,.55)}

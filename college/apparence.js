@@ -7,7 +7,7 @@ const LOOK=(()=>{
   const BUILD='21/11/2026 · n° 10';
   const KEY='isoleX_look',OWN='isoleX_look_owned';
   const THEMES=[
-    {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d\'abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},
+    {k:'etabli',n:'Établi fablab',d:'Bois, laiton et nid d’abeille',sw:['#7c5128','#f4e2bd','#c9982e','#26292d'],price:120},
     {k:'jungle',n:'Jungle',d:'Feutre vert et œuf doré',sw:['#23692f','#fffbea','#ffcf3a','#2f6f35'],price:120},
     {k:'nuit',n:'Nuit',d:'Sombre, reposant pour les yeux',sw:['#0f131c','#323b50','#f5c542','#121722'],price:0},
     {k:'tableau',n:'Tableau blanc',d:'Clair et sobre, idéal au vidéoprojecteur',sw:['#e4e9ef','#ffffff','#ffe066','#fbfdff'],price:0},
@@ -17,7 +17,7 @@ const LOOK=(()=>{
     {k:'bonbon',n:'Bonbon',d:'Pastels rose et lilas',sw:['#ffc2d9','#ffffff','#ff8fc2','#c8b6ff'],price:250},
     {k:'prestige',n:'Prestige',d:'Noir, ivoire et or',sw:['#0d0d0d','#fffaf0','#d4af37','#0f3d2e'],price:400},
   ];
-  const BOARDS=[['auto','Selon le thème'],['nid','Nid d\'abeille'],['feutre','Feutre'],['ardoise','Ardoise'],['quadrillage','Quadrillage'],['bois','Bois']];
+  const BOARDS=[['auto','Selon le thème'],['nid','Nid d’abeille'],['feutre','Feutre'],['ardoise','Ardoise'],['quadrillage','Quadrillage'],['bois','Bois']];
   const XS=[['auto','Selon le thème'],['laiton','Plaque'],['oeuf','Œuf'],['bille','Bille'],['hexa','Écrou'],['etoile','Étoile']];
   const ACCS=['auto','#1e88e5','#e53935','#ff8c42','#f4b400','#2e9e5b','#00a8a8','#6c5ce7','#d6336c'];
   const TOKS=[[1,'Normale ×1'],[1.25,'Grande ×1,25'],[1.5,'Très grande ×1,5']];
@@ -44,7 +44,7 @@ const LOOK=(()=>{
   /* opts : {coins:()=>n, spend:(prix)=>bool, onChange:()=>{}} ; sans opts.spend, on ne peut pas acheter ici */
   function init(nat,opts){native=nat;shop=opts||null;
     /* atelier STI2D : le thème Bonbon devient « Le labo des SII », gratuit */
-    if(nat==='etabli'){const t=find('bonbon');t.n='Le labo des SII';t.d='Rose et lilas, gratuit dans l\'atelier';t.price=0}
+    if(nat==='etabli'){const t=find('bonbon');t.n='Le labo des SII';t.d='Rose et lilas, gratuit dans l’atelier';t.price=0}
     apply()}
   function prevHTML(){
     const c=(v,cl='n')=>`<span class="card ${cl}">${v}</span>`;
@@ -58,13 +58,13 @@ const LOOK=(()=>{
      <h3>Thème</h3><div class="lookgrid">${THEMES.map(t=>{const ok=owned(t.k),on=t.k===th;
        return`<button class="lth${on?' on':''}${ok?'':' locked'}" data-lk="theme" data-v="${t.k}"><span class="sw" style="background:${t.sw[0]}"><i style="background:${t.sw[1]}"></i><i class="x" style="background:${t.sw[2]}"></i><i style="background:${t.sw[3]};outline:2px solid ${t.sw[1]}"></i></span>
         <b>${t.n}${t.k===native?' ★':''}</b><small>${t.d}</small>${ok?'':`<span class="lk">${shop&&shop.spend?'🪙 '+t.price:'🔒'}</span>`}</button>`}).join('')}</div>
-     ${coins!==null?`<p><small>🪙 ${coins} pièce${coins>1?'s':''} · les thèmes achetés le sont pour tous les jeux du site.</small></p>`:'<p><small>🔒 Les thèmes verrouillés se débloquent avec les pièces gagnées dans Isole x !</small></p>'}
+     ${coins!==null?`<p><small>🪙 ${coins} pièce${coins>1?'s':''} · les thèmes achetés le sont pour tous les jeux du site.</small></p>`:'<p><small>🔒 Les thèmes verrouillés se débloquent avec les pièces gagnées dans Isole x !</small></p>'}
      <h3>Plateau</h3><div class="lookrow">${BOARDS.map(([k,n])=>`<button class="chip${draft.board===k?' on':''}" data-lk="board" data-v="${k}">${n}</button>`).join('')}</div>
-     <h3>Forme de l'inconnue</h3><div class="lookrow">${XS.map(([k,n])=>`<button class="chip${draft.x===k?' on':''}" data-lk="x" data-v="${k}">${n}</button>`).join('')}</div>
+     <h3>Forme de l’inconnue</h3><div class="lookrow">${XS.map(([k,n])=>`<button class="chip${draft.x===k?' on':''}" data-lk="x" data-v="${k}">${n}</button>`).join('')}</div>
      <h3>Couleur des boutons</h3><div class="lookrow">${ACCS.map(c=>`<button class="lsw${c==='auto'?' auto':''}${draft.acc===c?' on':''}" data-lk="acc" data-v="${c}" title="${c==='auto'?'Selon la spécialité ou le thème':c}" style="${c==='auto'?'':'background:'+c}"></button>`).join('')}</div>
      <h3>Taille des jetons</h3><div class="lookrow">${TOKS.map(([v,n])=>`<button class="chip${+draft.tok===v?' on':''}" data-lk="tok" data-v="${v}">${n}</button>`).join('')}</div>
      <div class="lookrow" style="margin-top:14px;justify-content:center"><button class="ghostbtn" data-lk="reset" data-v="1">↺ Tout remettre par défaut</button></div>
-     </div><div class="looksave"><small class="lookstate ${dirty?'dirty':'ok'}">${dirty?'● Tes changements sont visibles en aperçu : touche Enregistrer pour les garder.':'✔ Tout est enregistré. Choisis un thème ou un réglage pour l\'essayer.'}</small>
+     </div><div class="looksave"><small class="lookstate ${dirty?'dirty':'ok'}">${dirty?'● Tes changements sont visibles en aperçu : touche Enregistrer pour les garder.':'✔ Tout est enregistré. Choisis un thème ou un réglage pour l’essayer.'}</small>
       <button class="ghostbtn" data-lk="cancel" data-v="1">${dirty?'Annuler':'◀ Retour'}</button><button class="bigbtn${dirty?' pulse':''}" data-lk="save" data-v="1"${dirty?'':' disabled'}>💾 Enregistrer</button>
       <small class="lookver">Version du ${BUILD}</small></div>`;
   }
@@ -76,9 +76,9 @@ const LOOK=(()=>{
     if(k==='cancel'){cancel();return{act:'cancel',msg:''}}
     if(k==='theme'){const t=find(v);
       if(!owned(v)){
-        if(!(shop&&shop.spend))return{msg:'🔒 Ce thème se débloque avec les pièces gagnées dans Isole x !',warn:1};
+        if(!(shop&&shop.spend))return{msg:'🔒 Ce thème se débloque avec les pièces gagnées dans Isole x !',warn:1};
         if(!shop.spend(t.price))return{msg:`Il te faut 🪙 ${t.price} pièces pour ce thème.`,warn:1};
-        own[v]=1;try{localStorage.setItem(OWN,JSON.stringify(own))}catch(e){}msg=`🎨 Thème « ${t.n} » débloqué ! Touche Enregistrer pour le garder.`}
+        own[v]=1;try{localStorage.setItem(OWN,JSON.stringify(own))}catch(e){}msg=`🎨 Thème « ${t.n} » débloqué ! Touche Enregistrer pour le garder.`}
       draft.theme=v===native?null:v}
     else if(k==='board')draft.board=v;else if(k==='x')draft.x=v;else if(k==='acc')draft.acc=v;else if(k==='tok')draft.tok=+v;
     else if(k==='reset')draft=Object.assign({},DEF);

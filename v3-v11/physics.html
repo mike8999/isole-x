@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Physic's &amp; Co</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fablab.css?v=3.1">
+<link rel="stylesheet" href="apparence.css?v=b1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+</head>
+<body class="bench">
+<div id="app">
+  <div id="menu" class="screen scrollscreen bench">
+    <div class="wrap">
+      <a class="backlink" href="index.html">◀ Accueil de l'atelier</a>
+      <div class="menutop">
+        <div id="specHead"><span class="specicon" style="background:#e4572e"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 8h16M27 8v16L12 52a3 3 0 0 0 3 4h34a3 3 0 0 0 3-4L37 24V8"/><path d="M18 42h28"/></svg></span>
+          <div><div class="kicker">STI2D · Physique-chimie</div><h1>Physic's &amp; Co <span>Bloc chimie : équilibrer les équations de réaction</span></h1></div></div>
+        <button class="ghostbtn" id="btnLookMenu">🎨 Apparence</button>
+        <button class="ghostbtn" id="btnHelpMenu">▶ Aide animée</button>
+      </div>
+      <div id="themes"></div>
+      <div class="chap">
+        <h2>🎲 Entraînement ciblé <small>un défi pas encore maîtrisé, dans les thèmes cochés</small></h2>
+        <div class="gen" id="rndChips"></div>
+        <div class="btns left"><button class="bigbtn" id="btnRnd">Défi aléatoire ▶</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="game" class="screen bench hidden">
+    <header>
+      <button class="hbtn" id="btnBack" title="Menu">◀</button>
+      <div class="badge"><span class="dotacc"></span><span id="lvlNum">1/10</span></div>
+      <div id="lvlTitle"></div>
+      <div class="spacer"></div>
+      <div id="moves"></div>
+      <button class="hbtn" id="btnUndo" title="Annuler">↶</button>
+      <button class="hbtn" id="btnHint" title="Indice">💡</button>
+      <button class="hbtn" id="btnReset" title="Recommencer">⟲</button>
+      <button class="hbtn" id="btnHelp" title="Aide animée">?</button>
+    </header>
+    <div id="tip" class="ply"></div>
+    <div id="isobar" class="hidden"></div>
+    <div id="chemmain">
+      <div id="reaction"></div>
+      <div id="counter"></div>
+    </div>
+  </div>
+</div>
+<div id="coach" class="hidden"><div id="coachCap"></div><button id="coachSkip">Passer le tutoriel ✕</button><div id="coachHand">👆</div></div>
+<div id="toast"></div>
+<div id="modal" class="modal hidden"><div class="mbox" id="mbox"></div></div>
+<script src="apparence.js?v=b2"></script>
+<script src="chimie.js?v=3.4"></script>
+<script>LOOK.sw();</script>
+</body>
+</html>
