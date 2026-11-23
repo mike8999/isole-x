@@ -16,3 +16,7 @@
   for = "/*/"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Boîte à idées : fonction qui envoie les suggestions vers Notion
+[functions]
+  directory = "netlify/functions"
