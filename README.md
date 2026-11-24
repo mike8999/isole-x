@@ -5,6 +5,7 @@ Jeux pour s’entraîner en STI2D.
 - **Version 1 (plateau vert)** : https://mike8999.github.io/isole-x/
 - **Version 2 (établi / fablab, spécialités)** : https://mike8999.github.io/isole-x/fablab/
 - **Atelier STI2D (Isole x ! + Physic’s & Co) — dernière version** : https://mike8999.github.io/isole-x/v3/
+  - ancienne version 13 conservée : https://mike8999.github.io/isole-x/v3-v13/
   - ancienne version 12 conservée : https://mike8999.github.io/isole-x/v3-v12/
   - ancienne version 11 conservée : https://mike8999.github.io/isole-x/v3-v11/
   - ancienne version 10 conservée : https://mike8999.github.io/isole-x/v3-v10/

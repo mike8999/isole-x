@@ -210,18 +210,20 @@ function hint(){
 }
 
 /* ---------- progression, créature, badges ---------- */
+/* Clés propres à l'Atelier (avant : partagées avec la Jungle). Reprise unique des anciennes données. */
+try{if(!localStorage.getItem('isoleX_v3_split')){['stats','opts','badges','shop','daily'].forEach(k=>{const v=localStorage.getItem('isoleX_college2_'+k);if(v!==null&&localStorage.getItem('isoleX_v3_'+k)===null)localStorage.setItem('isoleX_v3_'+k,v)});localStorage.setItem('isoleX_v3_split','1')}}catch(e){}
 let STATS={wins:0,noHint:0,bestNoHint:0,simp:0,goals:0,perfect:0,chronoBest:0};
-try{Object.assign(STATS,JSON.parse(localStorage.getItem('isoleX_college2_stats')||'{}'))}catch(e){}
-const saveStats=()=>{try{localStorage.setItem('isoleX_college2_stats',JSON.stringify(STATS))}catch(e){}};
-let OPTS={mute:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_college2_opts')||'{}'))}catch(e){}
+try{Object.assign(STATS,JSON.parse(localStorage.getItem('isoleX_v3_stats')||'{}'))}catch(e){}
+const saveStats=()=>{try{localStorage.setItem('isoleX_v3_stats',JSON.stringify(STATS))}catch(e){}};
+let OPTS={mute:false};try{Object.assign(OPTS,JSON.parse(localStorage.getItem('isoleX_v3_opts')||'{}'))}catch(e){}
 /* mode professeur : protégé par un code, jamais enregistré (s'éteint à la fermeture de la page) */
 let TEACHER=false;delete OPTS.teacher;
 const PROF_H='ba760f62';
 const profHash=c=>{let h=2166136261;for(const ch of 'volt-atelier|'+c){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return h.toString(16)};
 let profFails=0,profLockUntil=0;
-const saveOpts=()=>{try{localStorage.setItem('isoleX_college2_opts',JSON.stringify(OPTS))}catch(e){}};
-let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_college2_badges')||'{}')}catch(e){}
-const saveGot=()=>{try{localStorage.setItem('isoleX_college2_badges',JSON.stringify(GOT))}catch(e){}};
+const saveOpts=()=>{try{localStorage.setItem('isoleX_v3_opts',JSON.stringify(OPTS))}catch(e){}};
+let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_v3_badges')||'{}')}catch(e){}
+const saveGot=()=>{try{localStorage.setItem('isoleX_v3_badges',JSON.stringify(GOT))}catch(e){}};
 const worldStars=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{}).s||0),0);
 const worldPts=i=>WORLDS[i].levels.reduce((a,_,li)=>a+((PROG[progKey(i,li)]||{}).p||0),0);
 const worldDone=i=>WORLDS[i].levels.every((_,li)=>PROG[progKey(i,li)]);
@@ -577,8 +579,8 @@ const WHY=[
 function showWhy(i){const w=WHY[i];modal(`<h2>🤔 Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
   ${SCENES[w.s]?`<div class="sgrid n1">${sceneHTML(w.s)}</div>`:''}<div class="btns"><button class="bigbtn" data-act="close">J’ai compris</button></div>`,'intro')}
 /* ---------- boutique de Volt ---------- */
-let SHOP={owned:{},eq:{}};try{Object.assign(SHOP,JSON.parse(localStorage.getItem('isoleX_college2_shop')||'{}'))}catch(e){}
-const saveShop=()=>{try{localStorage.setItem('isoleX_college2_shop',JSON.stringify(SHOP))}catch(e){}};
+let SHOP={owned:{},eq:{}};try{Object.assign(SHOP,JSON.parse(localStorage.getItem('isoleX_v3_shop')||'{}'))}catch(e){}
+const saveShop=()=>{try{localStorage.setItem('isoleX_v3_shop',JSON.stringify(SHOP))}catch(e){}};
 const ITEMS=[
  {k:'hat',slot:'head',icon:'⛑️',name:'Casque de chantier',price:60},
  {k:'flowers',slot:'head',icon:'🎧',name:'Casque audio',price:90},
@@ -624,8 +626,8 @@ document.getElementById('mbox').addEventListener('click',e=>{
   showShop();
 });
 /* ---------- défi du jour ---------- */
-let DAILY={last:'',streak:0,best:0};try{Object.assign(DAILY,JSON.parse(localStorage.getItem('isoleX_college2_daily')||'{}'))}catch(e){}
-const saveDaily=()=>{try{localStorage.setItem('isoleX_college2_daily',JSON.stringify(DAILY))}catch(e){}};
+let DAILY={last:'',streak:0,best:0};try{Object.assign(DAILY,JSON.parse(localStorage.getItem('isoleX_v3_daily')||'{}'))}catch(e){}
+const saveDaily=()=>{try{localStorage.setItem('isoleX_v3_daily',JSON.stringify(DAILY))}catch(e){}};
 const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d)};
 const dailyDone=()=>DAILY.last===dayKey();
