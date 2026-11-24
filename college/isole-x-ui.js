@@ -47,13 +47,14 @@ function render(){
   else if(state.tip&&!state.tipClosed){tipEl.innerHTML=`<span class="tagacc"></span><span>${state.tip}</span><button id="tipX" title="Fermer">✕</button>`;tipEl.classList.remove('hidden')}
   else tipEl.classList.add('hidden');
   renderDeck();coachCheck();
+  const pe=$('#pet');if(pe&&!pe.innerHTML)pe.innerHTML=creatureSVG(petStage(),'idle');petIdleKick();
 }
 function renderDeck(){
   if(SILENT)return;const pend=state.pending;const MBd={d:false,box:state.box};
   const cards=state.deck.map((c,i)=>{const f=state.flip[i];
     return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}${c.user?`<span class="ddel" data-del="${i}" title="Retirer ce jeton">✕</span>`:''}</div>`}).join('');
   const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
-  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+(tools?'<span class="tsep"></span>'+tools:'');
+  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+'<span class="tsep"></span>'+tools+'<div class="dtool dpar" data-par="1" title="Parenthèses : glisse « ( » devant le premier terme, puis touche le dernier">( )</div>';
 }
 function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [data-deck="${i}"]`);if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
 
@@ -65,7 +66,7 @@ function fail(msg){if(SILENT)return false;const wi=WHY.findIndex(w=>w.re.test(ms
 function modal(html,cls=''){hideToast();$('#mbox').className='mbox '+cls;$('#mbox').innerHTML=html;$('#modal').classList.remove('hidden');animateScenes($('#mbox'))}
 function closeModal(){$('#modal').classList.add('hidden');$('#mbox').innerHTML=''}
 function starHTML(k){return[1,2,3].map(i=>`<span class="${i<=k?'':'off'}">★</span>`).join('')}
-function onWin(){petMood('happy')}
+function onWin(){petMood('happy','Bravo !')}
 function showWin(){
   if(state.mode==='chrono'){chronoSolved();return}
   if(state.mode==='level'&&state.chain&&state.chain.k<state.chain.n-1){chainStepWin();return}
@@ -77,7 +78,7 @@ function showWin(){
   else if(state.mode==='random')next=`<button class="bigbtn" data-act="again">Nouvelle équation 🎲</button>`;
   else if(state.mode==='daily')next=`<button class="bigbtn" data-act="home">Carte ▶</button>`;
   else next=`<button class="bigbtn" data-act="expback">Autre équation 🧪</button>`;
-  const S=STATS;S.wins++;S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
+  const S=STATS;S.wins++;S.lastPlay=Date.now();S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
   if(state.goal)S.goals++;else if(sc.simp)S.simp++;if(sc.stars===3)S.perfect++;saveStats();
   const nb=checkBadges(),after=petStage();
   modal(`<div class="winpet">${creatureSVG(after,'happy')}</div><h2>${esc(state.target)} est isolé !</h2>${state.par?`<div class="stars">${starHTML(sc.stars)}</div>`:''}
@@ -85,7 +86,8 @@ function showWin(){
    <div>${state.moves} coup${state.moves>1?'s':''}${state.par?` — maxi ${state.par} pour ★★★`:''}</div>
    <div class="sol">${mathEq(state.eq)}</div>${sol?`<div class="solline">${sol}</div>`:''}
    ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd’hui : reviens demain !'}</div>`:''}
-   ${after>before?`<div class="evo">🎊 Pépix a grandi : il est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
+   ${after>before?`<div class="evo">🎊 ${petName()} a grandi : ${OPTS.char==='catix'?'elle':'il'} est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
+   ${after===before&&PET_STEPS[after+1]?`<div class="petnext">Encore ${PET_STEPS[after+1]-totalStars()} ★ pour que ${petName()} grandisse.</div>`:''}
    ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
    <div class="btns"><button class="ghostbtn" data-act="replay">⟲ Rejouer</button><button class="ghostbtn" data-act="menu">Carte</button>${next}</div>`,'win');
   sfx(nb.length||after>before?'badge':'win');if(nb.length)confetti(120);
@@ -116,10 +118,10 @@ let drag=null,hotEl=null;
 $('#game').addEventListener('pointerdown',e=>{
   if(state.won||e.button>0)return;
   const del=e.target.closest('[data-del]');if(del){e.preventDefault();removeDeckCard(+del.dataset.del);return}
-  const el=e.target.closest('[data-deck],[data-tool],[data-fid],[data-tid]');
+  const el=e.target.closest('[data-deck],[data-tool],[data-par],[data-fid],[data-tid]');
   if(!el||!(boardEl.contains(el)||deckEl.contains(el)))return;
   e.preventDefault();
-  const kind=el.dataset.deck!==undefined?'deck':el.dataset.tool!==undefined?'tool':'board';
+  const kind=el.dataset.deck!==undefined?'deck':el.dataset.tool!==undefined?'tool':el.dataset.par!==undefined?'par':'board';
   let gsrc=el;
   if(kind==='board'){if(!el.dataset.fid)gsrc=el.closest('.term')||el;
     if(el.classList.contains('ftab')||el.classList.contains('fname')||el.classList.contains('fsup'))gsrc=el.closest('.fbox,.fpl');
@@ -131,34 +133,39 @@ function onMove(e){
   if(!drag)return;
   if(!drag.moved){if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<7)return;
     drag.moved=true;const g=document.createElement('div');g.className='ghost';g.innerHTML=drag.gsrc.outerHTML;document.body.appendChild(g);drag.ghost=g;
-    drag.gsrc.classList.add('lifted');document.body.classList.add(drag.kind==='deck'?'dragdeck':drag.kind==='tool'?'dragtool':'dragboard')}
+    drag.gsrc.classList.add('lifted');document.body.classList.add(drag.kind==='deck'?'dragdeck':drag.kind==='tool'?'dragtool':drag.kind==='par'?'dragpar':'dragboard')}
   drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';setHot(dropTarget(e.clientX,e.clientY));
 }
 function dropTarget(cx,cy){
   const h=document.elementFromPoint(cx,cy);if(!h)return null;
   if(drag.kind==='deck'){const dc=h.closest('[data-deck]');if(dc&&+dc.dataset.deck!==drag.src)return dc;return h.closest('[data-zone]:not([data-zone="fn"])')}
-  if(drag.kind==='tool')return h.closest('[data-zone="fn"]');
+  if(drag.kind==='tool'){const b=document.elementsFromPoint(cx,cy).map(e=>e.closest&&e.closest('[data-fid],[data-tid]')).find(x=>x&&boardEl.contains(x));if(b)return b;return h.closest('[data-zone="fn"]')||h.closest('#board .panel .content')}
+  if(drag.kind==='par'){const t=h.closest('#board .term');return t&&t.dataset.tid?t:null}
   if(deckEl.contains(h))return deckEl;
+  const ins=h.closest('[data-ins]');if(ins&&boardEl.contains(ins))return ins;
   const t=h.closest('[data-fid],[data-tid]');if(t&&boardEl.contains(t)&&!drag.gsrc.contains(t))return t;return null;
 }
 function setHot(el){if(hotEl===el)return;if(hotEl)hotEl.classList.remove('hot');hotEl=el;if(el)el.classList.add('hot')}
 function endDrag(){window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('pointercancel',onCancel);
-  if(drag&&drag.ghost)drag.ghost.remove();if(drag)drag.gsrc.classList.remove('lifted');document.body.classList.remove('dragdeck','dragboard','dragtool');setHot(null)}
+  if(drag&&drag.ghost)drag.ghost.remove();if(drag)drag.gsrc.classList.remove('lifted');document.body.classList.remove('dragdeck','dragboard','dragtool','dragpar');setHot(null)}
 function onCancel(){endDrag();drag=null}
 function onUp(e){
   const d=drag;if(!d)return;const tgt=d.moved?dropTarget(e.clientX,e.clientY):null;endDrag();drag=null;
   if(!d.moved){
     if(d.kind==='deck'){state.flip[d.src]=!state.flip[d.src];renderDeck();coachCheck()}
-    else if(d.kind==='tool')toast("Glisse l’outil sur un côté du plateau : il s’appliquera à tout ce côté.");
+    else if(d.kind==='tool')toast("Glisse l’outil sur un côté du plateau (ou sur un bloc) : il s’appliquera à tout ce côté.");
+    else if(d.kind==='par')toast("Glisse la « ( » devant le <b>premier terme</b>, puis touche le dernier terme à mettre entre ( ).");
     else if(d.fn)tapFn(d.fn);
     else if(d.dev)develop(d.dev);
     return;
   }
   if(!tgt)return;
-  if(d.kind==='deck'&&tgt.dataset.deck!==undefined)combineDeck(d.src,+tgt.dataset.deck);
+  if(d.kind==='deck'&&tgt.dataset.deck!==undefined)deckChooser(d.src,+tgt.dataset.deck,tgt);
   else if(d.kind==='deck')doDeck(+tgt.closest('.panel').dataset.side,tgt.dataset.zone,d.src);
-  else if(d.kind==='tool')doTool(+tgt.closest('.panel').dataset.side,d.src);
+  else if(d.kind==='tool'){const sd=+tgt.closest('.panel').dataset.side;if(tgt.dataset.zone)doTool(sd,d.src);else toolOnBlock(sd,d.src,tgt.dataset.fid||tgt.dataset.tid)}
+  else if(d.kind==='par')parStart(tgt.dataset.tid);
   else if(tgt===deckEl)copyToDeck(d.src);
+  else if(tgt.dataset.ins)moveTo(d.src,tgt.dataset.ins,tgt.dataset.pos);
   else boardDrop(d.src,tgt.dataset.fid||tgt.dataset.tid);
 }
 
@@ -176,17 +183,18 @@ function tapFn(id){
 }
 $('#game').addEventListener('dblclick',e=>e.preventDefault());
 /* ---------- opérations intermédiaires dans la pioche ---------- */
-function combineDeck(a,b){
+function combineDeck(a,b,op='add'){
   if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const ca=clone(state.deck[a]),cb=clone(state.deck[b]);if(state.flip[a])ca.neg=!ca.neg;if(state.flip[b])cb.neg=!cb.neg;
   const va=numVal([ca]),vb=numVal([cb]);let card;
-  if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
+  if(op==='mul')card=tidyProd(mulT(cb,ca));
+  else if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
   else card=T([G([reid(cb),reid(ca)])]);
   const neg=card.neg;card.neg=false;card.user=true;
   if(state.deck.some(c=>keyT(c)===keyT(card))){toast('Ce jeton existe déjà dans la pioche.');return}
   if(state.deck.length>=14)return fail('La pioche est pleine : retire un jeton avec ✕.');
   state.deck.push(card);state.flip.push(neg);renderDeck();flashDeck(state.deck.length-1);
-  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (opération dans la pioche, ça ne compte pas comme un coup).`);
+  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (${op==='mul'?'produit':'somme'} dans la pioche, ça ne compte pas comme un coup).`);
 }
 function removeDeckCard(i){if(state.pending)return fail('Termine d’abord l’opération en cours.');state.deck.splice(i,1);state.flip.splice(i,1);renderDeck()}
 
@@ -242,33 +250,46 @@ const BADGES=[
  {k:'legend',icon:'👑',name:'Légende de la jungle',d:'Pépix devient légendaire',ok:()=>petStage()>=5},
 ];
 function checkBadges(){const nb=[];BADGES.forEach(b=>{if(!GOT[b.k]&&b.ok()){GOT[b.k]=Date.now();nb.push(b)}});if(nb.length)saveGot();return nb}
+const CHARS={
+ pepix:{name:'Pépix',desc:'le poussin de la jungle',col:'#58c24a',col5:'#5fd35f',dark:'#1f7a32',belly:'#c9f29b',feet:'#2a8f3c',spot:'#7cc242'},
+ buzix:{name:'Buzix',desc:'le chien',col:'#c98b4f',col5:'#d99a5c',dark:'#6e4220',belly:'#f3dcb8',feet:'#8a5a2e',spot:'#c98b4f'},
+ catix:{name:'Catix',desc:'la chatte',col:'#f2a65a',col5:'#f6b56e',dark:'#a3561c',belly:'#ffe6c7',feet:'#c76a28',spot:'#f2a65a'}};
+const petChar=()=>CHARS[OPTS.char]||CHARS.pepix;const petName=()=>petChar().name;
+const sleepDays=()=>STATS.lastPlay?Math.floor((Date.now()-STATS.lastPlay)/864e5):0;
 function creatureSVG(stage,mood='idle'){
-  if(stage===0)return`<svg viewBox="0 0 120 120" class="pet st0 ${mood}" aria-label="Œuf de Pépix"><ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,.25)"/>
+  const C=petChar(),K=OPTS.char in CHARS?OPTS.char:'pepix';
+  if(stage===0)return`<svg viewBox="0 0 120 120" class="pet st0 ${mood}" aria-label="Œuf de ${C.name}"><ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,.25)"/>
     <ellipse cx="60" cy="66" rx="34" ry="44" fill="#fbf4d6" stroke="#c9b26a" stroke-width="2.5"/><ellipse cx="50" cy="44" rx="10" ry="14" fill="#fff" opacity=".6"/>
-    <circle cx="44" cy="62" r="6" fill="#7cc242"/><circle cx="74" cy="80" r="8" fill="#7cc242"/><circle cx="72" cy="42" r="4" fill="#2fbf71"/><circle cx="48" cy="92" r="5" fill="#2fbf71"/>
+    <circle cx="44" cy="62" r="6" fill="${C.spot}"/><circle cx="74" cy="80" r="8" fill="${C.spot}"/><circle cx="72" cy="42" r="4" fill="#2fbf71"/><circle cx="48" cy="92" r="5" fill="#2fbf71"/>
     ${totalStars()>=3?'<path d="M40 58l8 6 6-8 7 7 7-6 9 5" fill="none" stroke="#8a6d1d" stroke-width="2"/>':''}</svg>`;
   const r=22+stage*3.6,cy=80-stage*2.4,top=cy-r*.92;
   const ex=r*.38,ey=cy-r*.22,er=r*.27;
-  const eye=x=>mood==='happy'?`<path d="M${x-er*.8} ${ey+2}q${er*.8} -${er*1.1} ${er*1.6} 0" fill="none" stroke="#1d3b12" stroke-width="3.2" stroke-linecap="round"/>`
+  const eye=x=>mood==='sleep'?`<path d="M${x-er*.8} ${ey}q${er*.8} ${er*.9} ${er*1.6} 0" fill="none" stroke="#1d3b12" stroke-width="3" stroke-linecap="round"/>`:mood==='happy'?`<path d="M${x-er*.8} ${ey+2}q${er*.8} -${er*1.1} ${er*1.6} 0" fill="none" stroke="#1d3b12" stroke-width="3.2" stroke-linecap="round"/>`
     :`<circle cx="${x}" cy="${ey}" r="${er}" fill="#fff"/><circle cx="${x+1.5}" cy="${ey+1.5}" r="${er*.55}" fill="#1d3b12"/><circle cx="${x+3}" cy="${ey-1}" r="${er*.18}" fill="#fff"/>`;
   const mouth=mood==='sad'?`<path d="M${60-r*.22} ${cy+r*.38}q${r*.22} -${r*.16} ${r*.44} 0" fill="none" stroke="#1d3b12" stroke-width="2.6" stroke-linecap="round"/>`
     :mood==='happy'?`<path d="M${60-r*.3} ${cy+r*.22}q${r*.3} ${r*.42} ${r*.6} 0z" fill="#7a2e1d"/>`
     :`<path d="M${60-r*.2} ${cy+r*.28}q${r*.2} ${r*.2} ${r*.4} 0" fill="none" stroke="#1d3b12" stroke-width="2.6" stroke-linecap="round"/>`;
   const leaf=(x,rot,c='#2fbf71')=>`<path transform="rotate(${rot} ${x} ${top+4})" d="M${x} ${top+6}c-9 -14 -3 -26 11 -30c3 14 -2 25 -11 30z" fill="${c}" stroke="#167a45" stroke-width="1.5"/>`;
-  return`<svg viewBox="0 0 120 120" class="pet st${stage} ${mood}" aria-label="Pépix"><ellipse cx="60" cy="113" rx="${r*.9}" ry="5" fill="rgba(0,0,0,.25)"/>
-   ${stage>=4?`<path d="M${60-r*.9} ${cy}c-22 -8 -26 -26 -14 -34c6 14 14 20 18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/><path d="M${60+r*.9} ${cy}c22 -8 26 -26 14 -34c-6 14 -14 20 -18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/>`:''}
-   <ellipse cx="${60-r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="#2a8f3c"/><ellipse cx="${60+r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="#2a8f3c"/>
-   <ellipse cx="60" cy="${cy}" rx="${r}" ry="${r*.92}" fill="${(eqItem('color')||{}).col||(stage>=5?'#5fd35f':'#58c24a')}" stroke="${(eqItem('color')||{}).dark||'#1f7a32'}" stroke-width="2.5"/>
-   <ellipse cx="60" cy="${cy+r*.3}" rx="${r*.6}" ry="${r*.48}" fill="${(eqItem('color')||{}).belly||'#c9f29b'}"/>
-   ${stage>=1?leaf(60,0):''}${stage>=3?leaf(52,-35,'#9be15d')+leaf(68,35,'#9be15d'):''}
-   ${eye(60-ex)}${eye(60+ex)}<circle cx="${60-r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/><circle cx="${60+r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/>
-   ${mouth}${mood==='sad'?`<path d="M${60+ex+er} ${ey+er}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}
+  return`<svg viewBox="0 0 120 120" class="pet st${stage} ${mood}" aria-label="${C.name}"><ellipse cx="60" cy="113" rx="${r*.9}" ry="5" fill="rgba(0,0,0,.25)"/>
+   ${K==='buzix'?`<path class="ptail" d="M${60+r*.78} ${cy+r*.35}q${r*.6} -${r*.05} ${r*.5} -${r*.75}" fill="none" stroke="${C.dark}" stroke-width="${r*.17}" stroke-linecap="round"/>`:''}
+   ${K==='catix'?`<path class="ptail" d="M${60+r*.75} ${cy+r*.55}q${r*.75} 0 ${r*.6} -${r*.75}q-${r*.1} -${r*.3} ${r*.12} -${r*.38}" fill="none" stroke="${C.dark}" stroke-width="${r*.22}" stroke-linecap="round"/><path d="M${60+r*.75} ${cy+r*.55}q${r*.75} 0 ${r*.6} -${r*.75}q-${r*.1} -${r*.3} ${r*.12} -${r*.38}" fill="none" stroke="${C.col}" stroke-width="${r*.13}" stroke-linecap="round"/>${[-1,1].map(k=>`<path d="M${60+k*r*.78} ${cy-r*.42}L${60+k*r*.62} ${top-r*.42}L${60+k*r*.18} ${top+r*.08}z" fill="${C.col}" stroke="${C.dark}" stroke-width="2.2" stroke-linejoin="round"/><path d="M${60+k*r*.64} ${cy-r*.5}L${60+k*r*.58} ${top-r*.22}L${60+k*r*.3} ${top+r*.06}z" fill="#ffb3c1"/>`).join('')}`:''}
+   ${K==='pepix'&&stage>=4?`<path d="M${60-r*.9} ${cy}c-22 -8 -26 -26 -14 -34c6 14 14 20 18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/><path d="M${60+r*.9} ${cy}c22 -8 26 -26 14 -34c-6 14 -14 20 -18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/>`:''}
+   <ellipse cx="${60-r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="${C.feet}"/><ellipse cx="${60+r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="${C.feet}"/>
+   <ellipse cx="60" cy="${cy}" rx="${r}" ry="${r*.92}" fill="${(eqItem('color')||{}).col||(stage>=5?C.col5:C.col)}" stroke="${(eqItem('color')||{}).dark||C.dark}" stroke-width="2.5"/>
+   <ellipse cx="60" cy="${cy+r*.3}" rx="${r*.6}" ry="${r*.48}" fill="${(eqItem('color')||{}).belly||C.belly}"/>
+   ${K==='pepix'?(stage>=1?leaf(60,0):'')+(stage>=3?leaf(52,-35,'#9be15d')+leaf(68,35,'#9be15d'):''):''}
+   ${K==='buzix'?[-1,1].map(k=>`<ellipse cx="${60+k*r*.8}" cy="${cy-r*.32}" rx="${r*.22}" ry="${r*.44}" transform="rotate(${k*-22} ${60+k*r*.8} ${cy-r*.32})" fill="${C.dark}"/>`).join('')+`<ellipse cx="60" cy="${cy+r*.24}" rx="${r*.36}" ry="${r*.24}" fill="${C.belly}"/>`+(stage>=3?`<path d="M${60-r*.72} ${cy+r*.52}q${r*.72} ${r*.3} ${r*1.44} 0" fill="none" stroke="#e53935" stroke-width="${r*.12}"/><circle cx="60" cy="${cy+r*.78}" r="${r*.12}" fill="#ffd23f" stroke="#b8860b" stroke-width="1.2"/>`:'')+(stage>=4?`<ellipse cx="${60+r*.45}" cy="${cy-r*.45}" rx="${r*.2}" ry="${r*.14}" fill="${C.dark}" opacity=".45"/>`:''):''}
+   ${K==='catix'&&stage>=3?`<path d="M${60-r*.18} ${top+r*.12}v${r*.2}M60 ${top+r*.06}v${r*.24}M${60+r*.18} ${top+r*.12}v${r*.2}" stroke="${C.dark}" stroke-width="2.4" stroke-linecap="round"/>`:''}
+   <g class="peyes">${eye(60-ex)}${eye(60+ex)}</g>${mood==='sad'?`<path d="M${60-ex-er*1.1} ${ey-er*1.9}L${60-ex+er*.9} ${ey-er*1.25}M${60+ex+er*1.1} ${ey-er*1.9}L${60+ex-er*.9} ${ey-er*1.25}" stroke="#1d3b12" stroke-width="3" stroke-linecap="round" class="brow"/>`:''}<circle cx="${60-r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/><circle cx="${60+r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/>
+   ${K==='buzix'?`<ellipse cx="60" cy="${cy+r*.1}" rx="${r*.12}" ry="${r*.085}" fill="#2b1a10"/>`:''}${K==='catix'?`<path d="M${60-r*.09} ${cy+r*.06}h${r*.18}l-${r*.09} ${r*.1}z" fill="#ff7f9e"/>${[-1,1].map(k=>`<path d="M${60+k*r*.3} ${cy+r*.14}l${k*r*.5} -${r*.08}M${60+k*r*.3} ${cy+r*.2}l${k*r*.52} ${r*.04}" stroke="${C.dark}" stroke-width="1.4" stroke-linecap="round"/>`).join('')}`:''}
+   ${mouth}${mood==='sad'?`<path d="M${60+ex+er} ${ey+er}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}${mood==='sleep'?`<text x="${60+r*.7}" y="${top+4}" class="zz" font-family="Fredoka,sans-serif" font-weight="700" font-size="14" fill="#4ea8de">z</text><text x="${60+r*.95}" y="${top-8}" class="zz" font-family="Fredoka,sans-serif" font-weight="700" font-size="10" fill="#4ea8de">z</text>`:''}
    ${stage===1?`<path d="M${60-r*1.05} ${cy+r*.35}l${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} v${r*.62} h-${r*2.1}z" fill="#fbf4d6" stroke="#c9b26a" stroke-width="2"/>`:''}
    ${stage>=5?`<path d="M44 ${top-2}l4 -14 8 9 4 -13 4 13 8 -9 4 14z" fill="#ffd23f" stroke="#b8860b" stroke-width="1.5"/><circle cx="22" cy="30" r="2.5" fill="#ffe680"/><circle cx="100" cy="24" r="3" fill="#ffe680"/><circle cx="96" cy="70" r="2" fill="#ffe680"/>`:''}
    ${accSVG({r,cy,top,ex,ey,er})}</svg>`;
 }
 let petT;
-function petMood(m){const el=$('#pet');if(!el||SILENT)return;el.innerHTML=creatureSVG(petStage(),m);el.className='petmini '+m;clearTimeout(petT);petT=setTimeout(()=>{el.innerHTML=creatureSVG(petStage(),'idle');el.className='petmini'},1400)}
+function petMood(m,say){const el=$('#pet');if(!el||SILENT)return;el.innerHTML=creatureSVG(petStage(),m);el.className='petmini '+m;
+  if(say!==false&&PET_SAY[m]&&(say||m==='sad'||Math.random()<.5))petSay(say||PET_SAY[m][Math.floor(Math.random()*PET_SAY[m].length)],m);clearTimeout(petT);petT=setTimeout(()=>{el.innerHTML=creatureSVG(petStage(),'idle');el.className='petmini'},1400)}
 
 /* ---------- sons et confettis ---------- */
 let AC=null;
@@ -286,16 +307,18 @@ function toHome(){closeModal();renderHome();showScreen('home')}
 function toMenu(){toWorld(state.ci)}
 function backFromGame(){if(state.mode==='exp')showExp();else if(state.mode==='level')toWorld(state.ci);else if(state.mode==='random')showTrain();else toHome()}
 function renderHome(){
-  const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1];
-  $('#petCard').innerHTML=`<div class="bigpet">${creatureSVG(st,'idle')}</div><div class="petinfo"><div class="petname">Pépix <span>${PET_NAMES[st]}</span></div>
+  const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1],zz=st>0&&sleepDays()>=3;
+  $('#petCard').innerHTML=`<div class="bigpet" title="Changer de compagnon">${creatureSVG(st,zz?'sleep':'idle')}</div><div class="petinfo"><div class="petname">${petName()} <span>${PET_NAMES[st]}</span></div>
+    ${zz?`<div class="petsleep">😴 ${petName()} s’est endormi${OPTS.char==='catix'?'e':''} : ça fait ${sleepDays()} jours ! Réussis un défi pour ${OPTS.char==='catix'?'la':'le'} réveiller.</div>`:''}
     <div class="petbar"><i style="width:${nxt?Math.round(100*(t-PET_STEPS[st])/(nxt-PET_STEPS[st])):100}%"></i></div>
-    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour qu’il grandisse`:' · niveau maximum !'}</div></div>`;
+    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour ${OPTS.char==='catix'?'qu’elle':'qu’il'} grandisse`:' · niveau maximum !'}</div></div>`;
   $('#homeBtns').innerHTML=`<button class="hb" data-h="badges">🏅<b>Badges</b><small>${Object.keys(GOT).length}/${BADGES.length}</small></button>
     <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
     <button class="hb" data-h="train">🎲<b>Entraînement</b><small>par thème</small></button>
     <button class="hb" data-h="exp">🧪<b>Labo libre</b><small>ton équation</small></button>
     <button class="hb${dailyDone()?' done':''}" data-h="daily">📅<b>Défi du jour</b><small>${dailyDone()?'✔ réussi · ':''}série : ${curStreak()} 🔥</small></button>
     <button class="hb" data-h="shop">🛍️<b>Boutique</b><small>🪙 ${coins()}</small></button>`;
+  const bp=document.querySelector('#petCard .bigpet');if(bp)bp.onclick=showChars;
   document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>({badges:showBadges,chrono:startChrono,train:showTrain,exp:showExp,daily:startDaily,shop:showShop})[b.dataset.h]());
   $('#worlds').innerHTML=WORLDS.map((w,i)=>{const s=worldStars(i),u=unlocked(i);
     return`<button class="wtile${u?'':' locked'}" data-w="${i}" style="--wc:${w.color}"><span class="wnum">${i+1}</span><span class="wicon">${w.icon}</span><span class="wname">${esc(w.name)}</span>
@@ -582,10 +605,10 @@ function accSVG(G){const {r,cy,top,ex,ey,er}=G;let h='';const hd=eqItem('head'),
 }
 function showShop(){
   const c=coins();
-  modal(`<h2>🛍️ La boutique de Pépix</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
-   <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' Pépix doit d’abord éclore pour porter ses tenues.':''}</small></div></div>
+  modal(`<h2>🛍️ La boutique de ${petName()}</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
+   <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' ${petName()} doit d’abord éclore pour porter ses tenues.':''}</small></div></div>
    <div class="shopgrid">${ITEMS.map(it=>{const own=SHOP.owned[it.k],on=SHOP.eq[it.slot]===it.k;
-     return`<div class="sitem${own?' own':''}${on?' on':''}"><span class="si">${it.icon}</span><b>${esc(it.name)}</b>
+     return`<div class="sitem${own?' own':''}${on?' on':''}"><span class="si">${it.icon}</span><b>${esc(it.name.replace('Pépix',petName()))}</b>
       ${own?`<button class="chip${on?' on':''}" data-shop="wear" data-k="${it.k}">${on?'✔ Porté':'Porter'}</button>`:`<button class="chip" data-shop="buy" data-k="${it.k}"${c<it.price?' disabled':''}>🪙 ${it.price}</button>`}</div>`}).join('')}</div>
    <div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
 }
@@ -623,12 +646,14 @@ function showSettings(){
    <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d’espace entre les lettres.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
+   <div class="setrow"><span><b>🐾 Ton compagnon</b><small>Celui qui grandit avec tes étoiles. Ta progression est gardée si tu changes.</small></span><span class="sizes">${Object.entries(CHARS).map(([k,c])=>`<button class="chip${petChar()===c?' on':''}" data-char="${k}">${c.name}</button>`).join('')}</span></div>
    <div class="setrow"><span><b>🎨 Apparence</b><small>Thèmes (nuit, tableau blanc, contraste élevé, océan…), style du plateau, forme de l’inconnue, couleurs, taille des jetons.</small></span><button class="chip on" id="btnLookSet">Choisir</button></div>
    <div class="setrow"><span><b>Taille du texte</b><small>Sur un petit écran, elle est limitée automatiquement pour que rien ne soit coupé.</small></span><span class="sizes">${[[1,'Normal'],[1.15,'Grand'],[1.3,'Très grand']].map(([v,l])=>`<button class="chip${sz===v?' on':''}" data-size="${v}">${l}</button>`).join('')}</span></div>
    <div class="setrow"><span><b>📲 Utiliser sans Internet</b><small>${installEvt?'Installe l’appli sur cet appareil : elle marchera même hors ligne.':'Après une première visite, le jeu fonctionne hors ligne. Sur iPad ou iPhone : bouton Partager → « Sur l’écran d’accueil ». Sur Android ou ordinateur : menu du navigateur → « Installer l’application ».'}</small></span>${installEvt?'<button class="chip on" id="btnInstall">Installer</button>':''}</div>
    </div><p class="lookver" style="text-align:center">Version du ${LOOK.BUILD}</p><div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
   document.querySelectorAll('[data-opt]').forEach(i=>i.onchange=()=>{OPTS[i.dataset.opt]=i.checked;saveOpts();applyOpts();$('#btnMute').textContent=OPTS.mute?'🔇':'🔊'});
   document.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{OPTS.size=+b.dataset.size;saveOpts();applyOpts();showSettings()});
+  document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{setChar(b.dataset.char);showSettings()});
   $('#btnLookSet').onclick=showLook;
   const bi=$('#btnInstall');if(bi)bi.onclick=async()=>{installEvt.prompt();await installEvt.userChoice;installEvt=null;showSettings()};
 }
@@ -754,5 +779,61 @@ function askProfCode(){
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!$('#game').classList.contains('hidden')){e.preventDefault();undo()}});
 window.addEventListener('resize',()=>{if(state.coach)coachShow()});
 document.documentElement.style.setProperty('--acc','#ff8c42');
+/* =====================================================================
+   NOUVEAUTÉS (boîte à idées) : produit dans la pioche, parenthèses glissées,
+   réorganiser un membre, outils sur un bloc, mascotte qui réagit
+   ===================================================================== */
+/* --- pioche : choisir additionner ou multiplier --- */
+function closeChooser(){const c=document.getElementById('dchoose');if(c)c.remove();document.removeEventListener('pointerdown',chooserOut,true)}
+function chooserOut(e){if(!e.target.closest('#dchoose'))closeChooser()}
+function deckChooser(a,b,el){
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
+  closeChooser();const lab=i=>esc((state.flip[i]?'−':'')+textT(state.deck[i],false));
+  const m=document.createElement('div');m.id='dchoose';m.className='dchoose';
+  m.innerHTML=`<div class="dctit">${lab(b)} et ${lab(a)}</div><button class="chip" data-dop="add">+ Additionner</button><button class="chip" data-dop="mul">× Multiplier</button>`;
+  document.body.appendChild(m);const r=el.getBoundingClientRect();
+  m.style.left=Math.min(innerWidth-m.offsetWidth/2-6,Math.max(m.offsetWidth/2+6,r.left+r.width/2))+'px';m.style.top=Math.max(m.offsetHeight+6,r.top-8)+'px';
+  m.onclick=e=>{const k=e.target.closest('[data-dop]');if(!k)return;closeChooser();combineDeck(a,b,k.dataset.dop)};
+  setTimeout(()=>document.addEventListener('pointerdown',chooserOut,true),0);
+}
+/* --- parenthèses : glisser « ( » devant un terme, puis toucher le dernier terme --- */
+let PAR=null;
+function parStart(tid){
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
+  const l=locate(tid);if(!l)return;if(l.sum.length<2)return fail("Il faut au moins deux termes dans cette somme pour poser des parenthèses.");
+  PAR={id:l.term.id};const g=document.createElement('div');g.id='parGhost';g.className='parghost';g.textContent=')';document.body.appendChild(g);
+  parPaint(null);window.addEventListener('pointermove',parMove);document.addEventListener('pointerdown',parDown,true);document.addEventListener('keydown',parKey);
+  toast('Touche maintenant le <b>dernier terme</b> à mettre entre ( ). Ailleurs : la parenthèse disparaît.','',5000);
+}
+function parTermAt(x,y){const h=document.elementFromPoint(x,y);const t=h&&h.closest('#board .term');return t&&t.dataset.tid?t:null}
+function parPaint(endId){
+  document.querySelectorAll('#board .paropen,#board .parclose,#board .parin').forEach(e=>e.classList.remove('paropen','parclose','parin'));
+  if(!PAR)return;const a=locate(PAR.id);if(!a)return;const s=a.sum;let i=s.indexOf(a.term),j=i;
+  if(endId){const b=locate(endId),e=b&&b.chain.find(c=>c.sum===s);if(e)j=s.indexOf(e.term)}
+  const lo=Math.min(i,j),hi=Math.max(i,j);
+  s.slice(lo,hi+1).forEach((t,k)=>{const el=document.querySelector(`#board [data-tid="${t.id}"]`);if(!el)return;el.classList.add('parin');if(k===0)el.classList.add('paropen');if(lo+k===hi)el.classList.add('parclose')});
+}
+function parMove(e){const g=document.getElementById('parGhost');if(g){g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'}const t=parTermAt(e.clientX,e.clientY);parPaint(t?t.dataset.tid:null)}
+function parEnd(){PAR=null;parPaint(null);const g=document.getElementById('parGhost');if(g)g.remove();window.removeEventListener('pointermove',parMove);document.removeEventListener('pointerdown',parDown,true);document.removeEventListener('keydown',parKey)}
+function parKey(e){if(e.key==='Escape'){parEnd();toast('La parenthèse a disparu.')}}
+function parDown(e){
+  e.preventDefault();e.stopPropagation();const start=PAR&&PAR.id,t=parTermAt(e.clientX,e.clientY);parEnd();
+  if(!t){toast('La parenthèse a disparu.');return}groupTerms(start,t.dataset.tid);
+}
+/* --- compagnons : Pépix, Buzix, Catix --- */
+function setChar(k){OPTS.char=k;saveOpts();const pe=$('#pet');if(pe)pe.innerHTML='';renderHome();sfx('pop')}
+function showChars(){const st=Math.max(1,petStage());
+  modal(`<h2>🐾 Choisis ton compagnon</h2><p>Il grandit avec tes étoiles. Tes étoiles et tes objets sont gardés si tu changes.</p>
+   <div class="charpick">${Object.entries(CHARS).map(([k,c])=>{const o=OPTS.char;OPTS.char=k;const svg=creatureSVG(st,'happy');OPTS.char=o;
+     return`<button class="charbtn${petChar()===c?' on':''}" data-pick="${k}">${svg}<b>${c.name}</b><small>${c.desc}</small></button>`}).join('')}</div>
+   <div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{setChar(b.dataset.pick);showChars()});
+}
+/* --- mascotte : réagit, encourage, cligne des yeux --- */
+const PET_SAY={happy:['Bien joué !','Super !','Bravo !','Continue comme ça !','Oui !','Parfait !'],sad:['Oups…','Presque !','Essaie autrement.','Pas grave, réessaie !']};
+let sayT,idleT;
+function petSay(txt,m=''){const b=document.getElementById('petsay');if(!b||SILENT||!txt)return;b.textContent=txt;b.className='show '+m;clearTimeout(sayT);sayT=setTimeout(()=>b.className='',2000)}
+function petIdleKick(){clearTimeout(idleT);idleT=setTimeout(()=>{if(!$('#game').classList.contains('hidden')&&!state.won&&$('#modal').classList.contains('hidden'))petSay('Courage ! Besoin d’un coup de pouce ? Touche 💡')},35000)}
+
 applyOpts();renderHome();checkSaveLink();
 if(location.hash==='#labo')showExp();

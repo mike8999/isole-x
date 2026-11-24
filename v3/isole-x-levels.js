@@ -195,8 +195,20 @@ const INEQ={name:'Inéquations',icon:'<',theme:'ineq',levels:[
  {e:'2-x/3>x+6',goal:'x<-3'},
  {e:'(2x+1)/3-(x-2)/4<x/6+1',goal:'x<2/3',tip:"Défi ultime ! Trois fractions dans une inéquation : multiplie tout par un nombre positif commun."},
 ]};
-function chapters(){const sp=SPECS[state.spec]||SPECS.sin;return COMMON.concat([{name:'Formules '+sp.name,icon:'ƒ',theme:'formula',formula:true,levels:sp.f},state.spec==='si'?PROB_SI:PROB_STI,INEQ])}
-const WORLD_COLORS=['#1e88e5','#e67e22','#ff3b2f','#8e44ad','#2e9e5b','#c9982e','#00a8a8','#6c5ce7','var(--acc)','#e4572e','#5f676f'];
+const EXPERT={name:'Expert',icon:'🔥',theme:'expert',levels:[
+ {e:'(x+1)/3+(x-1)/2=x-2',goal:'x=11',box:false,tip:"Niveau expert : plus d’effet boîte. Commence par te débarrasser des dénominateurs 3 et 2."},
+ {e:'3x-2(1-(x-4))=2(x+5)',goal:'x=20/3',box:false,tip:"Parenthèses imbriquées : développe d’abord celle de l’intérieur."},
+ {e:'3(2x-5)-4(x-3)=5(x+1)-2(3-x)',goal:'x=-2/5',box:false},
+ {e:'x/(x+2)=3/5',goal:'x=3',box:false,tip:"L’inconnue est aussi au dénominateur : multiplie les deux côtés par (x + 2)."},
+ {e:'(2x-1)(x+3)=2x^2+7',goal:'x=2',box:false,tip:"Développe le produit : les x² vont disparaître."},
+ {e:'10^(x/2)=1000',goal:'x=6',box:false},
+ {e:'e^(2x-1)=5',goal:'x=(ln(5)+1)/2',box:false},
+ {e:'ln(x-1)+ln(2)=ln(10)',goal:'x=6',box:false,tip:"ln(a) + ln(b) = ln(a·b)."},
+ {e:'(x-a)/b+(x-b)/a=2',box:false,tip:"Des lettres partout : rassemble les x, puis factorise."},
+ {e:'(5x-2)/3-(2x+1)/4=(x+7)/6',goal:'x=25/12',box:false,tip:"Défi ultime ! Trois fractions et des signes − : multiplie tout par 12, puis développe avec soin."},
+]};
+function chapters(){const sp=SPECS[state.spec]||SPECS.sin;return COMMON.concat([{name:'Formules '+sp.name,icon:'ƒ',theme:'formula',formula:true,levels:sp.f},state.spec==='si'?PROB_SI:PROB_STI,INEQ,EXPERT])}
+const WORLD_COLORS=['#1e88e5','#e67e22','#ff3b2f','#8e44ad','#2e9e5b','#c9982e','#00a8a8','#6c5ce7','var(--acc)','#e4572e','#5f676f','#b8860b'];
 const WORLDS=[];const THEMES=[];
 function refreshWorlds(){WORLDS.length=0;chapters().forEach((c,i)=>{c.color=WORLD_COLORS[i];WORLDS.push(c)});THEMES.length=0;WORLDS.forEach(w=>THEMES.push({k:w.theme,n:w.name,icon:w.icon}))}
 function levelOpts(ci,li){
@@ -235,6 +247,7 @@ function genTheme(th,d){
     case'story':{const lv=pick((state.spec==='si'?PROB_SI:PROB_STI).levels.slice(0,4+3*d));return{e:lv.answer,t:lv.t,goal:lv.goal,tip:'📖 '+lv.story}}
     case'ineq':{const r=pick(['<','>','≤','≥']);const k=pick([a,-a]);const val=k*x0+b;const fl=k<0?{'<':'>','>':'<','≤':'≥','≥':'≤'}[r]:r;
       return pick([()=>({e:`x${sg(b)}${r}${x0+b}`,goal:`x${r}${x0}`}),()=>({e:`${k}x${sg(b)}${r}${val}`,goal:`x${fl}${x0}`})].slice(0,d>0?2:1))()}
+    case'expert':{const lv=pick(EXPERT.levels.slice(0,4+3*d));return{e:lv.e,goal:lv.goal,tip:lv.tip}}
     case'formula':{const lv=pick(SPECS[state.spec].f);return{e:lv.e,t:lv.t,tip:lv.tip}}
   }
 }

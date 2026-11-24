@@ -174,7 +174,8 @@ function hFn(f,m){
     default:return`<span class="fpl"${da}><span class="fname"${da}>${fnLab(f)}</span>${par(inner)}</span>`;
   }
 }
-function hRow(fs,t,m){if(!fs.length)return`<span class="card n one"${m.d?` data-tid="${t.id}"`:''}>1</span>`;return fs.map(f=>hF(f,m)).join('<span class="dot">·</span>')}
+function hRow(fs,t,m){if(!fs.length)return`<span class="card n one"${m.d?` data-tid="${t.id}"`:''}>1</span>`;const n=m.d&&fs.length>1;
+  return(n?`<span class="ins f" data-ins="${fs[0].id}" data-pos="b"></span>`:'')+fs.map((f,i)=>(i?`<span class="dot"${n?` data-ins="${f.id}" data-pos="b"`:''}>·</span>`:'')+hF(f,m)).join('')+(n?`<span class="ins f" data-ins="${fs[fs.length-1].id}" data-pos="a"></span>`:'')}
 function hT(t,m){
   const da=m.d?` data-tid="${t.id}"`:'';const num=`<span class="row">${hRow(t.num,t,m)}</span>`;
   const body=t.den.length?`<span class="frac">${num}<span class="bar"${da}></span><span class="row">${hRow(t.den,t,m)}</span></span>`:num;
@@ -182,7 +183,8 @@ function hT(t,m){
 }
 function hSum(sum,m){
   if(!sum.length)return`<span class="card n zero">0</span>`;
-  return sum.map((t,i)=>(i===0?(t.neg?'<span class="sign">−</span>':''):`<span class="sign">${t.neg?'−':'+'}</span>`)+hT(t,m)).join('');
+  const n=m.d&&sum.length>1,ins=(t,p)=>n?`<span class="ins" data-ins="${t.id}" data-pos="${p}"></span>`:'';
+  return sum.map((t,i)=>(i===0?ins(t,'b')+(t.neg?'<span class="sign">−</span>':''):`<span class="sign"${n?` data-ins="${t.id}" data-pos="b"`:''}>${t.neg?'−':'+'}</span>`)+hT(t,m)).join('')+ins(sum[sum.length-1],'a');
 }
 const MM={d:false,box:false};
 const mathSum=s=>`<span class="math">${hSum(s,MM)}</span>`;
@@ -201,7 +203,7 @@ function norm(sum){
     }
     t.num=t.num.filter(f=>!(f.t==='n'&&f.v===1));t.den=t.den.filter(f=>!(f.t==='n'&&f.v===1));
     if(t.num.some(f=>(f.t==='n'&&f.v===0)||(f.t==='g'&&!f.terms.length))){sum.splice(i,1);i--;continue}
-    if(!t.neg&&!t.den.length&&t.num.length===1&&t.num[0].t==='g'){sum.splice(i,1,...t.num[0].terms);i--;continue}
+    if(!t.neg&&!t.den.length&&t.num.length===1&&t.num[0].t==='g'&&!t.num[0].keep){sum.splice(i,1,...t.num[0].terms);i--;continue}
   }
 }
 
@@ -328,7 +330,7 @@ function develop(gid){
   const l=locate(gid);if(!l||l.kind!=='factor')return false;
   if(l.row==='den')return fail("On ne développe pas au dénominateur : multiplie plutôt les deux côtés par cette parenthèse.");
   const T0=l.term,others=T0.num.filter(f=>f!==l.f);
-  if(!others.length&&!T0.den.length&&!T0.neg)return fail('Rien à développer ici.');
+  if(!others.length&&!T0.den.length&&!T0.neg){if(l.f.keep){pushUndo();l.sum.splice(l.sum.indexOf(T0),1,...l.f.terms);return freeMove('Parenthèses retirées')}return fail('Rien à développer ici.')}
   pushUndo();
   const nts=l.f.terms.map(t=>({id:uid(),neg:T0.neg!==t.neg,num:[...others.map(reid),...t.num],den:[...T0.den.map(reid),...t.den]}));
   l.sum.splice(l.sum.indexOf(T0),1,...nts);return finishMove('Développement','dev');
@@ -354,6 +356,66 @@ function copyToDeck(id){
   toast('Jeton ajouté à la pioche : <b>'+esc(textT(card,false))+'</b>');return true;
 }
 
+/* ---------- réorganiser, parenthèses, outils sur un bloc, produit dans la pioche ---------- */
+/* une « ( » posée après un signe − : les signes à l’intérieur s’inversent, −a + b = −(a − b) */
+/* coup « gratuit » : écriture équivalente, ne compte pas dans les coups */
+function freeMove(desc){
+  norm(state.eq[0]);norm(state.eq[1]);
+  if(!SILENT){state.history.push({desc,eq:clone(state.eq),rel:state.rel});if(window.sfx)sfx('pop');if(window.petMood)petMood('happy')}
+  afterMove();render();return true;
+}
+const busy=()=>state.pending?fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`):false;
+function moveTo(src,insId,pos){
+  if(state.pending)return busy();
+  const a=locate(src),b=locate(insId);if(!a||!b)return false;
+  if(b.kind==='term'){
+    if(a.side!==b.side)return fail("Pour faire passer un terme de l’autre côté du =, utilise la pioche : on ajoute son opposé <b>des deux côtés</b>.");
+    const s=b.sum,e=a.chain.find(c=>c.sum===s);if(!e)return fail("Un terme se déplace seulement dans sa somme (ou dans sa boîte).");
+    const A=e.term,i0=s.indexOf(A);if(A===b.term)return false;
+    s.splice(i0,1);const k=s.indexOf(b.term)+(pos==='a'?1:0);s.splice(i0,0,A);if(k===i0)return false;
+    pushUndo();s.splice(i0,1);s.splice(k,0,A);
+    return freeMove(`Déplacement de ${textT(A,true)} : l’ordre des termes ne change rien (a + b = b + a)`);
+  }
+  if(a.kind!=='factor'||b.kind!=='factor'||a.term!==b.term||a.row!==b.row)return fail("Un facteur se déplace seulement dans son produit (a·b = b·a).");
+  if(a.f===b.f)return false;
+  const row=a.term[a.row],i0=row.indexOf(a.f);row.splice(i0,1);const k=row.indexOf(b.f)+(pos==='a'?1:0);row.splice(i0,0,a.f);if(k===i0)return false;
+  pushUndo();row.splice(i0,1);row.splice(k,0,a.f);return freeMove('Facteurs réordonnés : a·b = b·a');
+}
+function groupTerms(ia,ib){
+  if(state.pending)return busy();
+  const a=locate(ia),b=locate(ib);if(!a||!b)return false;
+  const s=a.sum,A=a.term,e=b.chain.find(c=>c.sum===s);
+  if(!e)return fail("La parenthèse doit se fermer dans la <b>même somme</b>, du même côté du =.");
+  let i=s.indexOf(A),j=s.indexOf(e.term);if(i>j)[i,j]=[j,i];
+  if(i===j)return fail("Mets au moins <b>deux termes</b> entre les parenthèses.");
+  pushUndo();const ts=s.slice(i,j+1),before=textSum(ts),allNeg=ts[0].neg;let nt;
+  if(allNeg){ts.forEach(t=>t.neg=!t.neg);nt=T([G(ts)],[],true)}else{const g=G(ts);g.keep=true;nt=T([g])}
+  s.splice(i,j-i+1,nt);
+  return freeMove(allNeg?`Mise entre parenthèses : ${before} = −(${textSum(ts)})`:`Mise entre parenthèses : (${before})`);
+}
+const BLOCK_EX={recip:'2 = 1 + 1, mais 1/2 ≠ 1/1 + 1/1',pow:'(1 + 2)² = 9, mais 1² + 2² = 5',root:'√(9 + 16) = 5, mais √9 + √16 = 7'};
+function toolOnBlock(side,idx,id){
+  const sm=state.eq[side],tool=state.tools[idx];if(!tool)return false;
+  const l=id?locate(id):null;if(!l||l.side!==side)return doTool(side,idx);
+  const whole=sm.length===1&&(l.kind==='term'?l.term===sm[0]:l.term===sm[0]&&l.sum===sm&&l.term.num.length+l.term.den.length===1);
+  if(whole)return doTool(side,idx);
+  if(sm.length===1&&l.sum===sm){const ok=doTool(side,idx);
+    if(ok&&!SILENT)setTimeout(()=>toast(`${toolTxt(tool)} s’applique à <b>tout le membre</b> : le produit entier passe dedans.`+(state.pending?` Maintenant <b>${state.pending.label}</b> de l’autre côté.`:'')),30);return ok}
+  return fail(`${toolTxt(tool)} ne s’applique pas à un seul bloc d’une somme : il faut l’appliquer à <b>tout le membre</b> (dépose-le sur la zone « Appliquer à tout ce côté », à côté des termes), sinon l’égalité devient fausse.`+(BLOCK_EX[tool.fn]?` Exemple : ${BLOCK_EX[tool.fn]}.`:''));
+}
+/* produit de deux jetons : nombres calculés, x·x = x², i·i = −1, simplifications haut/bas */
+function tidyProd(t0){
+  const t=reid(t0);
+  for(const r of['num','den']){let p=1;const rest=[];t[r].forEach(f=>{if(f.t==='n')p*=f.v;else rest.push(f)});
+    const im=rest.filter(f=>f.t==='s'&&isImagV(f.v));for(let k=0;k+1<im.length;k+=2){rest.splice(rest.indexOf(im[k]),1);rest.splice(rest.indexOf(im[k+1]),1);t.neg=!t.neg}
+    const out=[];rest.forEach(f=>{const x=powBase(f),j=x?out.findIndex(g=>{const y=powBase(g);return y&&y.k===x.k}):-1;
+      if(j>=0){const y=powBase(out[j]);out[j]=F('pow',x.n+y.n,[T([reid(x.base)])])}else out.push(f)});
+    t[r]=(p!==1?[N(p)]:[]).concat(out)}
+  const a=t.num.find(f=>f.t==='n'),b=t.den.find(f=>f.t==='n');if(a&&b){const g=gcd(a.v,b.v);a.v/=g;b.v/=g}
+  for(let i=t.num.length-1;i>=0;i--){const k=t.den.findIndex(g=>keyF(g)===keyF(t.num[i]));if(k>=0){t.den.splice(k,1);t.num.splice(i,1)}}
+  const s=[t];norm(s);return s[0]||T([N(0)]);
+}
+
 /* ---------- coups, annulation, isolement, victoire ---------- */
 function pushUndo(){if(SILENT)return;state.undo.push({rel:state.rel,eq:clone(state.eq),pending:clone(state.pending),moves:state.moves,hl:state.history.length,deck:clone(state.deck),flip:state.flip.slice(),tools:clone(state.tools),isoAt:state.isoAt,bonusMax:state.bonusMax});if(state.undo.length>200)state.undo.shift()}
 function undo(){
@@ -362,7 +424,7 @@ function undo(){
 }
 function finishMove(desc,kind){
   norm(state.eq[0]);norm(state.eq[1]);state.moves++;
-  if(!SILENT){state.history.push({desc,eq:clone(state.eq),rel:state.rel});if(window.sfx)sfx(kind==='cancel'||kind==='like'?'merge':'pop')}
+  if(!SILENT){state.history.push({desc,eq:clone(state.eq),rel:state.rel});if(window.sfx)sfx(kind==='cancel'||kind==='like'?'merge':'pop');if(window.petMood)petMood('happy')}
   afterMove();render();if(kind&&!SILENT)maybeIntroAfter(kind);return true;
 }
 function isolated(sd){const sm=state.eq[sd];if(sm.length!==1)return false;const t=sm[0];return !t.neg&&!t.den.length&&t.num.length===1&&t.num[0].t==='s'&&t.num[0].v===state.target}
@@ -412,7 +474,7 @@ function autoTools(){const m=new Map();walk(state.eq,z=>{if(z.t==='f'&&hasT(z)){
 function deckHas(t){const c=clone(t);c.neg=false;const k=keyT(c);return state.deck.findIndex(d=>keyT(d)===k)}
 function deckNote(t){return deckHas(t)<0?" Ce jeton n’est pas dans la pioche : glisse d’abord le terme du plateau <b>dans la pioche</b>.":''}
 function findSimp(sum){
-  for(const t of sum){
+  for(const t of sum){const kg=t.num[0];if(kg&&kg.t==='g'&&kg.keep&&t.num.length===1&&!t.den.length&&!t.neg)return{msg:'Ces parenthèses ne servent plus : touche-les pour les retirer.',ids:[kg.id],act:'dev'};
     for(const a of t.num)for(const b of t.den)if(keyF(a)===keyF(b))return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]};
     for(const a of t.num)for(const b of t.den)if(a.t==='n'&&b.t==='n'&&gcd(a.v,b.v)>1)return{msg:`${a.v} et ${b.v} sont divisibles par ${gcd(a.v,b.v)} : glisse l’un sur l’autre.`,ids:[a.id,b.id]};
     for(const r of['num','den']){const im=t[r].filter(f=>f.t==='s'&&isImagV(f.v));if(im.length>1)return{msg:'i·i = −1 : glisse un i sur l’autre.',ids:[im[0].id,im[1].id]}}
@@ -428,7 +490,7 @@ function findSimp(sum){
   for(const t of sum)for(const r of['num','den']){const ns=t[r].filter(f=>f.t==='n');if(ns.length>1)return{msg:'Calcule ce produit : glisse un nombre sur l’autre.',ids:[ns[0].id,ns[1].id]}}
   return null;
 }
-function findGroupDev(sum){for(const t of sum){const g=t.num.find(f=>f.t==='g');if(g&&(t.num.length>1||t.den.length||t.neg))return g;
+function findGroupDev(sum){for(const t of sum){const g=t.num.find(f=>f.t==='g');if(g&&(t.num.length>1||t.den.length||t.neg||g.keep))return g;
   for(const f of t.num.concat(t.den)){const sub=f.t==='g'?f.terms:f.t==='f'?f.arg:null;if(sub){const r=findGroupDev(sub);if(r)return r}}}return null}
 function findTermOf(sum,g){for(const t of sum){if(t.num.includes(g))return t;for(const f of t.num.concat(t.den)){const sub=f.t==='g'?f.terms:f.t==='f'?f.arg:null;if(sub){const r=findTermOf(sub,g);if(r)return r}}}return null}
 function conjCard(g){return T([G(g.terms.map(t=>{const c=reid(t);if(hasImag(c))c.neg=!c.neg;return c}))])}
@@ -510,6 +572,7 @@ function setup(o){
   state.deck=o.deck?o.deck.map(d=>{const s=parseSum(d);return s.length===1?s[0]:T([G(s)])}):autoDeck(o.nocomp);
   if(!state.deck.some(c=>keyT(c)==='#1/'))state.deck.push(T([N(1)]));
   state.flip=state.deck.map(()=>false);state.tools=o.tools||autoTools();if(!state.tools.some(t=>t.fn==='recip'))state.tools.push({fn:'recip',n:0});
+  if(state.rel==='='){if(!state.tools.some(t=>t.fn==='pow'&&t.n===2))state.tools.push({fn:'pow',n:2});if(!state.tools.some(t=>t.fn==='root'&&t.n===2))state.tools.push({fn:'root',n:2})}
   state.pending=null;state.moves=0;state.undo=[];state.won=false;state.usedHint=false;state.chain=o.chain||null;state.fails=0;state.tip=o.tip||'';state.isoAt=null;state.bonusMax=0;
   state.history=[{desc:'Départ',eq:clone(state.eq),rel:state.rel}];
   const r=runSolver();state.par=r.ok?(state.goal?r.total:r.iso):(o.par||null);

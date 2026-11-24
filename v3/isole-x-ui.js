@@ -47,13 +47,14 @@ function render(){
   else if(state.tip&&!state.tipClosed){tipEl.innerHTML=`<span class="tagacc"></span><span>${state.tip}</span><button id="tipX" title="Fermer">✕</button>`;tipEl.classList.remove('hidden')}
   else tipEl.classList.add('hidden');
   renderDeck();coachCheck();
+  const pe=$('#pet');if(pe&&!pe.innerHTML)pe.innerHTML=creatureSVG(petStage(),'idle');petIdleKick();
 }
 function renderDeck(){
   if(SILENT)return;const pend=state.pending;const MBd={d:false,box:state.box};
   const cards=state.deck.map((c,i)=>{const f=state.flip[i];
     return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}${c.user?`<span class="ddel" data-del="${i}" title="Retirer ce jeton">✕</span>`:''}</div>`}).join('');
   const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
-  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+(tools?'<span class="tsep"></span>'+tools:'');
+  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+'<span class="tsep"></span>'+tools+'<div class="dtool dpar" data-par="1" title="Parenthèses : glisse « ( » devant le premier terme, puis touche le dernier">( )</div>';
 }
 function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [data-deck="${i}"]`);if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
 
@@ -65,7 +66,7 @@ function fail(msg){if(SILENT)return false;const wi=WHY.findIndex(w=>w.re.test(ms
 function modal(html,cls=''){hideToast();$('#mbox').className='mbox '+cls;$('#mbox').innerHTML=html;$('#modal').classList.remove('hidden');animateScenes($('#mbox'))}
 function closeModal(){$('#modal').classList.add('hidden');$('#mbox').innerHTML=''}
 function starHTML(k){return[1,2,3].map(i=>`<span class="${i<=k?'':'off'}">★</span>`).join('')}
-function onWin(){petMood('happy')}
+function onWin(){petMood('happy','Bravo !')}
 function showWin(){
   if(state.mode==='chrono'){chronoSolved();return}
   if(state.mode==='level'&&state.chain&&state.chain.k<state.chain.n-1){chainStepWin();return}
@@ -116,10 +117,10 @@ let drag=null,hotEl=null;
 $('#game').addEventListener('pointerdown',e=>{
   if(state.won||e.button>0)return;
   const del=e.target.closest('[data-del]');if(del){e.preventDefault();removeDeckCard(+del.dataset.del);return}
-  const el=e.target.closest('[data-deck],[data-tool],[data-fid],[data-tid]');
+  const el=e.target.closest('[data-deck],[data-tool],[data-par],[data-fid],[data-tid]');
   if(!el||!(boardEl.contains(el)||deckEl.contains(el)))return;
   e.preventDefault();
-  const kind=el.dataset.deck!==undefined?'deck':el.dataset.tool!==undefined?'tool':'board';
+  const kind=el.dataset.deck!==undefined?'deck':el.dataset.tool!==undefined?'tool':el.dataset.par!==undefined?'par':'board';
   let gsrc=el;
   if(kind==='board'){if(!el.dataset.fid)gsrc=el.closest('.term')||el;
     if(el.classList.contains('ftab')||el.classList.contains('fname')||el.classList.contains('fsup'))gsrc=el.closest('.fbox,.fpl');
@@ -131,34 +132,39 @@ function onMove(e){
   if(!drag)return;
   if(!drag.moved){if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<7)return;
     drag.moved=true;const g=document.createElement('div');g.className='ghost';g.innerHTML=drag.gsrc.outerHTML;document.body.appendChild(g);drag.ghost=g;
-    drag.gsrc.classList.add('lifted');document.body.classList.add(drag.kind==='deck'?'dragdeck':drag.kind==='tool'?'dragtool':'dragboard')}
+    drag.gsrc.classList.add('lifted');document.body.classList.add(drag.kind==='deck'?'dragdeck':drag.kind==='tool'?'dragtool':drag.kind==='par'?'dragpar':'dragboard')}
   drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';setHot(dropTarget(e.clientX,e.clientY));
 }
 function dropTarget(cx,cy){
   const h=document.elementFromPoint(cx,cy);if(!h)return null;
   if(drag.kind==='deck'){const dc=h.closest('[data-deck]');if(dc&&+dc.dataset.deck!==drag.src)return dc;return h.closest('[data-zone]:not([data-zone="fn"])')}
-  if(drag.kind==='tool')return h.closest('[data-zone="fn"]');
+  if(drag.kind==='tool'){const b=document.elementsFromPoint(cx,cy).map(e=>e.closest&&e.closest('[data-fid],[data-tid]')).find(x=>x&&boardEl.contains(x));if(b)return b;return h.closest('[data-zone="fn"]')||h.closest('#board .panel .content')}
+  if(drag.kind==='par'){const t=h.closest('#board .term');return t&&t.dataset.tid?t:null}
   if(deckEl.contains(h))return deckEl;
+  const ins=h.closest('[data-ins]');if(ins&&boardEl.contains(ins))return ins;
   const t=h.closest('[data-fid],[data-tid]');if(t&&boardEl.contains(t)&&!drag.gsrc.contains(t))return t;return null;
 }
 function setHot(el){if(hotEl===el)return;if(hotEl)hotEl.classList.remove('hot');hotEl=el;if(el)el.classList.add('hot')}
 function endDrag(){window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('pointercancel',onCancel);
-  if(drag&&drag.ghost)drag.ghost.remove();if(drag)drag.gsrc.classList.remove('lifted');document.body.classList.remove('dragdeck','dragboard','dragtool');setHot(null)}
+  if(drag&&drag.ghost)drag.ghost.remove();if(drag)drag.gsrc.classList.remove('lifted');document.body.classList.remove('dragdeck','dragboard','dragtool','dragpar');setHot(null)}
 function onCancel(){endDrag();drag=null}
 function onUp(e){
   const d=drag;if(!d)return;const tgt=d.moved?dropTarget(e.clientX,e.clientY):null;endDrag();drag=null;
   if(!d.moved){
     if(d.kind==='deck'){state.flip[d.src]=!state.flip[d.src];renderDeck();coachCheck()}
-    else if(d.kind==='tool')toast("Glisse l’outil sur un côté du plateau : il s’appliquera à tout ce côté.");
+    else if(d.kind==='tool')toast("Glisse l’outil sur un côté du plateau (ou sur un bloc) : il s’appliquera à tout ce côté.");
+    else if(d.kind==='par')toast("Glisse la « ( » devant le <b>premier terme</b>, puis touche le dernier terme à mettre entre ( ).");
     else if(d.fn)tapFn(d.fn);
     else if(d.dev)develop(d.dev);
     return;
   }
   if(!tgt)return;
-  if(d.kind==='deck'&&tgt.dataset.deck!==undefined)combineDeck(d.src,+tgt.dataset.deck);
+  if(d.kind==='deck'&&tgt.dataset.deck!==undefined)deckChooser(d.src,+tgt.dataset.deck,tgt);
   else if(d.kind==='deck')doDeck(+tgt.closest('.panel').dataset.side,tgt.dataset.zone,d.src);
-  else if(d.kind==='tool')doTool(+tgt.closest('.panel').dataset.side,d.src);
+  else if(d.kind==='tool'){const sd=+tgt.closest('.panel').dataset.side;if(tgt.dataset.zone)doTool(sd,d.src);else toolOnBlock(sd,d.src,tgt.dataset.fid||tgt.dataset.tid)}
+  else if(d.kind==='par')parStart(tgt.dataset.tid);
   else if(tgt===deckEl)copyToDeck(d.src);
+  else if(tgt.dataset.ins)moveTo(d.src,tgt.dataset.ins,tgt.dataset.pos);
   else boardDrop(d.src,tgt.dataset.fid||tgt.dataset.tid);
 }
 
@@ -176,17 +182,18 @@ function tapFn(id){
 }
 $('#game').addEventListener('dblclick',e=>e.preventDefault());
 /* ---------- opérations intermédiaires dans la pioche ---------- */
-function combineDeck(a,b){
+function combineDeck(a,b,op='add'){
   if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
   const ca=clone(state.deck[a]),cb=clone(state.deck[b]);if(state.flip[a])ca.neg=!ca.neg;if(state.flip[b])cb.neg=!cb.neg;
   const va=numVal([ca]),vb=numVal([cb]);let card;
-  if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
+  if(op==='mul')card=tidyProd(mulT(cb,ca));
+  else if(va&&vb&&!va.pi&&!vb.pi){const p=va.p*vb.q+vb.p*va.q,q=va.q*vb.q;const r=resTerms({p:p/gcd(p,q),q:q/gcd(p,q),pi:0});card=r.length?r[0]:T([N(0)])}
   else card=T([G([reid(cb),reid(ca)])]);
   const neg=card.neg;card.neg=false;card.user=true;
   if(state.deck.some(c=>keyT(c)===keyT(card))){toast('Ce jeton existe déjà dans la pioche.');return}
   if(state.deck.length>=14)return fail('La pioche est pleine : retire un jeton avec ✕.');
   state.deck.push(card);state.flip.push(neg);renderDeck();flashDeck(state.deck.length-1);
-  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (opération dans la pioche, ça ne compte pas comme un coup).`);
+  toast(`Nouveau jeton : <b>${esc((neg?'−':'')+textT(card,false))}</b> (${op==='mul'?'produit':'somme'} dans la pioche, ça ne compte pas comme un coup).`);
 }
 function removeDeckCard(i){if(state.pending)return fail('Termine d’abord l’opération en cours.');state.deck.splice(i,1);state.flip.splice(i,1);renderDeck()}
 
@@ -235,7 +242,7 @@ const BADGES=[
  {k:'goal10',icon:'🎯',name:"Tireur d’élite",d:'10 résultats précis atteints',ok:()=>STATS.goals>=10},
  {k:'ch5',icon:'⚡',name:'Éclair',d:'5 équations en un défi chrono',ok:()=>STATS.chronoBest>=5},
  {k:'ch12',icon:'🌩️',name:'Tempête',d:'12 équations en un défi chrono',ok:()=>STATS.chronoBest>=12},
- ...['Addition','Multiplication','Équations mixtes','Développer','Puissances','Exp et ln','Trigonométrie','Complexes','Formules de spécialité','Problèmes','Inéquations'].map((n,i)=>({k:'world'+i,icon:['＋','×','±','( )','√','eˣ','∿','ℂ','ƒ','📖','<'][i],name:'Maître : '+n,d:'Réussir tous les défis du chapitre',ok:()=>WORLDS[i]&&worldDone(i)})),
+ ...['Addition','Multiplication','Équations mixtes','Développer','Puissances','Exp et ln','Trigonométrie','Complexes','Formules de spécialité','Problèmes','Inéquations','Expert'].map((n,i)=>({k:'world'+i,icon:['＋','×','±','( )','√','eˣ','∿','ℂ','ƒ','📖','<','🔥'][i],name:'Maître : '+n,d:'Réussir tous les défis du chapitre',ok:()=>WORLDS[i]&&worldDone(i)})),
  {k:'detective',icon:'🔎',name:'Détective',d:'5 problèmes bien traduits du premier coup',ok:()=>(STATS.storyFirst||0)>=5},
  {k:'day3',icon:'📅',name:'Fidèle',d:'Défi du jour 3 jours de suite',ok:()=>DAILY.best>=3},
  {k:'day7',icon:'🗓️',name:'Inarrêtable',d:'Défi du jour 7 jours de suite',ok:()=>DAILY.best>=7},
@@ -274,11 +281,12 @@ function creatureSVG(stage,mood='idle'){
    ${stage>=3?`<rect x="${60-r*1.06}" y="${cy-r*.22}" width="${r*.14}" height="${r*.44}" rx="${r*.05}" fill="${dark}"/><rect x="${60+r*.92}" y="${cy-r*.22}" width="${r*.14}" height="${r*.44}" rx="${r*.05}" fill="${dark}"/>`:''}
    <rect x="${60-r*.95}" y="${top}" width="${r*1.9}" height="${r*1.2}" rx="${r*.3}" fill="${col}" stroke="${dark}" stroke-width="2.5"/>
    <rect x="${60-r*.78}" y="${top+r*.14}" width="${r*1.56}" height="${r*.92}" rx="${r*.2}" fill="#16343d"/>
-   ${eye(60-ex)}${eye(60+ex)}${mouth}${mood==='sad'?`<path d="M${60+ex+er*.6} ${ey+er*1.1}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}
+   <g class="peyes">${eye(60-ex)}${eye(60+ex)}</g>${mood==='sad'?`<path d="M${60-ex-er*1.1} ${ey-er*1.9}L${60-ex+er*.9} ${ey-er*1.25}M${60+ex+er*1.1} ${ey-er*1.9}L${60+ex-er*.9} ${ey-er*1.25}" stroke="#1d3b12" stroke-width="3" stroke-linecap="round" class="brow"/>`:''}${mouth}${mood==='sad'?`<path d="M${60+ex+er*.6} ${ey+er*1.1}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}
    ${accSVG({r,cy,top,ex,ey,er})}</svg>`;
 }
 let petT;
-function petMood(m){const el=$('#pet');if(!el||SILENT)return;el.innerHTML=creatureSVG(petStage(),m);el.className='petmini '+m;clearTimeout(petT);petT=setTimeout(()=>{el.innerHTML=creatureSVG(petStage(),'idle');el.className='petmini'},1400)}
+function petMood(m,say){const el=$('#pet');if(!el||SILENT)return;el.innerHTML=creatureSVG(petStage(),m);el.className='petmini '+m;
+  if(say!==false&&PET_SAY[m]&&(say||m==='sad'||Math.random()<.5))petSay(say||PET_SAY[m][Math.floor(Math.random()*PET_SAY[m].length)],m);clearTimeout(petT);petT=setTimeout(()=>{el.innerHTML=creatureSVG(petStage(),'idle');el.className='petmini'},1400)}
 
 /* ---------- sons et confettis ---------- */
 let AC=null;
@@ -774,5 +782,52 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&
 window.addEventListener('resize',()=>{if(state.coach)coachShow()});
 document.documentElement.style.setProperty('--acc','#ff8c42');
 try{setSpec(localStorage.getItem('isoleX_spec')||'sin')}catch(e){setSpec('sin')}
+/* =====================================================================
+   NOUVEAUTÉS (boîte à idées) : produit dans la pioche, parenthèses glissées,
+   réorganiser un membre, outils sur un bloc, mascotte qui réagit
+   ===================================================================== */
+/* --- pioche : choisir additionner ou multiplier --- */
+function closeChooser(){const c=document.getElementById('dchoose');if(c)c.remove();document.removeEventListener('pointerdown',chooserOut,true)}
+function chooserOut(e){if(!e.target.closest('#dchoose'))closeChooser()}
+function deckChooser(a,b,el){
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
+  closeChooser();const lab=i=>esc((state.flip[i]?'−':'')+textT(state.deck[i],false));
+  const m=document.createElement('div');m.id='dchoose';m.className='dchoose';
+  m.innerHTML=`<div class="dctit">${lab(b)} et ${lab(a)}</div><button class="chip" data-dop="add">+ Additionner</button><button class="chip" data-dop="mul">× Multiplier</button>`;
+  document.body.appendChild(m);const r=el.getBoundingClientRect();
+  m.style.left=Math.min(innerWidth-m.offsetWidth/2-6,Math.max(m.offsetWidth/2+6,r.left+r.width/2))+'px';m.style.top=Math.max(m.offsetHeight+6,r.top-8)+'px';
+  m.onclick=e=>{const k=e.target.closest('[data-dop]');if(!k)return;closeChooser();combineDeck(a,b,k.dataset.dop)};
+  setTimeout(()=>document.addEventListener('pointerdown',chooserOut,true),0);
+}
+/* --- parenthèses : glisser « ( » devant un terme, puis toucher le dernier terme --- */
+let PAR=null;
+function parStart(tid){
+  if(state.pending)return fail(`Termine d’abord : <b>${state.pending.label}</b> de l’autre côté.`);
+  const l=locate(tid);if(!l)return;if(l.sum.length<2)return fail("Il faut au moins deux termes dans cette somme pour poser des parenthèses.");
+  PAR={id:l.term.id};const g=document.createElement('div');g.id='parGhost';g.className='parghost';g.textContent=')';document.body.appendChild(g);
+  parPaint(null);window.addEventListener('pointermove',parMove);document.addEventListener('pointerdown',parDown,true);document.addEventListener('keydown',parKey);
+  toast('Touche maintenant le <b>dernier terme</b> à mettre entre ( ). Ailleurs : la parenthèse disparaît.','',5000);
+}
+function parTermAt(x,y){const h=document.elementFromPoint(x,y);const t=h&&h.closest('#board .term');return t&&t.dataset.tid?t:null}
+function parPaint(endId){
+  document.querySelectorAll('#board .paropen,#board .parclose,#board .parin').forEach(e=>e.classList.remove('paropen','parclose','parin'));
+  if(!PAR)return;const a=locate(PAR.id);if(!a)return;const s=a.sum;let i=s.indexOf(a.term),j=i;
+  if(endId){const b=locate(endId),e=b&&b.chain.find(c=>c.sum===s);if(e)j=s.indexOf(e.term)}
+  const lo=Math.min(i,j),hi=Math.max(i,j);
+  s.slice(lo,hi+1).forEach((t,k)=>{const el=document.querySelector(`#board [data-tid="${t.id}"]`);if(!el)return;el.classList.add('parin');if(k===0)el.classList.add('paropen');if(lo+k===hi)el.classList.add('parclose')});
+}
+function parMove(e){const g=document.getElementById('parGhost');if(g){g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'}const t=parTermAt(e.clientX,e.clientY);parPaint(t?t.dataset.tid:null)}
+function parEnd(){PAR=null;parPaint(null);const g=document.getElementById('parGhost');if(g)g.remove();window.removeEventListener('pointermove',parMove);document.removeEventListener('pointerdown',parDown,true);document.removeEventListener('keydown',parKey)}
+function parKey(e){if(e.key==='Escape'){parEnd();toast('La parenthèse a disparu.')}}
+function parDown(e){
+  e.preventDefault();e.stopPropagation();const start=PAR&&PAR.id,t=parTermAt(e.clientX,e.clientY);parEnd();
+  if(!t){toast('La parenthèse a disparu.');return}groupTerms(start,t.dataset.tid);
+}
+/* --- mascotte : réagit, encourage, cligne des yeux --- */
+const PET_SAY={happy:['Bien joué !','Super !','Bravo !','Continue comme ça !','Oui !','Parfait !'],sad:['Oups…','Presque !','Essaie autrement.','Pas grave, réessaie !']};
+let sayT,idleT;
+function petSay(txt,m=''){const b=document.getElementById('petsay');if(!b||SILENT||!txt)return;b.textContent=txt;b.className='show '+m;clearTimeout(sayT);sayT=setTimeout(()=>b.className='',2000)}
+function petIdleKick(){clearTimeout(idleT);idleT=setTimeout(()=>{if(!$('#game').classList.contains('hidden')&&!state.won&&$('#modal').classList.contains('hidden'))petSay('Courage ! Besoin d’un coup de pouce ? Touche 💡')},35000)}
+
 applyOpts();renderHome();checkSaveLink();
 if(location.hash==='#labo')showExp();

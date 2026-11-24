@@ -1,6 +1,6 @@
 /* Isole x ! l'atelier : fonctionne hors ligne après une première visite */
-const CACHE='isolex-atelier-5.3';const MINE=k=>k.startsWith('isolex-atelier-');
-const SHELL=['./','./index.html','./isole-x.html','./physics.html','./chimie.js?v=3.4u','./fablab.css?v=4.0u','./atelier.css?v=4.0u','./qrcode.js?v=4.0u','./isole-x.js?v=4.9u','./isole-x-levels.js?v=5.1u','./isole-x-ui.js?v=5.1u','./fablab.css?v=3.1u','./apparence.css?v=b1u','./apparence.js?v=b2u','./idees.js?v=1u','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='isolex-atelier-5.4';const MINE=k=>k.startsWith('isolex-atelier-');
+const SHELL=['./','./index.html','./isole-x.html','./physics.html','./chimie.js?v=3.4u','./fablab.css?v=4.0u','./atelier.css?v=4.0u','./qrcode.js?v=4.0u','./isole-x.js?v=5.0u','./isole-x-levels.js?v=5.2u','./isole-x-ui.js?v=5.2u','./fablab.css?v=3.1u','./apparence.css?v=b1u','./apparence.js?v=b2u','./idees.js?v=2u','./nouveautes.css?v=1u','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>MINE(k)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

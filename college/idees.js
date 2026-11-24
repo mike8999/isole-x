@@ -11,7 +11,8 @@
 .ideebox .isite{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}`;
   document.head.appendChild(st);
   let type='Fonctionnalité',brouillon='';
-  function ecran(){return['home','menu','world','train','game','exp'].find(k=>{const e=document.getElementById(k);return e&&!e.classList.contains('hidden')})||''}
+  function ecran(){const k=['home','menu','world','train','game','exp'].find(k=>{const e=document.getElementById(k);return e&&!e.classList.contains('hidden')})||'';
+    if(k!=='game')return k;const t=id=>{const e=document.getElementById(id);return e?e.textContent.trim():''};return('jeu · défi '+t('lvlNum')+' · '+t('lvlTitle')).slice(0,120)}
   function ouvrir(){
     const from=ecran();
     modal(`<h2>💡 Boîte à idées</h2><p>Une idée pour améliorer le jeu ? Un bouton mal placé, un bug ? Écris-le ici : <b>c’est anonyme</b>, ton nom n’est pas envoyé.</p>
@@ -39,5 +40,7 @@
   }
   const ref=document.getElementById('btnSettings');
   if(ref){const btn=document.createElement('button');btn.className='ghostbtn';btn.id='btnIdees';btn.textContent='💡 Boîte à idées';btn.onclick=ouvrir;ref.after(btn)}
+  const g=document.getElementById('btnHelp');
+  if(g){const b=document.createElement('button');b.className='hbtn';b.id='btnIdeesG';b.title='Boîte à idées';b.setAttribute('aria-label','Boîte à idées');b.textContent='💬';b.onclick=ouvrir;g.after(b)}
   window.showIdees=ouvrir;
 })();

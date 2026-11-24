@@ -26,10 +26,10 @@ export default async (req) => {
   if (texte.length < 5) return out(400, { ok: false, error: 'Écris au moins quelques mots' });
   const type = TYPES.includes(d.type) ? d.type : 'Autre';
   const jeu = JEUX.includes(d.jeu) ? d.jeu : null;
-  const ecran = String(d.ecran || '').slice(0, 60);
+  const ecran = String(d.ecran || '').slice(0, 120);
 
   const props = {
-    Suggestion: { title: [{ text: { content: texte.slice(0, 200) } }] },
+    Suggestion: { title: [{ text: { content: texte } }] },
     Type: { select: { name: type } },
     Statut: { status: { name: 'Nouveau' } },
   };
