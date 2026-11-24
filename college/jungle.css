@@ -179,3 +179,7 @@ body.calm .jegg,body.calm .pet.idle,body.calm .stone,body.calm .petmini{animatio
 .savecode{font:700 22px/1.5 ui-monospace,"Consolas",monospace;letter-spacing:.06em;background:#fffbea;border:2px dashed #c9b26a;border-radius:14px;padding:10px 14px;max-width:340px;word-break:break-word;user-select:all;color:#3b2a0a}
 .saveqr{width:170px;background:#fff;border-radius:12px;padding:4px;box-shadow:0 3px 0 #c9b26a}.saveqr svg{display:block;width:100%;height:auto}
 .loadcode{display:block;margin:10px auto 4px;width:min(420px,100%);text-align:center;font:700 22px ui-monospace,"Consolas",monospace;letter-spacing:.08em;padding:10px;border-radius:14px;border:2px solid #c9b26a;background:#fffbea;color:#3b2a0a;text-transform:uppercase}
+/* compagnon en partie : deux fois plus grand (boîte à idées), il déborde sous la barre du haut */
+#game header #petbox{align-self:flex-start;z-index:30}
+body #game header #petbox .petmini{width:108px;height:108px;margin-bottom:-54px}
+@media (max-width:600px){body #game header #petbox .petmini{width:80px;height:80px;margin-bottom:-40px}}
