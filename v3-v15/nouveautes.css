@@ -1,0 +1,41 @@
+/* Nouveautés issues de la boîte à idées : commun à l'atelier et à la Jungle */
+/* pioche : additionner ou multiplier deux jetons */
+.dchoose{position:fixed;z-index:60;transform:translate(-50%,-100%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:10px 12px;border-radius:14px;background:#fffbea;color:#23272b;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:92vw}
+.dchoose .dctit{width:100%;text-align:center;font-weight:700;font-size:14px}
+.dchoose .chip{font-size:16px;color:#23272b}
+/* parenthèses glissées */
+.dtool.dpar{font-weight:800;letter-spacing:.12em}
+#board .term.parin{background:rgba(255,210,63,.25);border-radius:10px}
+#board .term.paropen::before,#board .term.parclose::after{content:'(';font-size:1.7em;font-weight:800;color:#ffd23f;text-shadow:0 2px 0 rgba(0,0,0,.45);align-self:center;margin:0 .04em}
+#board .term.parclose::after{content:')'}
+.parghost{position:fixed;z-index:70;pointer-events:none;transform:translate(-50%,-60%);font:800 46px/1 sans-serif;color:#ffd23f;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+/* emplacements pour réordonner un membre ou un produit */
+#board .ins{display:inline-block;width:8px;min-height:1.6em;align-self:stretch;border-radius:4px}
+#board .ins.f{width:6px}
+body.dragboard #board .ins{background:rgba(255,255,255,.18)}
+body.dragboard #board .ins.hot,body.dragboard #board .sign.hot,body.dragboard #board .dot.hot{background:#ffd23f;color:#23272b;border-radius:6px;box-shadow:0 0 0 3px rgba(255,210,63,.45)}
+body.dragboard #board .ins.hot{width:14px}
+/* mascotte en haut à droite : bulle, clignement, queue */
+#petbox{position:relative;flex:none;margin-left:auto}
+@media (max-width:600px){#game header #petbox .petmini{width:44px;height:44px}}
+#petsay{position:absolute;right:0;top:calc(100% + 8px);z-index:40;white-space:nowrap;padding:6px 10px;border-radius:12px;background:#fffbea;color:#23272b;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.3);opacity:0;transform:translateY(-4px);transition:opacity .2s,transform .2s;pointer-events:none}
+#petsay::before{content:'';position:absolute;top:-6px;right:18px;border:6px solid transparent;border-top:0;border-bottom-color:#fffbea}
+#petsay.show{opacity:1;transform:none}
+#petsay.sad{background:#ffe3e3}#petsay.sad::before{border-bottom-color:#ffe3e3}
+.pet .peyes{transform-box:fill-box;transform-origin:center;animation:pblink 4.2s infinite}
+.pet.happy .peyes,.pet.sleep .peyes{animation:none}
+@keyframes pblink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.pet .ptail{transform-box:fill-box;transform-origin:0% 100%;animation:pwag 1.3s ease-in-out infinite}
+@keyframes pwag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+.pet .zz{animation:pzz 2.4s ease-in-out infinite}
+@keyframes pzz{0%,100%{opacity:.3;transform:translateY(2px)}50%{opacity:1;transform:translateY(-3px)}}
+/* compagnons (Jungle) */
+.petsleep{font-size:14px;margin-top:4px}
+#petCard .bigpet{cursor:pointer}
+.charpick{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.charbtn{display:flex;flex-direction:column;align-items:center;gap:2px;width:130px;padding:10px;border-radius:16px;border:3px solid transparent;background:rgba(255,255,255,.5);font:inherit;color:inherit;cursor:pointer}
+.charbtn svg{width:96px;height:96px}
+.charbtn.on{border-color:var(--acc,#ff8c42);background:rgba(255,255,255,.85)}
+.charbtn small{opacity:.75}
+body.calm .pet .peyes,body.calm .pet .ptail,body.calm .pet .zz{animation:none}
+@media (prefers-reduced-motion:reduce){.pet .peyes,.pet .ptail,.pet .zz{animation:none}}

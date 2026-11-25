@@ -5,6 +5,7 @@ Jeux pour s’entraîner en STI2D.
 - **Version 1 (plateau vert)** : https://mike8999.github.io/isole-x/
 - **Version 2 (établi / fablab, spécialités)** : https://mike8999.github.io/isole-x/fablab/
 - **Atelier STI2D (Isole x ! + Physic’s & Co) — dernière version** : https://mike8999.github.io/isole-x/v3/
+  - ancienne version 15 conservée : https://mike8999.github.io/isole-x/v3-v15/
   - ancienne version 14 conservée : https://mike8999.github.io/isole-x/v3-v14/
   - ancienne version 13 conservée : https://mike8999.github.io/isole-x/v3-v13/
   - ancienne version 12 conservée : https://mike8999.github.io/isole-x/v3-v12/
@@ -22,6 +23,7 @@ Jeux pour s’entraîner en STI2D.
   - Isole x ! : 12 chapitres (dont « Expert », 10 défis difficiles) (5 défis pour addition et multiplication, 10 ensuite, avec une vraie progression et un défi ultime difficile) : formules de spécialité SI, SIN, ITEC, EE, AC, problèmes SI ou STI2D selon la spécialité, inéquations, robot Volt, badges, défi chrono, défi du jour, boutique, code de sauvegarde, hors ligne, fonctions, complexes, résultat précis, coups bonus, entraînement ciblé, mode expérimental, tutoriel et aide animés
   - Physic’s & Co : bloc chimie, 40 équations à équilibrer (combustions, oxydoréduction, acides-bases, matériaux et énergie)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
+  - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/
   - ancienne version 14 conservée : https://mike8999.github.io/isole-x/college-v14/
   - ancienne version 13 conservée : https://mike8999.github.io/isole-x/college-v13/
