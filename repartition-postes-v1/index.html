@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Planning des bénévoles</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"><style>
+/* VOICE: pratique, clair, chaleureux — un outil de club qu'on ouvre le jour J.
+   IDEA: la feuille de répartition affichée au club-house, tableau à cocher.
+   PICTURE: la grille tâches × bénévoles elle-même, en haut.
+   COLOUR and TYPE: vert prairie profond, sable de carrière, rouge flot de concours ; Barlow Condensed + Barlow.
+   LAYOUT: bandeau vert avec titre et chiffres, onglets, grille défilante à colonne figée. */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1814);--ink:light-dark(#14231c,#e6eee9);--mut:light-dark(#5a6b62,#9fb2a8);--g:light-dark(#1f4d3a,#163a2c);--g2:light-dark(#2f7a57,#6cc496);--sand:light-dark(#f1e7cc,#3a3424);--sand2:light-dark(#faf5e8,#1d1a12);--red:light-dark(#c8102e,#ff6b7d);--line:light-dark(#dde4df,#26352e);--card:light-dark(#ffffff,#13201a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+button,input,select{font:inherit;color:inherit}
+.band{padding:clamp(20px,3vw,40px) max(4vw,16px)}
+.head{background:var(--g);color:#fff}
+.head .row{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;max-width:1400px;margin:auto}
+.ttl{font:700 clamp(30px,4.2vw,48px)/1.05 "Barlow Condensed",sans-serif;background:none;border:0;border-bottom:2px dashed transparent;color:#fff;width:100%;padding:2px 0}
+.head .row>div:first-child{flex:1 1 420px}
+.ttl:hover,.ttl:focus{border-bottom-color:#ffffff88;outline:none}
+.date{background:#ffffff1a;border:1px solid #ffffff40;border-radius:8px;color:#fff;padding:6px 10px;margin-top:8px;color-scheme:dark}
+.stats{display:flex;flex-wrap:wrap;gap:8px 28px}
+.stat b{display:block;font:700 34px/1 "Barlow Condensed",sans-serif}.stat span{font-size:14px;opacity:.85}
+.stat.warn b{color:#ffb3bd}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px max(4vw,16px)}
+.bar .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:1400px;margin:auto}
+.tabs{display:flex;gap:4px;background:var(--sand2);border-radius:12px;padding:4px;margin-right:auto}
+.tabs a{padding:10px 16px;border-radius:9px;text-decoration:none;color:var(--ink);font-weight:600;min-height:44px;display:flex;align-items:center}
+.tabs a[aria-current]{background:var(--g);color:#fff}
+.btn{min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600}
+.btn.pri{background:var(--red);border-color:var(--red);color:light-dark(#fff,#1a0a0d)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.tabs a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--g2);outline-offset:2px}
+.status{font-size:14px;color:var(--mut);width:100%;max-width:1400px;margin:4px auto 0}.status.ok{color:var(--g2)}.status.warn{color:var(--red)}
+main{max-width:1400px;margin:auto;padding:20px max(4vw,16px) 60px}
+.scroll{overflow-x:auto}
+.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:15px}
+.grid th,.grid td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+.grid thead th{position:sticky;top:0;background:var(--bg);font-weight:600;font-size:14px;color:var(--mut);white-space:nowrap}
+.tcol{position:sticky;left:0;z-index:2;background:var(--bg);min-width:230px;max-width:320px;box-shadow:1px 0 0 var(--line)}
+.grid thead th.tcol{z-index:3}
+.catrow th{background:var(--sand);padding:10px 8px;position:static}
+.catrow .cn{font:700 20px/1.1 "Barlow Condensed",sans-serif;position:sticky;left:8px;margin-right:12px}
+.lnk{background:none;border:0;color:var(--g2);font-weight:600;cursor:pointer;padding:8px 6px;min-height:36px}
+.tname{background:none;border:0;padding:4px 0;text-align:left;cursor:pointer;font-weight:500;line-height:1.3}
+.tname:hover{text-decoration:underline}
+.tcol small{display:block;color:var(--mut);font-size:13px}
+.nowrap{white-space:nowrap}.num{text-align:right!important}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--sand2)}
+.chip.ok{background:light-dark(#dff2e7,#1b3a2b);color:var(--g2)}.chip.part{background:light-dark(#fff0d6,#3d3015);color:light-dark(#8a5a00,#f5c35b)}.chip.none{background:light-dark(#fde3e7,#3d1a20);color:var(--red)}
+.mcol{text-align:center!important;min-width:76px}
+.mname{background:none;border:0;cursor:pointer;font-weight:700;color:var(--ink);padding:4px;display:block;margin:auto}
+.mh{display:block;font-weight:400;font-size:13px}
+.cb{text-align:center!important;padding:0!important}
+.cb label{display:flex;align-items:center;justify-content:center;min-height:44px;cursor:pointer}
+.cb input{width:22px;height:22px;accent-color:var(--g2);cursor:pointer}
+.focus{background:var(--sand2)!important}
+.icon{background:none;border:0;color:var(--mut);cursor:pointer;width:44px;height:44px;border-radius:8px;font-size:16px}
+.icon:hover{color:var(--red);background:var(--sand2)}
+.empty{color:var(--mut);font-style:italic}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0;display:flex;justify-content:space-between;gap:8px}
+.card h3 span{color:var(--mut);font:500 16px Barlow,sans-serif;white-space:nowrap}
+.card ul{list-style:none;margin:10px 0 0;padding:0}.card li{padding:7px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.card li span{flex:1}.card li em{flex:none;font-style:normal;color:var(--mut);font-size:14px;white-space:nowrap;padding-top:2px}
+.card .none{color:var(--mut);margin:10px 0 0}
+.todo{background:var(--sand2);border-radius:14px;padding:16px;margin-bottom:20px}
+.todo h2,.sec h2{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0 0 8px}
+.todo ul{margin:0;padding-left:20px}
+.sec{margin-bottom:32px;max-width:720px}
+.lst{list-style:none;padding:0;margin:0}.lst li{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.lst input{flex:1}
+.txt{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--card);font-size:16px;width:100%}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.dlg{background:var(--bg);border-radius:16px;padding:22px;width:min(520px,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 60px #0006}
+.dlg h2{font:700 28px/1.1 "Barlow Condensed",sans-serif;margin:0 0 14px}
+.dlg label.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.chk{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:15px}.chk input{width:20px;height:20px;accent-color:var(--g2)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:flex-end}.acts .del{margin-right:auto;color:var(--red)}
+.note{font-size:13px;color:var(--mut);margin-top:16px}
+@media(max-width:600px){.tabs{width:100%;margin-right:0}.tabs a{flex:1;justify-content:center;padding:10px 6px}.tcol{min-width:170px}.two{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){.dlg{animation:pop .18s ease-out}@keyframes pop{from{transform:translateY(10px);opacity:0}}}
+</style><script src="../repartition-postes/api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Planning des bénévoles", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette/Restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier barrières/parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler zones sécurité/parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guidage parking/accueil visiteurs", "when": "8h-18h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveillance abords carrière/sécurité enfants", "when": "8h-18h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôle dernier départ/fermeture accès", "when": "18h-20h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter boissons et approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparation/installation buvette (tables propres, réchauds, friteuse)", "when": "8h-10h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenue de la buvette - encaissement", "when": "10h-17h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Inventaire caisse, rangement/congélation restes", "when": "17h-20h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparation crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le Vin chaud", "when": "10h-14h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14h-17h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyage site/nettoyage sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8h-18h", "hours": 10, "need": 1, "note": "Responsable : Président/Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage site (déchets, balayage, vérif boxes)", "when": "18h-20h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
+{
+const $=s=>document.querySelector(s), root=$('#root');
+let S=JSON.parse(document.getElementById('state').textContent);
+const hist=[];let etag=null,saving=false,pending=false,timer=null,focusM=null,modal=null;
+const VIEWS=['planning','benevoles','equipe'];
+let view=VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):'planning';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const fmtH=h=>(Math.round(h*10)/10).toString().replace('.',',');
+const need=t=>t.need===0?S.members.length:t.need;
+const mHours=id=>S.tasks.filter(t=>t.who.includes(id)).reduce((a,t)=>a+(+t.hours||0),0);
+const stOf=t=>{const n=t.who.length,d=need(t);return !d?'':n>=d?'ok':n?'part':'none'};
+
+function status(t,c){const e=$('#status');if(e){e.textContent=t;e.className='status '+(c||'')}}
+function commit(fn){hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
+function undo(){if(!hist.length)return;S=JSON.parse(hist.pop());render();queueSave()}
+function queueSave(){pending=true;clearTimeout(timer);status('Modifications en attente…');timer=setTimeout(save,800)}
+async function save(){
+  if(saving){timer=setTimeout(save,500);return}
+  pending=false;saving=true;status('Enregistrement…');
+  try{const r=await fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({state:S,etag})});
+    const d=await r.json().catch(()=>({}));
+    if((d.code||r.status)===409&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status('Quelqu’un a modifié le planning en même temps : sa version est affichée, refais ta dernière modification.','warn')}
+    else if(r.ok&&!d.code){etag=d.etag||etag;status('Enregistré pour toute l’équipe.','ok')}
+    else status('L’enregistrement a échoué. Refais une modification pour réessayer.','warn')}
+  catch(e){status('Pas de connexion : la modification n’est pas enregistrée.','warn')}
+  saving=false;
+}
+async function refresh(){
+  if(pending||saving||modal||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
+    if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
+}
+
+function renderHead(){
+  const T=S.tasks,withNeed=T.filter(t=>need(t)),full=withNeed.filter(t=>stOf(t)==='ok').length;
+  const holes=withNeed.reduce((a,t)=>a+Math.max(0,need(t)-t.who.length),0);
+  const hAff=S.members.reduce((a,m)=>a+mHours(m.id),0);
+  return `<header class="head band"><div class="row"><div><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l'événement"><br><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l'événement"></div>
+  <div class="stats"><div class="stat"><b>${S.members.length}</b><span>bénévoles</span></div><div class="stat"><b>${T.length}</b><span>tâches</span></div><div class="stat"><b>${full}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div><div class="stat"><b>${fmtH(hAff)} h</b><span>de bénévolat affectées</span></div></div></div></header>
+  <nav class="bar"><div class="row"><div class="tabs">${[['planning','Planning'],['benevoles','Par bénévole'],['equipe','Équipe']].map(([k,l])=>`<a href="#${k}" ${view===k?'aria-current="page"':''}>${l}</a>`).join('')}</div>
+  <button class="btn pri" data-addtask="">+ Tâche</button><button class="btn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button class="btn" id="csv">Copier pour Excel</button></div><div class="status" id="status"></div></nav>`;
+}
+function renderPlanning(){
+  const M=S.members,span=M.length+5;
+  let h=`<div class="scroll"><table class="grid"><thead><tr><th class="tcol">Tâche</th><th>Quand</th><th class="num">Durée</th><th>Effectif</th>${M.map(m=>`<th class="mcol ${focusM===m.id?'focus':''}"><button class="mname" data-focus="${m.id}" title="Surligner la colonne">${esc(m.name)}</button><span class="mh">${fmtH(mHours(m.id))} h</span></th>`).join('')}<th><span hidden>Actions</span></th></tr></thead><tbody>`;
+  for(const c of S.cats){const ts=S.tasks.filter(t=>t.cat===c.id);
+    h+=`<tr class="catrow"><th colspan="${span}"><span class="cn">${esc(c.name)}</span><button class="lnk" data-addtask="${c.id}">+ Ajouter une tâche</button></th></tr>`;
+    h+=ts.length?ts.map(t=>{const d=need(t);return `<tr><td class="tcol"><button class="tname" data-edit="${t.id}">${esc(t.name)}</button>${t.note?`<small>${esc(t.note)}</small>`:''}</td><td class="nowrap">${esc(t.when)||'—'}</td><td class="num nowrap">${t.hours?fmtH(+t.hours)+' h':'—'}</td><td><span class="chip ${stOf(t)}">${t.who.length} / ${t.need===0?'tous':d}</span></td>${M.map(m=>`<td class="cb ${focusM===m.id?'focus':''}"><label><input type="checkbox" data-t="${t.id}" data-m="${m.id}" aria-label="${esc(m.name)} : ${esc(t.name)}" ${t.who.includes(m.id)?'checked':''}></label></td>`).join('')}<td><button class="icon" data-del="${t.id}" aria-label="Supprimer ${esc(t.name)}">✕</button></td></tr>`}).join(''):`<tr><td class="tcol empty" colspan="4">Aucune tâche dans cette catégorie</td><td colspan="${M.length+1}"></td></tr>`;
+  }
+  return h+'</tbody></table></div>'+(M.length?'':'<p class="empty">Ajoutez des bénévoles dans l’onglet Équipe.</p>');
+}
+function renderPeople(){
+  const holes=S.tasks.filter(t=>need(t)&&t.who.length<need(t));
+  let h=holes.length?`<div class="todo"><h2>Il manque du monde</h2><ul>${holes.map(t=>`<li><button class="tname" data-edit="${t.id}">${esc(t.name)}</button> — ${need(t)-t.who.length} personne${need(t)-t.who.length>1?'s':''}${t.when?' · '+esc(t.when):''}</li>`).join('')}</ul></div>`:'<div class="todo"><h2>Tous les postes sont pourvus</h2></div>';
+  h+='<div class="cards">'+S.members.map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<div class="card"><h3>${esc(m.name)}<span>${fmtH(mHours(m.id))} h</span></h3>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}${t.hours?' · '+fmtH(+t.hours)+' h':''}</em></li>`).join('')}</ul>`:'<p class="none">Aucune tâche pour l’instant</p>'}</div>`}).join('')+'</div>';
+  return h;
+}
+function renderTeam(){
+  return `<section class="sec"><h2>Bénévoles</h2><ul class="lst">${S.members.map(m=>`<li><input class="txt" data-rename="${m.id}" value="${esc(m.name)}" aria-label="Nom du bénévole"><span class="nowrap">${fmtH(mHours(m.id))} h</span><button class="icon" data-delm="${m.id}" aria-label="Retirer ${esc(m.name)}">✕</button></li>`).join('')}</ul>
+  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="btn pri">Ajouter</button></form></section>
+  <section class="sec"><h2>Catégories</h2><ul class="lst">${S.cats.map(c=>`<li><input class="txt" data-renc="${c.id}" value="${esc(c.name)}" aria-label="Nom de la catégorie"><span class="nowrap">${S.tasks.filter(t=>t.cat===c.id).length} tâches</span><button class="icon" data-delc="${c.id}" aria-label="Supprimer ${esc(c.name)}">✕</button></li>`).join('')}</ul>
+  <form class="addrow" id="addc"><input class="txt" id="newc" placeholder="Nouvelle catégorie" aria-label="Nouvelle catégorie"><button class="btn pri">Ajouter</button></form></section>`;
+}
+function render(){
+  const st=$('#status')?.textContent||'',sc=$('#status')?.className||'status';
+  const sx=document.querySelector('.scroll')?.scrollLeft||0;
+  root.innerHTML=renderHead()+'<main>'+(view==='planning'?renderPlanning():view==='benevoles'?renderPeople():renderTeam())+'</main>'+(modal||'');
+  const e=$('#status');e.textContent=st;e.className=sc;
+  const s=document.querySelector('.scroll');if(s)s.scrollLeft=sx;
+}
+
+function taskDialog(catId,t){
+  const isNew=!t;t=t||{name:'',cat:catId||(S.cats[0]&&S.cats[0].id)||'',when:'',hours:'',need:1,note:''};
+  modal=`<div class="modal" id="modal"><form class="dlg" id="tform" data-id="${isNew?'':t.id}"><h2>${isNew?'Nouvelle tâche':'Modifier la tâche'}</h2>
+  <label class="f" for="f-name">Tâche / poste</label><input class="txt" id="f-name" required value="${esc(t.name)}">
+  <label class="f" for="f-cat">Catégorie</label><select class="txt" id="f-cat">${S.cats.map(c=>`<option value="${c.id}" ${c.id===t.cat?'selected':''}>${esc(c.name)}</option>`).join('')}<option value="__new">Nouvelle catégorie…</option></select>
+  <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;${S.cats.length?'display:none':''}">
+  <div class="two"><div><label class="f" for="f-when">Quand</label><input class="txt" id="f-when" value="${esc(t.when)}" placeholder="8h-18h, J-7…"></div><div><label class="f" for="f-hours">Durée (heures)</label><input class="txt" id="f-hours" type="number" min="0" step="0.5" value="${esc(t.hours)}"></div></div>
+  <label class="f" for="f-need">Nombre de personnes</label><input class="txt" id="f-need" type="number" min="1" value="${t.need||1}" ${t.need===0?'disabled':''}>
+  <label class="chk"><input type="checkbox" id="f-all" ${t.need===0?'checked':''}>Tout le monde</label>
+  <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="${esc(t.note)}" placeholder="Matériel, lieu, responsable…">
+  <div class="acts">${isNew?'':`<button type="button" class="btn del" data-del="${t.id}">Supprimer</button>`}<button type="button" class="btn" id="cancel">Annuler</button><button class="btn pri">Enregistrer</button></div></form></div>`;
+  render();setTimeout(()=>$('#f-name')?.focus(),0);
+}
+function confirmDlg(msg,fn){window._ok=fn;modal=`<div class="modal" id="modal"><div class="dlg"><h2>Confirmer</h2><p>${msg}</p><div class="acts"><button class="btn" id="cancel">Annuler</button><button class="btn pri" id="okc">Supprimer</button></div></div></div>`;render();$('#okc').focus()}
+function close(){modal=null;window._ok=null;render()}
+
+root.addEventListener('click',e=>{
+  const b=e.target.closest('button,a');if(!b)return;
+  if(b.id==='cancel'){e.preventDefault();return close()}
+  if(b.id==='okc'){const f=window._ok;modal=null;return commit(f)}
+  if(b.id==='undo')return undo();
+  if(b.id==='csv'){const M=S.members,rows=[['Catégorie','Tâche','Quand','Durée (h)','Effectif',...M.map(m=>m.name)]];
+    for(const c of S.cats)for(const t of S.tasks.filter(t=>t.cat===c.id))rows.push([c.name,t.name,t.when,t.hours,t.need===0?'tous':t.need,...M.map(m=>t.who.includes(m.id)?'X':'')]);
+    const txt=rows.map(r=>r.join('\t')).join('\n');
+    navigator.clipboard.writeText(txt).then(()=>status('Tableau copié : collez-le dans Excel ou Sheets.','ok'),()=>status('La copie a été refusée par le navigateur.','warn'));return}
+  if(b.dataset.addtask!==undefined)return taskDialog(b.dataset.addtask);
+  if(b.dataset.edit)return taskDialog(null,S.tasks.find(t=>t.id===b.dataset.edit));
+  if(b.dataset.focus){focusM=focusM===b.dataset.focus?null:b.dataset.focus;return render()}
+  if(b.dataset.del){const t=S.tasks.find(t=>t.id===b.dataset.del);return confirmDlg(`Supprimer la tâche « ${esc(t.name)} » ?`,()=>{S.tasks=S.tasks.filter(x=>x.id!==t.id)})}
+  if(b.dataset.delm){const m=S.members.find(m=>m.id===b.dataset.delm);return confirmDlg(`Retirer ${esc(m.name)} de l’équipe ? Ses ${S.tasks.filter(t=>t.who.includes(m.id)).length} affectation(s) seront effacées.`,()=>{S.members=S.members.filter(x=>x.id!==m.id);S.tasks.forEach(t=>t.who=t.who.filter(w=>w!==m.id))})}
+  if(b.dataset.delc){const c=S.cats.find(c=>c.id===b.dataset.delc),n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} tâche(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
+});
+root.addEventListener('change',e=>{
+  const i=e.target;
+  if(i.dataset.t){const t=S.tasks.find(t=>t.id===i.dataset.t),m=i.dataset.m;return commit(()=>{t.who=i.checked?[...new Set([...t.who,m])]:t.who.filter(w=>w!==m)})}
+  if(i.dataset.rename){const v=i.value.trim();if(v)commit(()=>{S.members.find(m=>m.id===i.dataset.rename).name=v});return}
+  if(i.dataset.renc){const v=i.value.trim();if(v)commit(()=>{S.cats.find(c=>c.id===i.dataset.renc).name=v});return}
+  if(i.id==='ttl'){const v=i.value.trim()||'Planning des bénévoles';return commit(()=>{S.title=v})}
+  if(i.id==='date')return commit(()=>{S.date=i.value});
+  if(i.id==='f-cat'){$('#f-newcat').style.display=i.value==='__new'?'':'none';if(i.value==='__new')$('#f-newcat').focus()}
+  if(i.id==='f-all')$('#f-need').disabled=i.checked;
+});
+root.addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==='addm'){const v=$('#newm').value.trim();if(v)commit(()=>S.members.push({id:uid('m'),name:v}));setTimeout(()=>$('#newm')?.focus(),0);return}
+  if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
+  if(f.id==='tform'){
+    const name=$('#f-name').value.trim();if(!name)return;
+    let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim();
+    if(cat==='__new'||!S.cats.length){if(!nc){$('#f-newcat').style.display='';return $('#f-newcat').focus()}}
+    const all=$('#f-all').checked,data={name,when:$('#f-when').value.trim(),hours:parseFloat($('#f-hours').value)||0,need:all?0:Math.max(1,parseInt($('#f-need').value)||1),note:$('#f-note').value.trim()};
+    const id=f.dataset.id;modal=null;
+    commit(()=>{if(cat==='__new'||!S.cats.length){cat=uid('c');S.cats.push({id:cat,name:nc})}
+      if(id)Object.assign(S.tasks.find(t=>t.id===id),data,{cat});else S.tasks.push({id:uid('t'),cat,who:[],...data})});
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)close();if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo()}});
+window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(VIEWS.includes(v)){view=v;render()}});
+render();
+fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(d.state){S=d.state;etag=d.etag;render()}status('Planning partagé : les modifications sont enregistrées pour toute l’équipe.','ok')}).catch(()=>status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn'));
+setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+}
+</script></body></html>
+
+

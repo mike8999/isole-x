@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Planning des bénévoles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ludique et clair, dans la famille d'Isole x ! (plateau vert).
+   IDEA: un plateau de jeu en feutre : chaque bénévole est un jeton crème qu'on pose sur les cartes des tâches.
+   PICTURE: le banc des jetons en haut, puis les tâches en tuiles où les jetons se posent.
+   COLOUR and TYPE: feutre vert, jetons crème, or pour la sélection et les postes complets ; police manuscrite + system-ui.
+   LAYOUT: titre et badges, banc collant, panneaux par catégorie avec grille de tuiles. */
+:root{--felt1:#5b8a3f;--felt2:#2f5224;--felt3:#24411b;--card:#f4efdc;--ink:#2b2a22;--gold1:#ffe27a;--gold2:#e2a826;--line:rgba(255,255,240,.35);--red:#ff9a8a;
+--hand:"Segoe Print","Comic Neue","Comic Sans MS","Chalkboard SE",cursive}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--felt3)}
+body{margin:0;min-height:100vh;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fffbea;overflow-x:clip;
+background:radial-gradient(ellipse at 50% 20%,rgba(255,255,255,.10),transparent 60%),repeating-radial-gradient(circle at 20% 30%,rgba(0,0,0,.035) 0 2px,transparent 2px 5px),linear-gradient(160deg,var(--felt1),var(--felt2) 70%,var(--felt3));background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+.wrap{width:min(1120px,100%);margin:auto;padding:18px 16px 60px}
+.title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:inline-grid;place-items:center;width:52px;height:60px;border-radius:10px;background:linear-gradient(145deg,var(--gold1),var(--gold2));color:#4a2c00;font:700 30px var(--hand);box-shadow:0 4px 0 #9b6f10,0 0 18px rgba(255,214,90,.7);border:2px solid #fff3b8;flex:none}
+.ttl{font:700 clamp(28px,5vw,46px)/1.1 var(--hand);color:#fffbea;background:none;border:0;border-bottom:2px dashed transparent;text-shadow:0 3px 0 rgba(0,0,0,.25);flex:1;padding:0}
+.ttl:hover,.ttl:focus{border-bottom-color:var(--line);outline:none}
+.sub{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:10px 0 14px}
+.date{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;color-scheme:dark;min-height:40px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.22);border:0;border-radius:8px;padding:4px 10px;font:600 15px system-ui,sans-serif;white-space:nowrap}
+.badge b{color:var(--gold1);font-size:19px}.badge.warn{background:rgba(120,30,15,.55)}.badge.warn b{color:#ffd2c7}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.chip{border:2px solid var(--line);background:rgba(255,255,255,.06);padding:8px 16px;border-radius:999px;text-decoration:none;color:inherit;min-height:44px;display:inline-flex;align-items:center;font-weight:600}
+.chip[aria-current]{background:var(--card);color:var(--ink);border-color:var(--card)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
+.bigbtn{background:linear-gradient(var(--gold1),var(--gold2));color:#3a2a00;border:0;border-radius:12px;padding:10px 18px;font-weight:700;box-shadow:0 3px 0 #9b6f10;min-height:44px;cursor:pointer}
+.bigbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #9b6f10}
+.ghostbtn{background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:12px;padding:9px 16px;min-height:44px;cursor:pointer}
+.ghostbtn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:3px solid var(--gold1);outline-offset:2px}
+.status{font-size:14px;min-height:20px;margin:-4px 0 10px}.status.warn{color:var(--red);opacity:1}
+.bench{position:sticky;top:0;z-index:10;background:rgba(36,65,27,.94);backdrop-filter:blur(6px);border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.bench.hot{border-color:var(--gold1);box-shadow:0 0 0 3px rgba(255,226,122,.4)}
+.bench h2,.chap h2{font:700 18px var(--hand);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.bench h2 small,.chap h2 small{font:400 13px system-ui;opacity:.8}
+.jetons{display:flex;flex-wrap:wrap;gap:8px}
+.jeton{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:4px 12px;border-radius:9px;background:var(--card);color:var(--ink);font:600 16px system-ui,sans-serif;box-shadow:0 3px 0 #b8ad8a,0 4px 8px rgba(0,0,0,.3);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;white-space:nowrap;border:2px solid transparent}
+.jeton small{font:600 12px system-ui;background:rgba(0,0,0,.08);border-radius:6px;padding:1px 5px}
+.jeton.sel{background:linear-gradient(145deg,var(--gold1),var(--gold2));color:#4a2c00;border-color:#fff3b8;box-shadow:0 3px 0 #9b6f10,0 0 14px rgba(255,214,90,.9)}
+.jeton.lift{opacity:.35}
+.ghost{position:fixed;left:0;top:0;z-index:100;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.tip{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border-radius:12px;padding:8px 12px;font-size:14px;margin-top:10px}
+.tip button{margin-left:auto}
+.chap{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.lnk{background:none;border:0;color:var(--gold1);font:600 14px system-ui;cursor:pointer;padding:8px 4px;min-height:40px}
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:8px}
+.task{position:relative;border:2px solid var(--line);border-radius:12px;background:rgba(255,255,255,.08);padding:7px 9px 8px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.task:hover{background:rgba(255,255,255,.13)}
+.task.ok{border-color:var(--gold2);background:rgba(255,226,122,.12)}
+.task.mine{box-shadow:0 0 0 3px var(--gold1)}
+body.dragging .task{border-style:dashed}
+.task.hot{border-style:solid!important;border-color:var(--gold1);background:rgba(255,226,122,.3);box-shadow:inset 0 0 0 2px var(--gold1)}
+.jeton{-webkit-touch-callout:none}
+html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
+.jeton.grab{outline:3px solid var(--gold1);outline-offset:1px}
+.task h3{font:600 15px/1.25 system-ui,sans-serif;margin:0 28px 2px 0}
+.meta{font-size:13px;color:#fffbea;display:flex;gap:4px 8px;flex-wrap:wrap}
+.count{font-weight:700;color:var(--gold1)}.task:not(.ok) .count.short{color:#fff;background:#a3261a;border-radius:6px;padding:0 6px}
+.note{font-size:13px;opacity:.95;margin-top:1px}
+.slots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;min-height:30px}
+.slots .jeton{font-size:14px;min-height:28px;padding:1px 8px;border-radius:7px;box-shadow:0 2px 0 #b8ad8a,0 2px 5px rgba(0,0,0,.3)}
+.slot{min-width:52px;min-height:28px;border-radius:7px;border:2px dashed rgba(255,255,240,.7);border-radius:9px;display:grid;place-items:center;font-size:13px;color:#fffbea}
+.edit{position:absolute;top:4px;right:4px;width:30px;height:30px;font-size:14px;border-radius:50%;border:2px solid var(--line);background:rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center}
+.edit:hover{background:rgba(255,255,255,.18)}
+.empty{opacity:.7;font-style:italic;margin:4px 0}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.people ul{list-style:none;margin:0;padding:0}.people li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.people li em{font-style:normal;opacity:.8;font-size:14px;white-space:nowrap;flex:none}
+.lst{list-style:none;padding:0;margin:0}.lst li{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.txt{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:rgba(0,0,0,.2);font-size:16px;width:100%;flex:1}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.x{background:none;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;opacity:.8;flex:none}.x:hover{background:rgba(255,255,255,.12);opacity:1}
+.modal{position:fixed;inset:0;background:rgba(10,20,8,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:200}
+.dlg{background:var(--card);color:var(--ink);border-radius:18px;padding:22px;width:min(520px,100%);max-height:92vh;overflow:auto;box-shadow:0 6px 0 #b8ad8a,0 20px 50px rgba(0,0,0,.5)}
+.dlg h2{font:700 26px var(--hand);margin:0 0 12px}
+.dlg label.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.dlg .txt{background:#fffdf4;border-color:#cfc6a6;color:var(--ink)}
+.dlg .ghostbtn{background:#e8e0c4;border-color:#cfc6a6}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.chk{display:flex;gap:8px;align-items:center;margin-top:8px}.chk input{width:20px;height:20px;accent-color:var(--gold2)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:flex-end}.acts .del{margin-right:auto;color:#a3261a}
+
+.blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px}
+.block{display:flex;flex-direction:column;gap:5px;text-decoration:none;color:inherit;background:rgba(0,0,0,.18);border:2px solid var(--line);border-radius:14px;padding:10px 12px;transition:background .15s,transform .12s,border-color .15s;cursor:pointer;font:inherit;text-align:left}
+.block:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.block.ok{border-color:var(--gold2);background:rgba(255,226,122,.1)}
+.block h2{font:700 19px/1.15 var(--hand);margin:0}.bh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px}.bh h2{overflow-wrap:anywhere}.pr{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;white-space:nowrap}.pr .prog{flex:1}
+.block .meta{font-size:13px;opacity:.8}
+.prog{height:6px;border-radius:99px;background:rgba(0,0,0,.25);overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--gold1),var(--gold2));border-radius:99px}
+.block .go{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{border-radius:99px;padding:1px 8px;font-size:12px;white-space:nowrap;flex:none;font-weight:700;background:rgba(0,0,0,.25)}.pill.short{color:#fff;background:#a3261a}.pill.ok{color:var(--gold1)}
+.block.new{border-style:dashed;align-items:center;justify-content:center;opacity:.85;min-height:76px}.block.new h2{font-size:17px}
+.cathead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:6px}
+.cathead h1{font:700 clamp(24px,4vw,34px)/1.1 var(--hand);margin:0 auto 0 4px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;align-items:start}
+.dock{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;margin:0;order:2}
+.dock .jetons{flex-direction:column;align-items:stretch;gap:6px}.dock .jeton{min-height:34px;padding:2px 10px}.dock .jeton{justify-content:space-between}
+.dock .hint{font-size:13px;opacity:.9;margin:0 0 8px}.mhint{display:none}
+@media(max-width:899px){.board{grid-template-columns:minmax(0,1fr) 90px;gap:8px}.mhint{display:block;font-size:14px;margin:-4px 0 10px}
+ .tasks{grid-template-columns:minmax(0,1fr)}
+ .dock{top:8px;max-height:calc(100vh - 80px);padding:6px;border-radius:12px;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .dock h2{font-size:14px;margin:0 0 6px;justify-content:center}.dock .hint{display:none}
+ .dock .jetons{gap:5px}.dock .jeton{font-size:14px;min-height:42px;padding:2px 4px;justify-content:center;overflow:hidden;text-overflow:ellipsis}.dock .jeton small{display:none}
+ .dock .tip{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:60;background:rgba(20,35,15,.96);border:1px solid var(--line);flex-wrap:nowrap;margin:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+ .dock .tip .ghostbtn{min-height:38px;padding:6px 12px;flex:none}
+ body.hasdock.selecting .wrap{padding-bottom:80px}
+ .cathead h1{flex-basis:100%;order:-1;margin:0}}
+@media(max-width:600px){.two{grid-template-columns:1fr}.tabs{width:100%}.tabs .chip{flex:1;justify-content:center;padding:8px 6px;font-size:14px;white-space:nowrap}.jeton{font-size:15px}}
+@media(prefers-reduced-motion:no-preference){.jeton.sel{animation:glow 2.4s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 3px 0 #9b6f10,0 0 22px rgba(255,214,90,1)}}}
+</style><script src="../repartition-postes/api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Planning des bénévoles", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
+{
+const $=s=>document.querySelector(s),root=$('#root');
+let S=JSON.parse(document.getElementById('state').textContent);
+const hist=[];let etag=null,saving=false,pending=false,timer=null,modal=null,sel=null,drag=null;
+const VIEWS=['planning','benevoles','equipe'];
+let view='planning',cat=null;
+function readHash(){const h=location.hash.slice(1);if(h.startsWith('cat-')&&S.cats.some(c=>c.id===h.slice(4))){view='planning';cat=h.slice(4)}else{view=VIEWS.includes(h)?h:'planning';cat=null}}
+readHash();
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const fmtH=h=>(Math.round(h*10)/10).toString().replace('.',',');
+const need=t=>t.need===0?S.members.length:t.need;
+const mHours=id=>S.tasks.filter(t=>t.who.includes(id)).reduce((a,t)=>a+(+t.hours||0),0);
+const mName=id=>S.members.find(m=>m.id===id)?.name||'';
+const full=t=>need(t)>0&&t.who.length>=need(t);
+
+function status(t,c){const e=$('#status');if(e){e.textContent=t;e.className='status '+(c||'')}}
+function commit(fn){hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
+function undo(){if(!hist.length)return;S=JSON.parse(hist.pop());render();queueSave()}
+function queueSave(){pending=true;clearTimeout(timer);status('Modifications en attente…');timer=setTimeout(save,800)}
+async function save(){
+  if(saving){timer=setTimeout(save,500);return}
+  pending=false;saving=true;status('Enregistrement…');
+  try{const r=await fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({state:S,etag})});
+    const d=await r.json().catch(()=>({}));
+    if((d.code||r.status)===409&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status('Quelqu’un a modifié le planning en même temps : sa version est affichée, refais ta dernière modification.','warn')}
+    else if(r.ok&&!d.code){etag=d.etag||etag;status('Enregistré pour toute l’équipe.')}
+    else status('L’enregistrement a échoué. Refais une modification pour réessayer.','warn')}
+  catch(e){status('Pas de connexion : la modification n’est pas enregistrée.','warn')}
+  saving=false;
+}
+async function refresh(){
+  if(pending||saving||modal||drag||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
+    if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
+}
+
+const jeton=(id,from,hours)=>`<span class="jeton ${sel===id?'sel':''}" data-j="${id}" data-from="${from||''}" role="button" tabindex="0" aria-label="${esc(mName(id))}">${esc(mName(id))}${hours?`<small>${fmtH(mHours(id))} h</small>`:''}</span>`;
+
+function renderHead(){
+  const T=S.tasks,withNeed=T.filter(t=>need(t)),ok=withNeed.filter(full).length;
+  const holes=withNeed.reduce((a,t)=>a+Math.max(0,need(t)-t.who.length),0);
+  const hAff=S.members.reduce((a,m)=>a+mHours(m.id),0);
+  return `<div class="title"><span class="logo" aria-hidden="true">★</span><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement"></div>
+  <div class="sub"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement">
+  <span class="badge"><b>${S.members.length}</b> bénévoles</span><span class="badge"><b>${ok}/${withNeed.length}</b> postes complets</span><span class="badge ${holes?'warn':''}"><b>${holes}</b> places à pourvoir</span><span class="badge"><b>${fmtH(hAff)} h</b> affectées</span></div>
+  <div class="bar"><nav class="tabs">${[['planning','Catégories'],['benevoles','Par bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
+  <button class="bigbtn" data-addtask="">+ Tâche</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button class="ghostbtn" id="csv">Copier pour Excel</button></div>
+  <div class="status" id="status"></div>`;
+}
+function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>need(t));return{ts,ok:wn.filter(full).length,n:wn.length,holes:wn.reduce((a,t)=>a+Math.max(0,need(t)-t.who.length),0),hrs:ts.reduce((a,t)=>a+(+t.hours||0)*t.who.length,0)}}
+function renderLanding(){
+  return '<div class="blocks">'+S.cats.map(c=>{const k=catStats(c),pc=k.n?Math.round(k.ok/k.n*100):0;
+    return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}"><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} tâche${k.ts.length>1?'s':''} · ${fmtH(k.hrs)} h affectées</div></a>`}).join('')
+  +`<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>`;
+}
+function renderCat(){
+  const c=S.cats.find(x=>x.id===cat),k=catStats(c);
+  let h=`<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>${esc(c.name)}</h1>
+  <span class="badge"><b>${k.ok}/${k.n}</b> complètes</span><span class="badge ${k.holes?'warn':''}"><b>${k.holes}</b> à pourvoir</span>
+  <button class="bigbtn" data-addtask="${c.id}">+ Tâche</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les tâches où l’affecter.</p>`;
+  h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers une tâche à gauche, ou touche un jeton puis les tâches. Pour retirer quelqu’un, ramène son jeton ici.</p>
+  ${sel?`<div class="tip"><span><b>${esc(mName(sel))}</b> : touche une tâche pour l’ajouter ou la retirer.</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
+  <div class="jetons">${S.members.map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
+  h+=k.ts.length?`<div class="tasks">${k.ts.map(t=>{const d=need(t),n=t.who.length,miss=Math.max(0,d-n);
+      return `<div class="task ${full(t)?'ok':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0"><h3>${esc(t.name)}</h3><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
+      <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}${t.hours?`<span>${fmtH(+t.hours)} h</span>`:''}<span class="count ${miss?'short':''}">${n}/${t.need===0?'tous':d}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
+      <div class="slots">${t.who.map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(miss,4)},()=>'<span class="slot">libre</span>').join('')}${miss>4&&t.need!==0?`<span class="slot">+${miss-4}</span>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucune tâche dans cette catégorie. Ajoute-en une avec « + Tâche ».</p></div>';
+  return h+'</div>';
+}
+function catDialog(){modal=`<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>`;render();setTimeout(()=>$('#f-cname')?.focus(),0)}
+function renderPeople(){
+  const holes=S.tasks.filter(t=>need(t)&&t.who.length<need(t));
+  let h=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${need(t)-t.who.length} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
+  return h+'<div class="people">'+S.members.map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}<small>${fmtH(mHours(m.id))} h</small></h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}${t.hours?' · '+fmtH(+t.hours)+' h':''}</em></li>`).join('')}</ul>`:'<p class="empty">Aucune tâche pour l’instant</p>'}</section>`}).join('')+'</div>';
+}
+function renderTeam(){
+  return `<section class="chap"><h2>Bénévoles</h2><ul class="lst">${S.members.map(m=>`<li><input class="txt" data-rename="${m.id}" value="${esc(m.name)}" aria-label="Nom du bénévole"><span style="white-space:nowrap">${fmtH(mHours(m.id))} h</span><button class="x" data-delm="${m.id}" aria-label="Retirer ${esc(m.name)}">✕</button></li>`).join('')}</ul>
+  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>
+  <section class="chap"><h2>Catégories</h2><ul class="lst">${S.cats.map(c=>`<li><input class="txt" data-renc="${c.id}" value="${esc(c.name)}" aria-label="Nom de la catégorie"><span style="white-space:nowrap">${S.tasks.filter(t=>t.cat===c.id).length} tâches</span><button class="x" data-delc="${c.id}" aria-label="Supprimer ${esc(c.name)}">✕</button></li>`).join('')}</ul>
+  <form class="addrow" id="addc"><input class="txt" id="newc" placeholder="Nouvelle catégorie" aria-label="Nouvelle catégorie"><button class="bigbtn">Ajouter</button></form></section>`;
+}
+function render(){
+  const e0=$('#status'),st=e0?.textContent||'',sc=e0?.className||'status';
+  if(cat&&!S.cats.some(c=>c.id===cat)){cat=null;if(location.hash.startsWith('#cat-'))history.replaceState(null,'','#planning')}
+  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);
+  root.innerHTML='<div class="wrap">'+(inCat?renderCat():renderHead()+(view==='planning'?renderLanding():view==='benevoles'?renderPeople():renderTeam()))+'</div>'+(modal||'');
+  const e=$('#status');e.textContent=st;e.className=sc;
+}
+
+function taskDialog(catId,t){
+  const isNew=!t;t=t||{name:'',cat:catId||(S.cats[0]&&S.cats[0].id)||'',when:'',hours:'',need:1,note:''};
+  modal=`<div class="modal"><form class="dlg" id="tform" data-id="${isNew?'':t.id}"><h2>${isNew?'Nouvelle tâche':'Modifier la tâche'}</h2>
+  <label class="f" for="f-name">Tâche / poste</label><input class="txt" id="f-name" required value="${esc(t.name)}">
+  <label class="f" for="f-cat">Catégorie</label><select class="txt" id="f-cat">${S.cats.map(c=>`<option value="${c.id}" ${c.id===t.cat?'selected':''}>${esc(c.name)}</option>`).join('')}<option value="__new">Nouvelle catégorie…</option></select>
+  <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;${S.cats.length?'display:none':''}">
+  <div class="two"><div><label class="f" for="f-when">Quand</label><input class="txt" id="f-when" value="${esc(t.when)}" placeholder="8 h – 18 h, J-7…"></div><div><label class="f" for="f-hours">Durée (heures)</label><input class="txt" id="f-hours" type="number" min="0" step="0.5" value="${esc(t.hours)}"></div></div>
+  <label class="f" for="f-need">Nombre de personnes</label><input class="txt" id="f-need" type="number" min="1" value="${t.need||1}" ${t.need===0?'disabled':''}>
+  <label class="chk"><input type="checkbox" id="f-all" ${t.need===0?'checked':''}>Tout le monde</label>
+  <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="${esc(t.note)}" placeholder="Matériel, lieu, responsable…">
+  <div class="acts">${isNew?'':`<button type="button" class="ghostbtn del" data-del="${t.id}">Supprimer</button>`}<button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Enregistrer</button></div></form></div>`;
+  render();setTimeout(()=>$('#f-name')?.focus(),0);
+}
+let okFn=null;
+function confirmDlg(msg,fn){okFn=fn;modal=`<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>${msg}</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>`;render();$('#okc').focus()}
+function closeDlg(){modal=null;okFn=null;render()}
+function toggle(tid,mid){commit(()=>{const t=S.tasks.find(x=>x.id===tid);t.who=t.who.includes(mid)?t.who.filter(w=>w!==mid):[...t.who,mid]})}
+
+/* glisser-déposer des jetons */
+root.addEventListener('pointerdown',e=>{const j=e.target.closest('.jeton');if(!j||e.button>0||!j.closest('.bench,.slots'))return;drag={id:j.dataset.j,from:j.dataset.from,x:e.clientX,y:e.clientY,el:j,ghost:null,hot:null,touch:e.pointerType!=='mouse'};j.classList.add('grab');try{j.setPointerCapture(e.pointerId)}catch(_){}});
+window.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.ghost){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)<6)return;const g=drag.el.cloneNode(true);g.classList.add('ghost');g.classList.remove('sel','grab');document.body.appendChild(g);drag.ghost=g;drag.el.classList.add('lift');document.body.classList.add('dragging');document.documentElement.classList.add('dragging');try{drag.touch&&navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
+  e.preventDefault();drag.ghost.style.transform=`translate(${e.clientX}px,${e.clientY}px) translate(-50%,${drag.touch?'-140%':'-50%'}) scale(1.1)`;
+  const ed=60;if(e.clientY>innerHeight-ed)scrollBy(0,Math.ceil((e.clientY-innerHeight+ed)/6));else if(e.clientY<ed)scrollBy(0,-Math.ceil((ed-e.clientY)/6));
+  const t=document.elementFromPoint(e.clientX,drag.touch?e.clientY-30:e.clientY)?.closest('.task,.bench')||null;
+  if(t!==drag.hot){drag.hot?.classList.remove('hot');t?.classList.add('hot');drag.hot=t}
+},{passive:false});
+function endDrag(cancel){
+  const d=drag;drag=null;if(!d)return;d.el.classList.remove('grab');document.documentElement.classList.remove('dragging');
+  if(!d.ghost){if(!cancel){sel=sel===d.id?null:d.id;render()}return}
+  d.ghost.remove();document.body.classList.remove('dragging');d.hot?.classList.remove('hot');d.el.classList.remove('lift');
+  if(cancel)return;
+  const tgt=d.hot;
+  if(tgt&&tgt.classList.contains('task')){const tid=tgt.dataset.task;if(tid===d.from)return;
+    commit(()=>{const t=S.tasks.find(x=>x.id===tid);if(!t.who.includes(d.id))t.who.push(d.id);if(d.from){const f=S.tasks.find(x=>x.id===d.from);f.who=f.who.filter(w=>w!==d.id)}})}
+  else if(d.from)commit(()=>{const f=S.tasks.find(x=>x.id===d.from);f.who=f.who.filter(w=>w!==d.id)});
+}
+window.addEventListener('pointerup',()=>endDrag(false));
+window.addEventListener('pointercancel',()=>endDrag(true));
+root.addEventListener('keydown',e=>{const j=e.target.closest?.('.jeton');if(j&&(e.key==='Enter'||e.key===' ')){e.preventDefault();sel=sel===j.dataset.j?null:j.dataset.j;render()}
+  const t=e.target.closest?.('.task');if(t&&e.target===t&&sel&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(t.dataset.task,sel)}});
+
+root.addEventListener('click',e=>{
+  if(e.target.closest('.jeton'))return;
+  const b=e.target.closest('button,a');
+  if(!b){const t=e.target.closest('.task');if(t&&sel)toggle(t.dataset.task,sel);return}
+  if(b.id==='cancel'){e.preventDefault();return closeDlg()}
+  if(b.id==='okc'){const f=okFn;modal=null;okFn=null;return commit(f)}
+  if(b.id==='undo')return undo();
+  if(b.id==='unsel'){sel=null;return render()}
+  if(b.id==='newcat')return catDialog();
+  if(b.id==='csv'){const M=S.members,rows=[['Catégorie','Tâche','Quand','Durée (h)','Effectif',...M.map(m=>m.name)]];
+    for(const c of S.cats)for(const t of S.tasks.filter(t=>t.cat===c.id))rows.push([c.name,t.name,t.when,t.hours,t.need===0?'tous':t.need,...M.map(m=>t.who.includes(m.id)?'X':'')]);
+    navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n')).then(()=>status('Tableau copié : colle-le dans Excel ou Sheets.'),()=>status('La copie a été refusée par le navigateur.','warn'));return}
+  if(b.dataset.addtask!==undefined)return taskDialog(b.dataset.addtask);
+  if(b.dataset.edit)return taskDialog(null,S.tasks.find(t=>t.id===b.dataset.edit));
+  if(b.dataset.del){const t=S.tasks.find(t=>t.id===b.dataset.del);return confirmDlg(`Supprimer la tâche « ${esc(t.name)} » ?`,()=>{S.tasks=S.tasks.filter(x=>x.id!==t.id)})}
+  if(b.dataset.delm){const m=S.members.find(m=>m.id===b.dataset.delm);return confirmDlg(`Retirer ${esc(m.name)} de l’équipe ? Ses ${S.tasks.filter(t=>t.who.includes(m.id)).length} affectation(s) seront effacées.`,()=>{S.members=S.members.filter(x=>x.id!==m.id);S.tasks.forEach(t=>t.who=t.who.filter(w=>w!==m.id));if(sel===m.id)sel=null})}
+  if(b.dataset.delc){const c=S.cats.find(c=>c.id===b.dataset.delc),n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} tâche(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
+});
+root.addEventListener('change',e=>{
+  const i=e.target;
+  if(i.dataset.rename){const v=i.value.trim();if(v)commit(()=>{S.members.find(m=>m.id===i.dataset.rename).name=v});return}
+  if(i.dataset.renc){const v=i.value.trim();if(v)commit(()=>{S.cats.find(c=>c.id===i.dataset.renc).name=v});return}
+  if(i.id==='ttl'){const v=i.value.trim()||'Planning des bénévoles';return commit(()=>{S.title=v})}
+  if(i.id==='date')return commit(()=>{S.date=i.value});
+  if(i.id==='f-cat'){$('#f-newcat').style.display=i.value==='__new'?'':'none';if(i.value==='__new')$('#f-newcat').focus()}
+  if(i.id==='f-all')$('#f-need').disabled=i.checked;
+});
+root.addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==='addm'){const v=$('#newm').value.trim();if(v)commit(()=>S.members.push({id:uid('m'),name:v}));setTimeout(()=>$('#newm')?.focus(),0);return}
+  if(f.id==='cform'){const v=$('#f-cname').value.trim();if(!v)return;const id=uid('c');modal=null;commit(()=>S.cats.push({id,name:v}));location.hash='cat-'+id;return}
+  if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
+  if(f.id==='tform'){
+    const name=$('#f-name').value.trim();if(!name)return;
+    let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim(),mk=cat==='__new'||!S.cats.length;
+    if(mk&&!nc){$('#f-newcat').style.display='';return $('#f-newcat').focus()}
+    const all=$('#f-all').checked,data={name,when:$('#f-when').value.trim(),hours:parseFloat($('#f-hours').value)||0,need:all?0:Math.max(1,parseInt($('#f-need').value)||1),note:$('#f-note').value.trim()};
+    const id=f.dataset.id;modal=null;
+    commit(()=>{if(mk){cat=uid('c');S.cats.push({id:cat,name:nc})}
+      if(id)Object.assign(S.tasks.find(t=>t.id===id),data,{cat});else S.tasks.push({id:uid('t'),cat,who:[],...data})});
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal)closeDlg();else if(sel){sel=null;render()}}
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo()}});
+window.addEventListener('hashchange',()=>{readHash();scrollTo(0,0);render()});
+render();
+fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(d.state){S=d.state;etag=d.etag;readHash();render()}status('Planning partagé : les modifications sont enregistrées pour toute l’équipe.')}).catch(()=>status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn'));
+setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+}
+</script></body></html>
+
+
