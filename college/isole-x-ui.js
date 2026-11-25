@@ -86,7 +86,7 @@ function showWin(){
    <div>${state.moves} coup${state.moves>1?'s':''}${state.par?` — maxi ${state.par} pour ★★★`:''}</div>
    <div class="sol">${mathEq(state.eq)}</div>${sol?`<div class="solline">${sol}</div>`:''}
    ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd’hui : reviens demain !'}</div>`:''}
-   ${after>before?`<div class="evo">🎊 ${petName()} a grandi : ${OPTS.char==='catix'?'elle':'il'} est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
+   ${after>before?`<div class="evo">🎊 ${petName()} a grandi : ${OPTS.char==='rainix'?'elle':'il'} est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
    ${after===before&&PET_STEPS[after+1]?`<div class="petnext">Encore ${PET_STEPS[after+1]-totalStars()} ★ pour que ${petName()} grandisse.</div>`:''}
    ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
    <div class="btns"><button class="ghostbtn" data-act="replay">⟲ Rejouer</button><button class="ghostbtn" data-act="menu">Carte</button>${next}</div>`,'win');
@@ -220,6 +220,7 @@ let TEACHER=false;delete OPTS.teacher;
 const PROF_H='253314d2';
 const profHash=c=>{let h=2166136261;for(const ch of 'pepix-jungle|'+c){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return h.toString(16)};
 let profFails=0,profLockUntil=0;
+if(OPTS.char==='catix')OPTS.char='rainix';
 const saveOpts=()=>{try{localStorage.setItem('isoleX_college2_opts',JSON.stringify(OPTS))}catch(e){}};
 let GOT={};try{GOT=JSON.parse(localStorage.getItem('isoleX_college2_badges')||'{}')}catch(e){}
 const saveGot=()=>{try{localStorage.setItem('isoleX_college2_badges',JSON.stringify(GOT))}catch(e){}};
@@ -253,7 +254,7 @@ function checkBadges(){const nb=[];BADGES.forEach(b=>{if(!GOT[b.k]&&b.ok()){GOT[
 const CHARS={
  pepix:{name:'Pépix',desc:'le poussin de la jungle',col:'#58c24a',col5:'#5fd35f',dark:'#1f7a32',belly:'#c9f29b',feet:'#2a8f3c',spot:'#7cc242'},
  buzix:{name:'Buzix',desc:'le chien',col:'#c98b4f',col5:'#d99a5c',dark:'#6e4220',belly:'#f3dcb8',feet:'#8a5a2e',spot:'#c98b4f'},
- catix:{name:'Catix',desc:'la chatte',col:'#f2a65a',col5:'#f6b56e',dark:'#a3561c',belly:'#ffe6c7',feet:'#c76a28',spot:'#f2a65a'}};
+ rainix:{name:'Rainix',desc:'la grenouille',col:'#3fbf9a',col5:'#4fd3ab',dark:'#17735a',belly:'#e9f8c9',feet:'#2a9a78',spot:'#2a9a78'}};
 const petChar=()=>CHARS[OPTS.char]||CHARS.pepix;const petName=()=>petChar().name;
 const sleepDays=()=>STATS.lastPlay?Math.floor((Date.now()-STATS.lastPlay)/864e5):0;
 function creatureSVG(stage,mood='idle'){
@@ -263,25 +264,27 @@ function creatureSVG(stage,mood='idle'){
     <circle cx="44" cy="62" r="6" fill="${C.spot}"/><circle cx="74" cy="80" r="8" fill="${C.spot}"/><circle cx="72" cy="42" r="4" fill="#2fbf71"/><circle cx="48" cy="92" r="5" fill="#2fbf71"/>
     ${totalStars()>=3?'<path d="M40 58l8 6 6-8 7 7 7-6 9 5" fill="none" stroke="#8a6d1d" stroke-width="2"/>':''}</svg>`;
   const r=22+stage*3.6,cy=80-stage*2.4,top=cy-r*.92;
-  const ex=r*.38,ey=cy-r*.22,er=r*.27;
+  const ex=r*.38,ey=K==='rainix'?cy-r*.62:cy-r*.22,er=r*.27;
   const eye=x=>mood==='sleep'?`<path d="M${x-er*.8} ${ey}q${er*.8} ${er*.9} ${er*1.6} 0" fill="none" stroke="#1d3b12" stroke-width="3" stroke-linecap="round"/>`:mood==='happy'?`<path d="M${x-er*.8} ${ey+2}q${er*.8} -${er*1.1} ${er*1.6} 0" fill="none" stroke="#1d3b12" stroke-width="3.2" stroke-linecap="round"/>`
     :`<circle cx="${x}" cy="${ey}" r="${er}" fill="#fff"/><circle cx="${x+1.5}" cy="${ey+1.5}" r="${er*.55}" fill="#1d3b12"/><circle cx="${x+3}" cy="${ey-1}" r="${er*.18}" fill="#fff"/>`;
-  const mouth=mood==='sad'?`<path d="M${60-r*.22} ${cy+r*.38}q${r*.22} -${r*.16} ${r*.44} 0" fill="none" stroke="#1d3b12" stroke-width="2.6" stroke-linecap="round"/>`
+  const mouth=K==='rainix'&&mood==='idle'?'':mood==='sad'?`<path d="M${60-r*.22} ${cy+r*.38}q${r*.22} -${r*.16} ${r*.44} 0" fill="none" stroke="#1d3b12" stroke-width="2.6" stroke-linecap="round"/>`
     :mood==='happy'?`<path d="M${60-r*.3} ${cy+r*.22}q${r*.3} ${r*.42} ${r*.6} 0z" fill="#7a2e1d"/>`
     :`<path d="M${60-r*.2} ${cy+r*.28}q${r*.2} ${r*.2} ${r*.4} 0" fill="none" stroke="#1d3b12" stroke-width="2.6" stroke-linecap="round"/>`;
   const leaf=(x,rot,c='#2fbf71')=>`<path transform="rotate(${rot} ${x} ${top+4})" d="M${x} ${top+6}c-9 -14 -3 -26 11 -30c3 14 -2 25 -11 30z" fill="${c}" stroke="#167a45" stroke-width="1.5"/>`;
   return`<svg viewBox="0 0 120 120" class="pet st${stage} ${mood}" aria-label="${C.name}"><ellipse cx="60" cy="113" rx="${r*.9}" ry="5" fill="rgba(0,0,0,.25)"/>
    ${K==='buzix'?`<path class="ptail" d="M${60+r*.78} ${cy+r*.35}q${r*.6} -${r*.05} ${r*.5} -${r*.75}" fill="none" stroke="${C.dark}" stroke-width="${r*.17}" stroke-linecap="round"/>`:''}
-   ${K==='catix'?`<path class="ptail" d="M${60+r*.75} ${cy+r*.55}q${r*.75} 0 ${r*.6} -${r*.75}q-${r*.1} -${r*.3} ${r*.12} -${r*.38}" fill="none" stroke="${C.dark}" stroke-width="${r*.22}" stroke-linecap="round"/><path d="M${60+r*.75} ${cy+r*.55}q${r*.75} 0 ${r*.6} -${r*.75}q-${r*.1} -${r*.3} ${r*.12} -${r*.38}" fill="none" stroke="${C.col}" stroke-width="${r*.13}" stroke-linecap="round"/>${[-1,1].map(k=>`<path d="M${60+k*r*.78} ${cy-r*.42}L${60+k*r*.62} ${top-r*.42}L${60+k*r*.18} ${top+r*.08}z" fill="${C.col}" stroke="${C.dark}" stroke-width="2.2" stroke-linejoin="round"/><path d="M${60+k*r*.64} ${cy-r*.5}L${60+k*r*.58} ${top-r*.22}L${60+k*r*.3} ${top+r*.06}z" fill="#ffb3c1"/>`).join('')}`:''}
+   
    ${K==='pepix'&&stage>=4?`<path d="M${60-r*.9} ${cy}c-22 -8 -26 -26 -14 -34c6 14 14 20 18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/><path d="M${60+r*.9} ${cy}c22 -8 26 -26 14 -34c-6 14 -14 20 -18 22z" fill="#9be15d" stroke="#167a45" stroke-width="1.5"/>`:''}
+   ${K==='rainix'?[-1,1].map(k=>`<path d="M${60+k*r*.55} ${cy+r*.82}l${k*r*.42} ${r*.12}M${60+k*r*.55} ${cy+r*.82}l${k*r*.36} ${r*.26}M${60+k*r*.55} ${cy+r*.82}l${k*r*.16} ${r*.3}" stroke="${C.feet}" stroke-width="${r*.12}" stroke-linecap="round"/>`).join(''):''}
    <ellipse cx="${60-r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="${C.feet}"/><ellipse cx="${60+r*.45}" cy="${cy+r*.88}" rx="${r*.26}" ry="${r*.14}" fill="${C.feet}"/>
    <ellipse cx="60" cy="${cy}" rx="${r}" ry="${r*.92}" fill="${(eqItem('color')||{}).col||(stage>=5?C.col5:C.col)}" stroke="${(eqItem('color')||{}).dark||C.dark}" stroke-width="2.5"/>
    <ellipse cx="60" cy="${cy+r*.3}" rx="${r*.6}" ry="${r*.48}" fill="${(eqItem('color')||{}).belly||C.belly}"/>
+   ${K==='rainix'?[-1,1].map(k=>`<circle cx="${60+k*ex}" cy="${ey}" r="${er*1.45}" fill="${(eqItem('color')||{}).col||(stage>=5?C.col5:C.col)}" stroke="${(eqItem('color')||{}).dark||C.dark}" stroke-width="2.5"/>`).join('')+(stage>=2?`<circle cx="${60-r*.62}" cy="${cy-r*.05}" r="${r*.1}" fill="${C.spot}"/><circle cx="${60+r*.66}" cy="${cy+r*.08}" r="${r*.08}" fill="${C.spot}"/><circle cx="${60+r*.5}" cy="${cy-r*.3}" r="${r*.06}" fill="${C.spot}"/>`:'')+(stage>=3?`<path d="M${60-r*.34} ${top-r*.02}a${r*.34} ${r*.13} 0 1 0 ${r*.68} 0z" fill="#7cc242" stroke="#167a45" stroke-width="1.5"/><circle cx="60" cy="${top-r*.08}" r="${r*.08}" fill="#ff8fb1"/>`:''):''}
    ${K==='pepix'?(stage>=1?leaf(60,0):'')+(stage>=3?leaf(52,-35,'#9be15d')+leaf(68,35,'#9be15d'):''):''}
    ${K==='buzix'?[-1,1].map(k=>`<ellipse cx="${60+k*r*.8}" cy="${cy-r*.32}" rx="${r*.22}" ry="${r*.44}" transform="rotate(${k*-22} ${60+k*r*.8} ${cy-r*.32})" fill="${C.dark}"/>`).join('')+`<ellipse cx="60" cy="${cy+r*.24}" rx="${r*.36}" ry="${r*.24}" fill="${C.belly}"/>`+(stage>=3?`<path d="M${60-r*.72} ${cy+r*.52}q${r*.72} ${r*.3} ${r*1.44} 0" fill="none" stroke="#e53935" stroke-width="${r*.12}"/><circle cx="60" cy="${cy+r*.78}" r="${r*.12}" fill="#ffd23f" stroke="#b8860b" stroke-width="1.2"/>`:'')+(stage>=4?`<ellipse cx="${60+r*.45}" cy="${cy-r*.45}" rx="${r*.2}" ry="${r*.14}" fill="${C.dark}" opacity=".45"/>`:''):''}
-   ${K==='catix'&&stage>=3?`<path d="M${60-r*.18} ${top+r*.12}v${r*.2}M60 ${top+r*.06}v${r*.24}M${60+r*.18} ${top+r*.12}v${r*.2}" stroke="${C.dark}" stroke-width="2.4" stroke-linecap="round"/>`:''}
+   
    <g class="peyes">${eye(60-ex)}${eye(60+ex)}</g>${mood==='sad'?`<path d="M${60-ex-er*1.1} ${ey-er*1.9}L${60-ex+er*.9} ${ey-er*1.25}M${60+ex+er*1.1} ${ey-er*1.9}L${60+ex-er*.9} ${ey-er*1.25}" stroke="#1d3b12" stroke-width="3" stroke-linecap="round" class="brow"/>`:''}<circle cx="${60-r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/><circle cx="${60+r*.62}" cy="${cy+r*.12}" r="${r*.12}" fill="#ff8fa3" opacity=".7"/>
-   ${K==='buzix'?`<ellipse cx="60" cy="${cy+r*.1}" rx="${r*.12}" ry="${r*.085}" fill="#2b1a10"/>`:''}${K==='catix'?`<path d="M${60-r*.09} ${cy+r*.06}h${r*.18}l-${r*.09} ${r*.1}z" fill="#ff7f9e"/>${[-1,1].map(k=>`<path d="M${60+k*r*.3} ${cy+r*.14}l${k*r*.5} -${r*.08}M${60+k*r*.3} ${cy+r*.2}l${k*r*.52} ${r*.04}" stroke="${C.dark}" stroke-width="1.4" stroke-linecap="round"/>`).join('')}`:''}
+   ${K==='rainix'?`<circle cx="${60-r*.1}" cy="${cy-r*.02}" r="${r*.04}" fill="${C.dark}"/><circle cx="${60+r*.1}" cy="${cy-r*.02}" r="${r*.04}" fill="${C.dark}"/>`+(mood==='idle'?`<path d="M${60-r*.5} ${cy+r*.18}q${r*.5} ${r*.32} ${r}  0" fill="none" stroke="#1d3b12" stroke-width="2.4" stroke-linecap="round"/>`:''):''}${K==='buzix'?`<ellipse cx="60" cy="${cy+r*.1}" rx="${r*.12}" ry="${r*.085}" fill="#2b1a10"/>`:''}
    ${mouth}${mood==='sad'?`<path d="M${60+ex+er} ${ey+er}q3 6 0 9q-3 -3 0 -9z" fill="#7ad7ff"/>`:''}${mood==='sleep'?`<text x="${60+r*.7}" y="${top+4}" class="zz" font-family="Fredoka,sans-serif" font-weight="700" font-size="14" fill="#4ea8de">z</text><text x="${60+r*.95}" y="${top-8}" class="zz" font-family="Fredoka,sans-serif" font-weight="700" font-size="10" fill="#4ea8de">z</text>`:''}
    ${stage===1?`<path d="M${60-r*1.05} ${cy+r*.35}l${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} ${r*.35} -${r*.25} ${r*.35} ${r*.25} v${r*.62} h-${r*2.1}z" fill="#fbf4d6" stroke="#c9b26a" stroke-width="2"/>`:''}
    ${stage>=5?`<path d="M44 ${top-2}l4 -14 8 9 4 -13 4 13 8 -9 4 14z" fill="#ffd23f" stroke="#b8860b" stroke-width="1.5"/><circle cx="22" cy="30" r="2.5" fill="#ffe680"/><circle cx="100" cy="24" r="3" fill="#ffe680"/><circle cx="96" cy="70" r="2" fill="#ffe680"/>`:''}
@@ -309,9 +312,9 @@ function backFromGame(){if(state.mode==='exp')showExp();else if(state.mode==='le
 function renderHome(){
   const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1],zz=st>0&&sleepDays()>=3;
   $('#petCard').innerHTML=`<div class="bigpet" title="Changer de compagnon">${creatureSVG(st,zz?'sleep':'idle')}</div><div class="petinfo"><div class="petname">${petName()} <span>${PET_NAMES[st]}</span></div>
-    ${zz?`<div class="petsleep">😴 ${petName()} s’est endormi${OPTS.char==='catix'?'e':''} : ça fait ${sleepDays()} jours ! Réussis un défi pour ${OPTS.char==='catix'?'la':'le'} réveiller.</div>`:''}
+    ${zz?`<div class="petsleep">😴 ${petName()} s’est endormi${OPTS.char==='rainix'?'e':''} : ça fait ${sleepDays()} jours ! Réussis un défi pour ${OPTS.char==='rainix'?'la':'le'} réveiller.</div>`:''}
     <div class="petbar"><i style="width:${nxt?Math.round(100*(t-PET_STEPS[st])/(nxt-PET_STEPS[st])):100}%"></i></div>
-    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour ${OPTS.char==='catix'?'qu’elle':'qu’il'} grandisse`:' · niveau maximum !'}</div></div>`;
+    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour ${OPTS.char==='rainix'?'qu’elle':'qu’il'} grandisse`:' · niveau maximum !'}</div></div>`;
   $('#homeBtns').innerHTML=`<button class="hb" data-h="badges">🏅<b>Badges</b><small>${Object.keys(GOT).length}/${BADGES.length}</small></button>
     <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
     <button class="hb" data-h="train">🎲<b>Entraînement</b><small>par thème</small></button>
@@ -820,7 +823,7 @@ function parDown(e){
   e.preventDefault();e.stopPropagation();const start=PAR&&PAR.id,t=parTermAt(e.clientX,e.clientY);parEnd();
   if(!t){toast('La parenthèse a disparu.');return}groupTerms(start,t.dataset.tid);
 }
-/* --- compagnons : Pépix, Buzix, Catix --- */
+/* --- compagnons : Pépix, Buzix, Rainix --- */
 function setChar(k){OPTS.char=k;saveOpts();const pe=$('#pet');if(pe)pe.innerHTML='';renderHome();sfx('pop')}
 function showChars(){const st=Math.max(1,petStage());
   modal(`<h2>Choisis ton compagnon</h2><p>Il grandit avec tes étoiles. Tes étoiles et tes objets sont gardés si tu changes.</p>
