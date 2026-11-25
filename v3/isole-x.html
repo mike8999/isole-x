@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Isole x ! — l’atelier STI2D</title>
+<title>Isole x !, l’atelier STI2D</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#5b3a1c">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -30,7 +30,7 @@
       <div class="group"><div class="grouplab">Série STI2D</div><div class="specs" id="specSTI"></div></div>
       <div class="homefoot">
         <button class="ghostbtn" id="btnHelpHome">▶ Aide animée</button>
-        <button class="hbtn" id="btnMute" title="Sons activés / coupés">🔊</button>
+        <button class="hbtn" id="btnMute" title="Sons activés / coupés" aria-label="Sons activés / coupés">🔊</button>
         <button class="ghostbtn" id="btnSave">Sauvegarde</button>
         <button class="ghostbtn" id="btnLook">Apparence</button>
         <button class="ghostbtn" id="btnSettings">Réglages</button>
@@ -43,7 +43,7 @@
   <div id="menu" class="screen scrollscreen bench hidden">
     <div class="wrap">
       <div class="menutop">
-        <button class="hbtn" id="btnLand" title="Accueil">◀</button>
+        <button class="hbtn" id="btnLand" title="Accueil" aria-label="Accueil">◀</button>
         <div id="specHead"></div>
         <button class="ghostbtn" id="btnMenuTrain">🎲 Entraînement</button>
       </div>
@@ -55,7 +55,7 @@
   <!-- ===== UN CHAPITRE : 10 DÉFIS ===== -->
   <div id="world" class="screen scrollscreen bench hidden">
     <div class="wrap">
-      <div class="menutop"><button class="hbtn" id="btnWorldBack" title="Chapitres">◀</button><div id="worldHead"></div></div>
+      <div class="menutop"><button class="hbtn" id="btnWorldBack" title="Chapitres" aria-label="Chapitres">◀</button><div id="worldHead"></div></div>
       <div id="stones"></div>
       <p class="lead small">Premiers défis : découverte, les parenthèses sont des <b>boîtes</b> à ouvrir. Ensuite, ça se corse à chaque défi ! 🎯 = résultat précis à atteindre. 👑 = défi ultime.</p>
     </div>
@@ -64,7 +64,7 @@
   <!-- ===== ENTRAÎNEMENT ===== -->
   <div id="train" class="screen scrollscreen bench hidden">
     <div class="wrap">
-      <div class="menutop"><button class="hbtn" id="btnTrainBack" title="Chapitres">◀</button><h1 class="exptitle">🎲 Entraînement ciblé</h1></div>
+      <div class="menutop"><button class="hbtn" id="btnTrainBack" title="Chapitres" aria-label="Chapitres">◀</button><h1 class="exptitle">🎲 Entraînement ciblé</h1></div>
       <div class="chap">
         <h2>Choisis les thèmes <small>(chapitres ouverts)</small></h2>
         <div class="gen" id="themeChips"></div>
@@ -81,8 +81,8 @@
   <!-- ===== MODE EXPÉRIMENTAL ===== -->
   <div id="exp" class="screen scrollscreen bench hidden">
     <div class="wrap">
-      <div class="menutop"><button class="hbtn" id="btnExpBack" title="Retour">◀</button>
-        <div id="specHead2"><h1 class="exptitle">🧪 Mode expérimental</h1></div></div>
+      <div class="menutop"><button class="hbtn" id="btnExpBack" title="Retour" aria-label="Retour">◀</button>
+        <div id="specHead2"><h1 class="exptitle">🧪 Labo libre</h1></div></div>
       <div class="chap">
         <h2>1. Écris ton équation</h2>
         <input id="expInput" class="expin" type="text" autocomplete="off" spellcheck="false" placeholder="ex. 3x + 2 = 11   ·   U = R*I   ·   e^(2x) = 9   ·   2x − 3 < 7">
@@ -108,17 +108,17 @@
   <!-- ===== JEU ===== -->
   <div id="game" class="screen bench hidden">
     <header>
-      <button class="hbtn" id="btnBack" title="Retour">◀</button>
+      <button class="hbtn" id="btnBack" title="Retour" aria-label="Retour">◀</button>
       <div class="badge"><span class="dotacc"></span><span id="lvlNum">1/10</span></div>
       <div id="lvlTitle"></div>
       <div class="spacer"></div><div id="chrono" class="hidden"></div>
       <div id="moves"></div>
-      <button class="hbtn" id="btnUndo" title="Annuler">↶</button>
-      <button class="hbtn" id="btnHint" title="Indice">💡</button>
-      <button class="hbtn" id="btnReset" title="Recommencer">⟲</button>
-      <button class="hbtn on" id="btnTrad" title="Traduction en équation">𝑓</button>
-      <button class="hbtn" id="btnHist" title="Historique des étapes">📜</button>
-      <button class="hbtn" id="btnHelp" title="Aide animée">?</button>
+      <button class="hbtn" id="btnUndo" title="Annuler" aria-label="Annuler">↶</button>
+      <button class="hbtn" id="btnHint" title="Indice" aria-label="Indice">💡</button>
+      <button class="hbtn" id="btnReset" title="Recommencer" aria-label="Recommencer">⟲</button>
+      <button class="hbtn on" id="btnTrad" title="Traduction en équation" aria-label="Traduction en équation">𝑓</button>
+      <button class="hbtn" id="btnHist" title="Historique des étapes" aria-label="Historique des étapes">📜</button>
+      <button class="hbtn" id="btnHelp" title="Aide animée" aria-label="Aide animée">?</button>
       <div id="petbox"><div id="pet" class="petmini"></div><div id="petsay" aria-live="polite"></div></div>
     </header>
     <div id="tip" class="ply hidden"></div>
@@ -149,7 +149,7 @@
 <script src="isole-x.js?v=5.0u"></script>
 <script src="isole-x-levels.js?v=5.2u"></script>
 <script src="apparence.js?v=b2u"></script>
-<script src="isole-x-ui.js?v=5.3u"></script>
+<script src="isole-x-ui.js?v=5.4u"></script>
 <script src="idees.js?v=2u" data-jeu="Atelier STI2D"></script>
 </body>
 </html>

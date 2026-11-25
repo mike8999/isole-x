@@ -333,7 +333,7 @@ function toWorld(i){closeModal();state.ci=i;const w=WORLDS[i];document.documentE
   document.querySelectorAll('.stone').forEach(b=>b.onclick=()=>startLevel(i,+b.dataset.l));
   showScreen('world');
 }
-function showBadges(){modal(`<h2>🏅 Badges</h2><div class="badges">${BADGES.map(b=>`<div class="bdg${GOT[b.k]?' got':''}"><span class="bi">${GOT[b.k]?b.icon:'❔'}</span><b>${esc(b.name)}</b><small>${esc(b.d)}</small></div>`).join('')}</div>
+function showBadges(){modal(`<h2>Badges</h2><div class="badges">${BADGES.map(b=>`<div class="bdg${GOT[b.k]?' got':''}"><span class="bi">${GOT[b.k]?b.icon:'❔'}</span><b>${esc(b.name)}</b><small>${esc(b.d)}</small></div>`).join('')}</div>
   <div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox')}
 let genDiff=0,genThemes=new Set(['add']);
 function showTrain(){renderTrain();showScreen('train')}
@@ -364,13 +364,13 @@ function tickChrono(){if(!CHR)return;const left=Math.max(0,CHR.end-Date.now());c
   if(s<=5&&s>0&&Math.abs(left%1000-0)<260)sfx('tick');if(left<=0)stopChrono(true)}
 function stopChrono(show){if(!CHR){clearInterval(chrT);return}clearInterval(chrT);const n=CHR.solved;CHR=null;$('#chrono').classList.add('hidden');if(!show)return;
   state.won=true;const rec=n>STATS.chronoBest;STATS.chronoBest=Math.max(STATS.chronoBest,n);saveStats();const nb=checkBadges();
-  modal(`<div class="winpet">${creatureSVG(petStage(),n?'happy':'sad')}</div><h2>⏱ Temps écoulé !</h2><div class="pts">${n} équation${n>1?'s':''} résolue${n>1?'s':''} en 2 minutes</div>
+  modal(`<div class="winpet">${creatureSVG(petStage(),n?'happy':'sad')}</div><h2>Temps écoulé !</h2><div class="pts">${n} équation${n>1?'s':''} résolue${n>1?'s':''} en 2 minutes</div>
    <div>${rec?'🏆 Nouveau record !':'Record : '+STATS.chronoBest}</div>${nb.map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}
    <div class="btns"><button class="ghostbtn" data-act="home">Carte</button><button class="bigbtn" data-act="chrono">Rejouer ⚡</button></div>`,'win');
   sfx(rec||nb.length?'badge':'win');if(rec)confetti(120);
 }
 
-/* ---------- mode expérimental ---------- */
+/* ---------- labo libre ---------- */
 let expSel=null;
 const EXAMPLES=['3x+2=11','5x-7=2x+8','x/4+1=3','2(x+3)=10','x^2-5=20','v=d/t','U=R*I','cos(A)=AB/AC'];
 function showExp(){showScreen('exp');$('#expEx').innerHTML=EXAMPLES.map(e=>`<button class="chip" data-ex="${esc(e)}">${esc(e)}</button>`).join('');
@@ -467,12 +467,12 @@ async function playScene(el,sc){
 let introQueue=null;
 function showIntro(keys){
   keys=[].concat(keys).filter(k=>SCENES[k]);if(!keys.length)return;introQueue=keys;
-  modal(`<h2>Nouveau !</h2><div class="sgrid n${keys.length}">${keys.map(sceneHTML).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">À moi !</button></div>`,'intro');
+  modal(`<h2>Nouveau${keys.length>1?'x gestes':' geste'}</h2><div class="sgrid n${keys.length}">${keys.map(sceneHTML).join('')}</div><div class="btns"><button class="bigbtn" data-act="close">À moi !</button></div>`,'intro');
 }
 function introDone(){if(introQueue){introQueue.forEach(k=>SEEN[k]=true);saveSeen();introQueue=null}}
 function maybeIntroAfter(kind){if(kind==='bonus'&&!SEEN.bonus&&!state.coach&&!state.won)setTimeout(()=>{if(!state.won&&isoSide()>=0&&$('#modal').classList.contains('hidden'))showIntro(['bonus'])},350)}
 function showHelp(){
-  modal(`<h2>🐾 Aide animée de Pépix</h2><div class="helpgrid">${HELP.map(([t,ks])=>`<h3>${esc(t)}</h3><div class="sgrid">${ks.map(sceneHTML).join('')}</div>`).join('')}</div>
+  modal(`<h2>Aide animée de Pépix</h2><div class="helpgrid">${HELP.map(([t,ks])=>`<h3>${esc(t)}</h3><div class="sgrid">${ks.map(sceneHTML).join('')}</div>`).join('')}</div>
    <div class="btns"><button class="ghostbtn" data-act="tuto">▶ Revoir le tutoriel</button><button class="bigbtn" data-act="close">Fermer</button></div>`,'help');
 }
 
@@ -519,7 +519,7 @@ let storyTry=0;
 function showStory(ci,li){
   const lv=WORLDS[ci].levels[li];state.ci=ci;state.li=li;state.mode='level';storyTry=0;
   const order=lv.ch.map((_,i)=>i);
-  modal(`<div class="winpet">${creatureSVG(petStage(),'idle')}</div><h2>📖 Le problème</h2><div class="storytxt">${lv.story}</div>
+  modal(`<div class="winpet">${creatureSVG(petStage(),'idle')}</div><h2>Le problème</h2><div class="storytxt">${lv.story}</div>
    <div class="kick">Quelle équation traduit ce problème ?</div>
    <div class="stchoices">${order.map(i=>`<button class="stch" data-story="${i}">${mathEq(parseEq(lv.ch[i]),parseRel(lv.ch[i]))}</button>`).join('')}</div>
    <div id="storyWhy"></div><div class="btns"><button class="ghostbtn" data-act="menu">Retour</button></div>`,'story');
@@ -545,7 +545,7 @@ const prettySol=g=>g.replace(/-/g,'−').replace(/([=<>≤≥])/,' $1 ').replace
 function chainStepWin(){
   const lv=WORLDS[state.ci].levels[state.li],k=state.chain.k;
   CHAIN.moves+=state.moves;CHAIN.par+=state.par||0;CHAIN.sols.push(lv.steps[k].goal);
-  modal(`<div class="winpet">${creatureSVG(petStage(),'happy')}</div><h2>✔ Étape ${k+1}/${state.chain.n} réussie !</h2>
+  modal(`<div class="winpet">${creatureSVG(petStage(),'happy')}</div><h2>Étape ${k+1}/${state.chain.n} réussie !</h2>
 <div class="sol">${mathEq(state.eq)}</div><div>${lv.zero?'Le facteur suivant peut aussi être nul…':'On garde ce résultat pour l’étape suivante.'}</div>
    <div class="btns"><button class="bigbtn" data-act="step">Étape suivante ▶</button></div>`,'win');sfx('win');
 }
@@ -569,7 +569,7 @@ const WHY=[
  {re:/réciproque|valeur exacte/,s:'inv',t:"Une fonction s’annule avec sa <b>réciproque</b> : √(x²) = x (si x ≥ 0), (√x)² = x. Applique d’abord l’outil réciproque des deux côtés."},
  {re:/inéquation|signe d'une lettre/,s:'ineqneg',t:"Dans une inéquation, multiplier ou diviser par un nombre <b>négatif</b> retourne le sens. Avec une lettre, on ne sait pas si elle est positive ou négative : on ne peut pas savoir si le sens change."},
 ];
-function showWhy(i){const w=WHY[i];modal(`<h2>🤔 Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
+function showWhy(i){const w=WHY[i];modal(`<h2>Pourquoi ce coup est refusé ?</h2><div class="whybox big">${w.t}</div>
   ${SCENES[w.s]?`<div class="sgrid n1">${sceneHTML(w.s)}</div>`:''}<div class="btns"><button class="bigbtn" data-act="close">J’ai compris</button></div>`,'intro')}
 /* ---------- boutique de Pépix ---------- */
 let SHOP={owned:{},eq:{}};try{Object.assign(SHOP,JSON.parse(localStorage.getItem('isoleX_college2_shop')||'{}'))}catch(e){}
@@ -605,7 +605,7 @@ function accSVG(G){const {r,cy,top,ex,ey,er}=G;let h='';const hd=eqItem('head'),
 }
 function showShop(){
   const c=coins();
-  modal(`<h2>🛍️ La boutique de ${petName()}</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
+  modal(`<h2>La boutique de ${petName()}</h2><div class="shoptop"><div class="winpet">${creatureSVG(Math.max(1,petStage()),'happy')}</div>
    <div><div class="coins">🪙 ${c} pièce${c>1?'s':''}</div><small>1 pièce pour 10 points gagnés, + bonus du défi du jour et du chrono.${petStage()===0?' ${petName()} doit d’abord éclore pour porter ses tenues.':''}</small></div></div>
    <div class="shopgrid">${ITEMS.map(it=>{const own=SHOP.owned[it.k],on=SHOP.eq[it.slot]===it.k;
      return`<div class="sitem${own?' own':''}${on?' on':''}"><span class="si">${it.icon}</span><b>${esc(it.name.replace('Pépix',petName()))}</b>
@@ -642,7 +642,7 @@ function applyOpts(){document.body.classList.toggle('dys',!!OPTS.dys);document.b
 let installEvt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 function showSettings(){
   const sz=OPTS.size||1;
-  modal(`<h2>⚙️ Réglages</h2><div class="setlist">
+  modal(`<h2>Réglages</h2><div class="setlist">
    <label class="setrow"><input type="checkbox" data-opt="dys"${OPTS.dys?' checked':''}> <span><b>Police très lisible</b><small>Lettres bien distinctes (Atkinson Hyperlegible), plus d’espace entre les lettres.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="calm"${OPTS.calm?' checked':''}> <span><b>Animations réduites</b><small>Pas de confettis ni de plateau qui penche, aides sans mouvement.</small></span></label>
    <label class="setrow"><input type="checkbox" data-opt="mute"${OPTS.mute?' checked':''}> <span><b>Couper les sons</b></span></label>
@@ -707,7 +707,7 @@ const saveURL=code=>location.href.split('#')[0].split('?')[0].replace(/[^/]*$/,'
 function showSave(tab='save'){
   const code=makeSaveCode();let qr='';
   try{if(window.qrcode){const q=qrcode(0,'M');q.addData(saveURL(code));q.make();qr=q.createSvgTag({cellSize:4,margin:2,scalable:true,alt:'QR code de sauvegarde'})}}catch(e){}
-  modal(`<h2>💾 Ma sauvegarde</h2>
+  modal(`<h2>Ma sauvegarde</h2>
    <div class="savetabs"><button class="chip${tab==='save'?' on':''}" data-stab="save">Sauvegarder</button><button class="chip${tab==='load'?' on':''}" data-stab="load">Reprendre sur cet appareil</button></div>
    ${tab==='save'?`<p>Ta progression reste sur cet appareil. Pour la retrouver <b>sur un autre ordinateur ou une tablette</b>, note ce code ou prends le QR code en photo.</p>
     <div class="savebox"><div class="savecode" id="saveCode">${code}</div>${qr?`<div class="saveqr">${qr}</div>`:''}</div>
@@ -725,7 +725,7 @@ function showSave(tab='save'){
 }
 let pendingSave=null;
 function confirmLoad(d){pendingSave=d;
-  modal(`<h2>💾 Reprendre cette partie ?</h2><div class="pts">${saveSummary(d)}</div><p>La progression actuelle de cet appareil sera <b>remplacée</b>.</p>
+  modal(`<h2>Reprendre cette partie ?</h2><div class="pts">${saveSummary(d)}</div><p>La progression actuelle de cet appareil sera <b>remplacée</b>.</p>
    <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="btnDoLoad">Oui, reprendre</button></div>`,'intro');
   $('#btnDoLoad').onclick=()=>{applySave(pendingSave);pendingSave=null;closeModal();toHome();sfx('badge');toast('✔ Partie reprise : bon retour dans la jungle !')};
 }
@@ -766,7 +766,7 @@ $('#optTeacher').onchange=e=>{if(!e.target.checked){TEACHER=false;renderHome();r
 function askProfCode(){
   const wait=Math.ceil((profLockUntil-Date.now())/1000);
   if(wait>0){toast(`🔒 Trop d’essais : attends ${wait} s.`,'warn');return}
-  modal(`<h2>🔒 Mode professeur</h2><p>Tape le code professeur pour ouvrir tous les mondes.<br><small>Il se désactive tout seul quand on ferme la page.</small></p>
+  modal(`<h2>Mode professeur</h2><p>Tape le code professeur pour ouvrir tous les mondes.<br><small>Il se désactive tout seul quand on ferme la page.</small></p>
    <input id="profCode" class="profcode" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••">
    <div id="profMsg" class="profmsg"></div>
    <div class="btns"><button class="ghostbtn" data-act="close">Annuler</button><button class="bigbtn" id="profOk">Valider</button></div>`,'intro');
@@ -823,7 +823,7 @@ function parDown(e){
 /* --- compagnons : Pépix, Buzix, Catix --- */
 function setChar(k){OPTS.char=k;saveOpts();const pe=$('#pet');if(pe)pe.innerHTML='';renderHome();sfx('pop')}
 function showChars(){const st=Math.max(1,petStage());
-  modal(`<h2>🐾 Choisis ton compagnon</h2><p>Il grandit avec tes étoiles. Tes étoiles et tes objets sont gardés si tu changes.</p>
+  modal(`<h2>Choisis ton compagnon</h2><p>Il grandit avec tes étoiles. Tes étoiles et tes objets sont gardés si tu changes.</p>
    <div class="charpick">${Object.entries(CHARS).map(([k,c])=>{const o=OPTS.char;OPTS.char=k;const svg=creatureSVG(st,'happy');OPTS.char=o;
      return`<button class="charbtn${petChar()===c?' on':''}" data-pick="${k}">${svg}<b>${c.name}</b><small>${c.desc}</small></button>`}).join('')}</div>
    <div class="btns"><button class="bigbtn" data-act="close">Fermer</button></div>`,'badgesbox');
