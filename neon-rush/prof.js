@@ -121,7 +121,7 @@ NR.idees=()=>{const from=NR.ecran();
  document.querySelectorAll("input[name=itype]").forEach(i=>i.onchange=()=>type=i.value);
  b.onclick=async()=>{const texte=t.value.trim();if(texte.length<5){m.className="msg err";m.textContent="Écris au moins quelques mots.";return}
   b.disabled=true;m.className="msg";m.textContent="Envoi…";
-  try{await post(IDEES,{texte,type,jeu:"Neon Rush STI2D",ecran:String(from||"").slice(0,120),site:$("#ideeSite").value});
+  try{await post(IDEES,{texte,type,jeu:"Neon Rush STI2D",ecran:("Neon Rush · "+String(from||"")).slice(0,120),site:$("#ideeSite").value});
    brouillon="";t.value="";$("#ideeCount").textContent="0/600";m.className="msg ok";m.textContent="Merci, ton idée a bien été envoyée.";b.textContent="Envoyer une autre idée";NR.fx("ok")}
   catch(e){m.className="msg err";m.textContent=errTxt(e)+" Ton texte est gardé."}
   b.disabled=false};
