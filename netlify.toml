@@ -17,6 +17,7 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Boîte à idées : fonction qui envoie les suggestions vers Notion
+# Fonctions : boîte à idées (vers Notion) et contenu partagé de Neon Rush (Netlify Blobs)
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"

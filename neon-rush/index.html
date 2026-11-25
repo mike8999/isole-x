@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>Neon Rush STI2D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+<nav class="hud" id="hud" aria-label="Écrans">
+ <button data-i="0"><i></i>HUB</button><button data-i="1"><i></i>QUIZ</button><button data-i="2"><i></i>COURS</button><button data-i="3"><i></i>SUIVI</button>
+</nav>
+<button class="prof-badge" id="profBadge" data-editor hidden>PROF · ÉDITER</button>
+
+<main class="track" id="track">
+ <section class="panel" id="p0" aria-label="Hub"><div class="in" id="dash"></div></section>
+ <section class="panel" id="p1" aria-label="Quiz"><div class="in" id="quizTab"></div></section>
+ <section class="panel" id="p2" aria-label="Cours"><div class="in" id="cours"></div></section>
+ <section class="panel" id="p3" aria-label="Suivi"><div class="in" id="suivi"></div></section>
+</main>
+
+<button class="pull" id="pull" aria-label="Ouvrir les réglages">
+ <svg width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10 11 2l9 8"/></svg>RÉGLAGES
+</button>
+
+<div class="ov full" id="ovQuiz" role="dialog" aria-label="Quiz"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR QUITTER</button><div class="ovs"><div class="in" id="quizBody"></div></div></div></div>
+<div class="ov full" id="ovCards" role="dialog" aria-label="Flashcards"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR QUITTER</button><div class="ovs"><div class="in" id="cardBody"></div></div></div></div>
+<div class="ov full" id="ovFiche" role="dialog" aria-label="Fiche de cours"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR FERMER</button><div class="ovs"><div class="in" id="ficheBody"></div></div></div></div>
+<div class="ov full" id="ovSchema" role="dialog" aria-label="Schéma à compléter"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR QUITTER</button><div class="ovs"><div class="in" id="schemaBody"></div></div></div></div>
+<div class="ov full" id="ovEdit" role="dialog" aria-label="Éditeur professeur"><div class="sheet"><button class="grab" data-close><i></i>FERMER L'ÉDITEUR</button><div class="ovs"><div class="in" id="editBody"></div></div></div></div>
+<div class="ov" id="ovSet" role="dialog" aria-label="Réglages"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR FERMER</button><div class="ovs"><div class="in" id="setBody"></div></div></div></div>
+<div class="ov" id="ovIdee" role="dialog" aria-label="Boîte à idées"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR FERMER</button><div class="ovs"><div class="in" id="ideeBody"></div></div></div></div>
+<div id="fx"></div>
+
+<script src="contenu.js?v=2"></script>
+<script src="schemas.js?v=2"></script>
+<script src="app.js?v=2"></script>
+<script src="prof.js?v=2"></script>
+</body>
+</html>

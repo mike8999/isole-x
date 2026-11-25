@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>Neon Rush STI2D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE  : cockpit de nuit, précis, gratifiant, sans bavardage
+   IDEA   : un poste de pilotage — compteurs, jauges, terminal de bord
+   PICTURE: grand compteur circulaire gradué au centre du hub
+   COLOUR : noir mat, vert néon #00FF41 actif, bleu électrique #00E5FF secondaire, violet profond repos
+   TYPE   : Orbitron (chiffres, titres) + Inter (texte) + JetBrains Mono (terminal)
+   LAYOUT : 4 écrans plein cadre en balayage horizontal, feuilles qui montent du bas */
+:root{color-scheme:dark;--bg:#050607;--p:#0a0d10;--p2:#0f1318;--ln:#1b2129;--ink:#e8f3ee;--mut:#8a979f;--g:#00FF41;--c:#00E5FF;--v:#2a1250;--v2:#8b5cf6;--bad:#ff3d6a;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif;overflow:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(120% 60% at 50% 115%,rgba(91,33,182,.42),transparent 60%),
+ linear-gradient(rgba(0,229,255,.035) 1px,transparent 1px) 0 0/100% 28px,
+ linear-gradient(90deg,rgba(0,229,255,.035) 1px,transparent 1px) 0 0/28px 100%}
+h1,h2,h3,.num{font-family:Orbitron,Inter,sans-serif;letter-spacing:.02em;margin:0}
+h1{font-size:26px;line-height:1.1;font-weight:900}
+h2{font-size:17px;font-weight:800}
+p{margin:.4em 0}
+.mut{color:var(--mut)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;z-index:5;padding:calc(var(--safe-t) + 10px) 18px 8px;display:flex;gap:6px;justify-content:center;transition:opacity .3s}
+.hud button{background:none;border:0;padding:10px 4px;flex:0 1 84px;display:grid;gap:5px;font:600 11px Orbitron,sans-serif;color:var(--mut);letter-spacing:.06em}
+.hud button i{display:block;height:3px;border-radius:2px;background:var(--ln);transition:.3s}
+.hud button.on{color:var(--g)}.hud button.on i{background:var(--g);box-shadow:0 0 10px var(--g)}
+.pull{position:fixed;left:50%;bottom:calc(var(--safe-b) + 6px);transform:translateX(-50%);z-index:5;background:none;border:0;padding:10px 22px;color:var(--mut);font:600 11px Orbitron,sans-serif;letter-spacing:.08em;display:grid;justify-items:center;gap:4px}
+.pull svg{animation:bob 2.4s ease-in-out infinite;color:var(--c);filter:drop-shadow(0 0 6px var(--c))}
+@keyframes bob{50%{transform:translateY(-4px)}}
+
+/* écrans */
+.track{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior:contain;transition:filter .35s}
+.track::-webkit-scrollbar{display:none}
+.panel{flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;overscroll-behavior:contain;padding:calc(var(--safe-t) + 64px) 18px calc(var(--safe-b) + 80px)}
+.in{max-width:560px;margin:0 auto;display:grid;gap:18px}
+body.dim .track,body.dim .hud,body.dim .pull{filter:brightness(.3) blur(2px);pointer-events:none}
+
+/* blocs */
+.box{background:linear-gradient(180deg,var(--p2),var(--p));border:1px solid var(--ln);border-radius:18px;padding:16px}
+.halo{border-color:rgba(0,255,65,.5);box-shadow:0 0 0 1px rgba(0,255,65,.15),0 0 34px rgba(0,255,65,.16)}
+.btn{min-height:50px;border-radius:14px;border:1px solid var(--g);background:rgba(0,255,65,.1);color:var(--g);font:800 14px Orbitron,sans-serif;letter-spacing:.05em;padding:0 18px;box-shadow:0 0 16px rgba(0,255,65,.25),inset 0 0 12px rgba(0,255,65,.08);transition:transform .15s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn:hover{box-shadow:0 0 26px rgba(0,255,65,.45),inset 0 0 14px rgba(0,255,65,.14)}
+.btn.c{border-color:var(--c);color:var(--c);background:rgba(0,229,255,.08);box-shadow:0 0 16px rgba(0,229,255,.22)}
+.btn.ghost{border-color:var(--ln);color:var(--ink);background:var(--p2);box-shadow:none}
+.btn.bad{border-color:var(--bad);color:var(--bad);background:rgba(255,61,106,.08);box-shadow:none}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px}
+
+/* compteurs */
+.gauge{position:relative;width:min(78vw,290px);aspect-ratio:1;margin:4px auto 0}
+.gauge svg{position:absolute;inset:0;width:100%;height:100%}
+.gauge .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.gauge .num{font-size:clamp(44px,14vw,62px);font-weight:900;color:var(--g);text-shadow:0 0 18px rgba(0,255,65,.6);line-height:1}
+.gauge .num small{font-size:.4em}
+.rt{fill:none;stroke:#141a20;stroke-width:8}
+.rv{fill:none;stroke:var(--c);stroke-width:8;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--c));animation:fill 1.2s cubic-bezier(.2,.8,.2,1)}
+@keyframes fill{from{stroke-dashoffset:var(--C)}}
+.tk{stroke:#25303a;stroke-width:1.2}.tk.on{stroke:var(--g)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{text-align:center;padding:12px 6px}
+.stat .num{font-size:22px;font-weight:800;color:var(--c);white-space:nowrap}
+.stat span{font-size:12px;color:var(--mut)}
+.doms{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.dom{background:var(--p);border:1px solid var(--ln);border-radius:16px;padding:10px 6px 8px;display:grid;justify-items:center;gap:2px;min-height:44px}
+.dom .r{position:relative;width:70px;height:70px}
+.dom .r svg{width:100%;height:100%}
+.dom .r b{position:absolute;inset:0;display:grid;place-content:center;font:800 15px Orbitron,sans-serif}
+.dom em{font:700 12px Orbitron,sans-serif;font-style:normal;letter-spacing:.05em}
+.hint{font-size:13px;color:var(--mut);text-align:center;line-height:1.6}
+.hint b{color:var(--c);font-weight:600}
+
+/* barres */
+.bar{height:8px;border-radius:5px;background:#131920;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:var(--c);box-shadow:0 0 10px var(--c);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.mrow{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid var(--ln)}
+.mrow:last-child{border:0}
+.mrow header{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.mrow header b{font-family:Orbitron,sans-serif;white-space:nowrap}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end;height:120px;margin-top:10px}
+.week div{display:grid;gap:4px;align-items:end;height:100%;grid-template-rows:1fr auto;text-align:center;font-size:12px;color:var(--mut)}
+.week i{display:block;border-radius:6px 6px 2px 2px;background:linear-gradient(var(--g),rgba(0,255,65,.25));box-shadow:0 0 10px rgba(0,255,65,.4);align-self:end;min-height:3px}
+.list{display:grid;gap:8px;margin:10px 0 0;padding:0;list-style:none}
+.list li{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 0;border-bottom:1px solid var(--ln)}
+.list li:last-child{border:0}
+.tag{font:700 11px Orbitron,sans-serif;padding:3px 7px;border-radius:6px;border:1px solid currentColor;white-space:nowrap;letter-spacing:.05em}
+
+/* choix (cases cliquables) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:var(--p);font:700 13px Orbitron,sans-serif;letter-spacing:.04em;transition:.2s}
+.chip span::before{content:"";width:16px;height:16px;border-radius:4px;border:1.5px solid var(--mut);flex:none}
+.chip input[type=radio]+span::before{border-radius:50%}
+.chip input:checked+span{border-color:var(--g);color:var(--g);box-shadow:0 0 14px rgba(0,255,65,.25)}
+.chip input:checked+span::before{background:var(--g);border-color:var(--g);box-shadow:0 0 8px var(--g)}
+.chip input:focus-visible+span{outline:2px solid var(--c);outline-offset:2px}
+
+/* fiches */
+.fiche{text-align:left;width:100%;display:grid;gap:4px;min-height:44px}
+.fiche h3{font-size:15px}
+.fiche:hover{border-color:rgba(0,229,255,.5)}
+
+/* feuilles */
+.ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;visibility:hidden;pointer-events:none}
+.ov .sheet{transform:translateY(105%);transition:transform .38s cubic-bezier(.2,.8,.2,1);background:#07090b;border-top:1px solid rgba(0,229,255,.35);border-radius:24px 24px 0 0;box-shadow:0 -10px 50px rgba(0,229,255,.12);max-height:100%;display:flex;flex-direction:column}
+.ov.full .sheet{height:100%;border-radius:0;border:0;box-shadow:none;background:rgba(4,6,7,.96)}
+.ov.on{visibility:visible;pointer-events:auto}
+.ov.on .sheet{transform:none}
+.grab{display:grid;justify-items:center;gap:4px;padding:calc(10px) 0 2px;font:600 10px Orbitron,sans-serif;color:var(--mut);letter-spacing:.08em;background:none;border:0;width:100%;min-height:44px}
+.ov.full .grab{padding-top:calc(var(--safe-t) + 10px)}
+.grab i{width:44px;height:4px;border-radius:3px;background:#2a333d}
+.ovs{overflow-y:auto;padding:6px 18px calc(var(--safe-b) + 24px);flex:1}
+.ovs>.in{gap:16px}
+
+/* terminal */
+.term{font-family:"JetBrains Mono",ui-monospace,monospace;background:#020604;border:1px solid rgba(0,255,65,.4);border-radius:16px;padding:16px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,255,65,.12),inset 0 0 40px rgba(0,255,65,.04)}
+.term::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 3px,rgba(0,255,65,.03) 3px 4px)}
+.scan{position:absolute;left:0;right:0;height:42px;top:-50px;background:linear-gradient(transparent,rgba(0,255,65,.18),transparent);pointer-events:none;animation:sweep 1.1s ease-out forwards}
+@keyframes sweep{to{top:110%}}
+.ln{opacity:0;animation:type .45s steps(24) forwards;animation-delay:var(--d,0s)}
+@keyframes type{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+.prompt{color:var(--g);font-size:13px}
+.qtxt{font-size:17px;line-height:1.5;color:#eafff0;margin:10px 0 14px;font-family:Inter,sans-serif;font-weight:600}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;min-height:50px;padding:12px 14px;margin-top:8px;border-radius:12px;border:1px solid #17321f;background:rgba(0,255,65,.03);font:15px/1.4 "JetBrains Mono",monospace;color:#d4f7df;transition:border-color .2s,box-shadow .2s,background .2s}
+.opt kbd{font:700 12px Orbitron,sans-serif;color:var(--c);padding-top:2px}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--g);background:rgba(0,255,65,.12);box-shadow:0 0 22px rgba(0,255,65,.45);color:#fff}
+.opt.ko{border-color:var(--bad);background:rgba(255,61,106,.1);box-shadow:0 0 18px rgba(255,61,106,.4);animation:glitch .35s}
+.opt.dim{opacity:.4}
+@keyframes glitch{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.expl{margin-top:14px;font-size:14px;color:var(--c);line-height:1.5}
+.segs{display:flex;gap:4px}
+.segs i{flex:1;height:6px;border-radius:3px;background:#141a20;transition:.3s}
+.segs i.cur{background:var(--c);box-shadow:0 0 8px var(--c)}
+.segs i.ok{background:var(--g);box-shadow:0 0 8px var(--g)}
+.segs i.ko{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 12px Orbitron,sans-serif;letter-spacing:.06em}
+
+/* flashcards */
+.stage{perspective:1300px;display:grid;place-items:center;padding:8px 0}
+.fc{width:min(100%,380px);aspect-ratio:3/4;max-height:56vh;position:relative;touch-action:pan-y;user-select:none;transition:transform .3s,opacity .3s}
+.fc-in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.3,1.3,.4,1)}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:24px;display:grid;align-content:center;gap:14px;text-align:center;background:radial-gradient(120% 80% at 50% 0%,#101820,#06080a);border:1px solid rgba(0,229,255,.45);box-shadow:0 0 34px rgba(0,229,255,.18)}
+.face.b{transform:rotateY(180deg);border-color:rgba(0,255,65,.6);box-shadow:0 0 34px rgba(0,255,65,.2)}
+.face .tag{justify-self:center}
+.face h3{font-size:clamp(20px,6vw,26px);line-height:1.2;font-weight:800}
+.face p{font-size:17px;line-height:1.55;margin:0}
+.face small{color:var(--mut);font-size:13px}
+.fc.zap .face.b{animation:zap .7s}
+@keyframes zap{0%{box-shadow:0 0 0 rgba(0,255,65,0)}30%{box-shadow:0 0 60px rgba(0,255,65,.9),inset 0 0 30px rgba(0,255,65,.35)}100%{box-shadow:0 0 34px rgba(0,255,65,.2)}}
+.fc.outR{transform:translateX(120%) rotate(14deg);opacity:0}
+.fc.outL{transform:translateX(-120%) rotate(-14deg);opacity:0}
+.fcbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formula{font:700 17px "JetBrains Mono",monospace;color:var(--g);background:#020604;border:1px solid rgba(0,255,65,.35);border-radius:12px;padding:12px 14px;text-shadow:0 0 8px rgba(0,255,65,.5);overflow-x:auto}
+.pts{margin:0;padding-left:1.2em;display:grid;gap:8px}
+.pts li::marker{color:var(--c)}
+
+/* retours lumineux */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20;opacity:0}
+#fx.ok{animation:fx .6s;box-shadow:inset 0 0 90px rgba(0,255,65,.55)}
+#fx.ko{animation:fx .6s;box-shadow:inset 0 0 90px rgba(255,61,106,.55)}
+@keyframes fx{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+.confirm{display:none;gap:10px;margin-top:10px}
+.confirm.on{display:grid}
+.big{font:900 clamp(46px,16vw,72px)/1 Orbitron,sans-serif;color:var(--g);text-align:center;text-shadow:0 0 22px rgba(0,255,65,.6)}
+
+html.calm *,html.calm *::before,html.calm *::after{animation:none!important;transition:none!important}
+html.calm .ln{opacity:1}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.ln{opacity:1}}
+@media (min-width:700px){h1{font-size:32px}.panel{padding-inline:32px}}
+</style>
+</head>
+<body>
+<nav class="hud" id="hud" aria-label="Écrans">
+ <button data-i="0"><i></i>HUB</button><button data-i="1"><i></i>QUIZ</button><button data-i="2"><i></i>COURS</button><button data-i="3"><i></i>SUIVI</button>
+</nav>
+
+<main class="track" id="track">
+ <section class="panel" id="p0" aria-label="Hub"><div class="in" id="dash"></div></section>
+ <section class="panel" id="p1" aria-label="Quiz"><div class="in" id="quizTab"></div></section>
+ <section class="panel" id="p2" aria-label="Cours"><div class="in" id="cours"></div></section>
+ <section class="panel" id="p3" aria-label="Suivi"><div class="in" id="suivi"></div></section>
+</main>
+
+<button class="pull" id="pull" aria-label="Ouvrir les réglages">
+ <svg width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10 11 2l9 8"/></svg>RÉGLAGES
+</button>
+
+<div class="ov full" id="ovQuiz" role="dialog" aria-label="Quiz"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR QUITTER</button><div class="ovs"><div class="in" id="quizBody"></div></div></div></div>
+<div class="ov full" id="ovCards" role="dialog" aria-label="Flashcards"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR QUITTER</button><div class="ovs"><div class="in" id="cardBody"></div></div></div></div>
+<div class="ov full" id="ovFiche" role="dialog" aria-label="Résumé de cours"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR FERMER</button><div class="ovs"><div class="in" id="ficheBody"></div></div></div></div>
+<div class="ov" id="ovSet" role="dialog" aria-label="Réglages"><div class="sheet"><button class="grab" data-close><i></i>GLISSER ↓ POUR FERMER</button><div class="ovs"><div class="in" id="setBody"></div></div></div></div>
+<div id="fx"></div>
+
+<script>
+{
+const DOM={
+ I2D:{n:"Tronc commun I2D",c:"#00FF41"},
+ SIN:{n:"Systèmes d'information et numérique",c:"#00E5FF"},
+ EE:{n:"Énergies et environnement",c:"#7CFFB2"},
+ ITEC:{n:"Innovation technologique et éco-conception",c:"#A98BFF"},
+ AC:{n:"Architecture et construction",c:"#4FA3FF"}};
+
+const Q=[
+ {d:"I2D",q:"Une chaîne d'énergie comporte trois éléments de rendements 0,90 ; 0,80 et 0,95. Quel est le rendement global ?",o:["0,684","0,883","2,65","0,80"],e:"Les rendements en série se multiplient : 0,90 × 0,80 × 0,95 = 0,684."},
+ {d:"I2D",q:"Un radiateur de 2 kW fonctionne pendant 3 h. Quelle énergie consomme-t-il ?",o:["6 kWh","0,67 kWh","6 kW","1,5 kWh"],e:"E = P × t = 2 kW × 3 h = 6 kWh. Le kW mesure une puissance, le kWh une énergie."},
+ {d:"I2D",q:"Quel diagramme SysML décrit ce que le système doit satisfaire ?",o:["Diagramme des exigences (req)","Diagramme de séquence (sd)","Diagramme de blocs internes (ibd)","Diagramme d'états (stm)"],e:"Le diagramme des exigences liste et relie les exigences du cahier des charges."},
+ {d:"I2D",q:"Dans la chaîne d'information, quelle fonction assure un capteur ?",o:["Acquérir","Traiter","Distribuer","Convertir"],e:"Le capteur acquiert une grandeur physique et la traduit en signal exploitable."},
+ {d:"I2D",q:"Le variateur de vitesse d'un moteur assure quelle fonction de la chaîne de puissance ?",o:["Distribuer","Acquérir","Transmettre","Alimenter"],e:"Il module l'énergie envoyée à l'actionneur : c'est la fonction Distribuer."},
+ {d:"I2D",q:"Pour un radiateur électrique utilisé quinze ans, quelle phase de l'ACV pèse le plus ?",o:["L'utilisation","L'emballage","Le transport","La fin de vie"],e:"Un appareil qui consomme de l'énergie longtemps a l'essentiel de son impact pendant l'utilisation."},
+ {d:"SIN",q:"Que vaut 0b1011 en décimal ?",o:["11","13","9","1011"],e:"1011₂ = 8 + 0 + 2 + 1 = 11."},
+ {d:"SIN",q:"Que vaut 0xFF en décimal ?",o:["255","256","15","240"],e:"FF₁₆ = 15 × 16 + 15 = 255."},
+ {d:"SIN",q:"Hôte 192.168.1.10/24 : quelle est l'adresse du réseau ?",o:["192.168.1.0","192.168.0.0","192.168.1.255","192.168.1.1"],e:"Masque /24 = 255.255.255.0 : on garde les trois premiers octets, le dernier passe à 0."},
+ {d:"SIN",q:"Combien d'hôtes peut-on adresser dans un réseau /24 ?",o:["254","256","255","24"],e:"2⁸ = 256 adresses, moins l'adresse réseau et l'adresse de diffusion : 254."},
+ {d:"SIN",q:"Quel protocole de transport fonctionne sans connexion, comme pour le streaming ?",o:["UDP","TCP","HTTP","ARP"],e:"UDP n'établit pas de connexion et ne garantit pas la livraison, mais il est rapide."},
+ {d:"SIN",q:"CAN 10 bits, pleine échelle 5 V : quel est le quantum ?",o:["≈ 4,9 mV","≈ 19,5 mV","≈ 0,5 V","≈ 1,2 mV"],e:"q = 5 V / 2¹⁰ = 5 / 1024 ≈ 4,88 mV."},
+ {d:"SIN",q:"Signal PWM d'amplitude 12 V, rapport cyclique 25 %. Tension moyenne ?",o:["3 V","9 V","12 V","0,25 V"],e:"Umoy = α × Umax = 0,25 × 12 = 3 V."},
+ {d:"EE",q:"Comment calcule-t-on la puissance mécanique d'un moteur en rotation ?",o:["P = C × ω","P = U × I","P = F / S","P = C / ω"],e:"C en N·m, ω en rad/s : P en W."},
+ {d:"EE",q:"Combien font 1 500 tr/min en rad/s ?",o:["≈ 157 rad/s","≈ 25 rad/s","≈ 9 425 rad/s","1 500 rad/s"],e:"ω = 2π × N / 60 = 2π × 1500 / 60 ≈ 157 rad/s."},
+ {d:"EE",q:"Batterie 12 V – 100 Ah : quelle énergie stockée ?",o:["1,2 kWh","12 kWh","120 Wh","8,3 kWh"],e:"E = U × Q = 12 V × 100 Ah = 1 200 Wh = 1,2 kWh."},
+ {d:"EE",q:"Quel convertisseur transforme le continu en alternatif ?",o:["Onduleur","Hacheur","Redresseur","Transformateur"],e:"Onduleur : DC → AC. Hacheur : DC → DC. Redresseur : AC → DC."},
+ {d:"EE",q:"Puissance active en monophasé ?",o:["P = U × I × cos φ","P = U × I × sin φ","P = U × I","P = √3 × U × I"],e:"P = U I cos φ (W). U I sin φ est la puissance réactive, U I la puissance apparente."},
+ {d:"EE",q:"Un moteur absorbe 2 000 W et fournit 1 700 W. Quel est son rendement ?",o:["85 %","117 %","15 %","70 %"],e:"η = Pu / Pa = 1 700 / 2 000 = 0,85."},
+ {d:"ITEC",q:"Quelle relation donne la contrainte normale en traction ?",o:["σ = F / S","σ = F × S","σ = E × S","σ = S / F"],e:"F en N, S en mm² : σ en MPa (N/mm²)."},
+ {d:"ITEC",q:"Comment s'exprime le coefficient de sécurité ?",o:["s = Re / σmax","s = σmax / Re","s = E / Re","s = F / Re"],e:"On compare la limite élastique Re à la contrainte maximale : s doit dépasser la valeur exigée."},
+ {d:"ITEC",q:"Combien de degrés de liberté laisse une liaison pivot ?",o:["1 rotation","1 translation","1 rotation + 1 translation","Aucun"],e:"La pivot autorise uniquement la rotation autour de son axe."},
+ {d:"ITEC",q:"Quelle est l'unité du module de Young E ?",o:["Pa (souvent en GPa)","N","N·m","Sans unité"],e:"E = σ / ε ; ε est sans unité, donc E s'exprime comme une contrainte."},
+ {d:"ITEC",q:"Quel matériau a une masse volumique proche de 2 700 kg/m³ ?",o:["Aluminium","Acier","Cuivre","PLA"],e:"Aluminium ≈ 2 700, acier ≈ 7 850, cuivre ≈ 8 960, PLA ≈ 1 240 kg/m³."},
+ {d:"ITEC",q:"Une éprouvette de 100 mm s'allonge de 0,5 mm. Déformation ε ?",o:["0,005","0,05","200","5"],e:"ε = ΔL / L0 = 0,5 / 100 = 0,005."},
+ {d:"AC",q:"Résistance thermique d'une paroi homogène ?",o:["R = e / λ","R = λ / e","R = e × λ","R = U × S"],e:"e en m, λ en W/(m·K) : R en m²·K/W."},
+ {d:"AC",q:"Quelle est l'unité de la conductivité thermique λ ?",o:["W/(m·K)","m²·K/W","W/m²","kWh/m²"],e:"λ s'exprime en watts par mètre et par kelvin."},
+ {d:"AC",q:"Lequel de ces matériaux isole le mieux ?",o:["λ = 0,035 W/(m·K)","λ = 0,15 W/(m·K)","λ = 1,7 W/(m·K)","λ = 50 W/(m·K)"],e:"Plus λ est faible, meilleur est l'isolant. 1,7 ≈ béton, 50 ≈ acier."},
+ {d:"AC",q:"Isolant de 12 cm, λ = 0,04 W/(m·K). Résistance thermique ?",o:["3 m²·K/W","0,0048 m²·K/W","4,8 m²·K/W","0,33 m²·K/W"],e:"R = e / λ = 0,12 / 0,04 = 3 m²·K/W. Attention : e en mètres."},
+ {d:"AC",q:"Paroi de résistance totale 4 m²·K/W : coefficient U ?",o:["0,25 W/(m²·K)","4 W/(m²·K)","40 W/(m²·K)","0,4 W/(m²·K)"],e:"U = 1 / R = 1 / 4 = 0,25 W/(m²·K)."},
+ {d:"AC",q:"Quelle réglementation s'applique aux bâtiments neufs en France depuis 2022 ?",o:["RE2020","RT2012","HQE","BBC"],e:"La RE2020 a remplacé la RT2012 ; elle ajoute l'impact carbone et le confort d'été."},
+ {d:"AC",q:"Qu'est-ce qu'un pont thermique ?",o:["Une zone où l'isolation est interrompue","Un élément porteur entre deux poutres","Un système de ventilation","Un capteur de température"],e:"Jonctions mur/plancher, menuiseries… la chaleur s'y échappe plus vite."}
+];
+const C=[
+ {d:"I2D",f:"Rendement η",b:"η = P utile / P absorbée (< 1). En série : η = η₁ × η₂ × …"},
+ {d:"I2D",f:"Chaîne de puissance",b:"Alimenter → Distribuer → Convertir → Transmettre"},
+ {d:"I2D",f:"Chaîne d'information",b:"Acquérir → Traiter → Communiquer"},
+ {d:"I2D",f:"Énergie",b:"E = P × t. 1 Wh = 3 600 J ; 1 kWh = 3,6 MJ"},
+ {d:"SIN",f:"Masque /24",b:"255.255.255.0 : 256 adresses, 254 hôtes"},
+ {d:"SIN",f:"Quantum d'un CAN",b:"q = pleine échelle / 2ⁿ (n = nombre de bits)"},
+ {d:"SIN",f:"TCP ou UDP ?",b:"TCP : connecté, fiable, ordonné. UDP : sans connexion, rapide, sans garantie"},
+ {d:"SIN",f:"Rapport cyclique",b:"α = tH / T ; Umoy = α × Umax"},
+ {d:"EE",f:"Vitesse angulaire",b:"ω = 2π × N / 60 (N en tr/min, ω en rad/s)"},
+ {d:"EE",f:"Puissance mécanique",b:"P = C × ω (W, N·m, rad/s)"},
+ {d:"EE",f:"Énergie d'une batterie",b:"E (Wh) = U (V) × Q (Ah)"},
+ {d:"EE",f:"Convertisseurs",b:"Redresseur AC→DC · Hacheur DC→DC · Onduleur DC→AC"},
+ {d:"ITEC",f:"Contrainte normale",b:"σ = F / S (MPa = N/mm²)"},
+ {d:"ITEC",f:"Loi de Hooke",b:"σ = E × ε avec ε = ΔL / L0"},
+ {d:"ITEC",f:"Coefficient de sécurité",b:"s = Re / σmax ; on vérifie s ≥ s exigé"},
+ {d:"ITEC",f:"Liaison pivot",b:"1 degré de liberté : rotation autour de l'axe"},
+ {d:"AC",f:"Résistance thermique",b:"R = e / λ (m²·K/W), e en mètres"},
+ {d:"AC",f:"Coefficient U",b:"U = 1 / R totale (W/(m²·K)) ; plus U est faible, mieux la paroi isole"},
+ {d:"AC",f:"Flux thermique",b:"Φ = U × S × ΔT (W)"},
+ {d:"AC",f:"RE2020",b:"Bâtiments neufs : sobriété énergétique, carbone sur le cycle de vie, confort d'été"}
+];
+const F=[
+ {d:"I2D",t:"Chaînes de puissance et d'information",f:"η global = η₁ × η₂ × η₃",p:["Chaîne de puissance : Alimenter, Distribuer, Convertir, Transmettre.","Chaîne d'information : Acquérir, Traiter, Communiquer.","Chaque conversion perd de l'énergie : le rendement global est le produit des rendements.","Puissance (W) et énergie (Wh ou J) ne se confondent pas : E = P × t."]},
+ {d:"I2D",t:"Modéliser avec SysML",f:"req · uc · bdd · ibd · sd · stm",p:["Exigences (req) : ce que le système doit satisfaire.","Cas d'utilisation (uc) : qui interagit avec le système.","Blocs (bdd, ibd) : structure et flux entre composants.","Séquence (sd) et états (stm) : comportement dans le temps."]},
+ {d:"SIN",t:"Numération et réseaux",f:"N hôtes = 2^(32 − préfixe) − 2",p:["Binaire → décimal : somme des puissances de 2 des bits à 1.","Hexadécimal : 1 chiffre = 4 bits ; FF = 255.","Adresse réseau : ET logique entre l'adresse IP et le masque.","TCP fiable et connecté, UDP rapide sans connexion."]},
+ {d:"SIN",t:"Acquisition et commande",f:"q = PE / 2ⁿ   ·   Umoy = α × Umax",p:["Un CAN n bits découpe la pleine échelle en 2ⁿ niveaux.","Plus n est grand, plus la mesure est fine.","La PWM règle une puissance moyenne en jouant sur le rapport cyclique α."]},
+ {d:"EE",t:"Puissances et conversion",f:"P = C × ω   ·   ω = 2πN / 60",p:["Puissance active monophasée : P = U I cos φ.","Rendement : η = Pu / Pa.","Redresseur AC→DC, hacheur DC→DC, onduleur DC→AC.","Énergie d'une batterie : E = U × Q (Wh)."]},
+ {d:"ITEC",t:"Résistance des matériaux",f:"σ = F / S   ·   σ = E × ε   ·   s = Re / σmax",p:["La contrainte se calcule en MPa avec F en N et S en mm².","La loi de Hooke vaut dans le domaine élastique.","On valide une pièce si le coefficient de sécurité dépasse la valeur exigée.","Masses volumiques : alu ≈ 2 700, acier ≈ 7 850 kg/m³."]},
+ {d:"AC",t:"Thermique du bâtiment",f:"R = e / λ   ·   U = 1 / R   ·   Φ = U × S × ΔT",p:["λ faible = bon isolant (laines ≈ 0,035 W/(m·K)).","Les résistances des couches d'une paroi s'additionnent.","Les ponts thermiques sont des fuites localisées.","La RE2020 encadre les bâtiments neufs depuis 2022."]}
+];
+Q.forEach((x,i)=>x.id="q"+i);C.forEach((x,i)=>x.id="c"+i);
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pct=x=>Math.round(x*100);
+const KEY="neonrush-sti2d-v1";
+let S=null;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+S=Object.assign({spec:Object.keys(DOM),len:8,motion:true,qs:{},cs:{},hist:[],ans:[],tab:0},S||{});
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const day=t=>{const d=new Date(t);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+const specs=()=>Object.keys(DOM).filter(k=>S.spec.includes(k));
+
+function mast(d){const q=Q.filter(x=>x.d===d),c=C.filter(x=>x.d===d);
+ const a=q.filter(x=>S.qs[x.id]&&S.qs[x.id].ok).length,b=c.filter(x=>S.cs[x.id]).length;
+ return{all:(a+b)/(q.length+c.length),q:a/q.length,c:b/c.length}}
+function globalM(){const s=specs();return s.reduce((t,d)=>t+mast(d).all,0)/(s.length||1)}
+function streak(){const set=new Set(S.hist.map(h=>day(h.t)));let n=0,t=new Date();if(!set.has(day(t)))t.setDate(t.getDate()-1);while(set.has(day(t))){n++;t.setDate(t.getDate()-1)}return n}
+const xp=()=>S.hist.reduce((t,h)=>t+(h.xp||0),0);
+function acc(){const a=S.ans.slice(-20);return a.length?pct(a.reduce((x,y)=>x+y,0)/a.length)+"%":"—"}
+const errs=()=>Q.filter(x=>specs().includes(x.d)&&S.qs[x.id]&&!S.qs[x.id].ok);
+
+function ring(p,col,ticks){const r=52,L=2*Math.PI*r;let t="";
+ if(ticks)for(let i=0;i<60;i++){const a=i*6*Math.PI/180,on=i/60<p;t+=`<line class="tk${on?" on":""}" x1="${60+58*Math.sin(a)}" y1="${60-58*Math.cos(a)}" x2="${60+(i%5?55.5:54)*Math.sin(a)}" y2="${60-(i%5?55.5:54)*Math.cos(a)}"/>`}
+ return `<svg viewBox="0 0 120 120" aria-hidden="true">${t}<circle cx="60" cy="60" r="${ticks?47:r}" class="rt"/><circle cx="60" cy="60" r="${ticks?47:r}" class="rv" style="stroke:${col};--C:${2*Math.PI*(ticks?47:r)}" stroke-dasharray="${2*Math.PI*(ticks?47:r)}" stroke-dashoffset="${2*Math.PI*(ticks?47:r)*(1-p)}" transform="rotate(-90 60 60)"/></svg>`}
+
+/* ---------- écrans ---------- */
+function rDash(){const g=globalM(),s=specs();
+ const weak=s.slice().sort((a,b)=>mast(a).all-mast(b).all)[0];
+ $("#dash").innerHTML=`
+ <div><p class="mut" style="margin:0 0 4px;font-size:13px">Assistant révision STI2D</p><h1>Cockpit de révision</h1></div>
+ <div class="gauge">${ring(g,"#00E5FF",true)}<div class="mid"><div class="num">${pct(g)}<small>%</small></div><span class="mut" style="font-size:13px">maîtrise globale</span></div></div>
+ <div class="stats"><div class="box stat"><div class="num">${streak()}</div><span>jours de suite</span></div><div class="box stat"><div class="num">${xp()}</div><span>XP</span></div><div class="box stat"><div class="num">${acc()}</div><span>réussite (20 dern.)</span></div></div>
+ <div class="box halo" style="display:grid;gap:12px">
+  <h2>Mission suivante</h2>
+  <p class="mut" style="margin:0">Point faible : <b style="color:${DOM[weak].c}">${weak}</b> à ${pct(mast(weak).all)} %. Un quiz ciblé fait remonter la jauge.</p>
+  <div class="row"><button class="btn" data-quiz="${weak}">Quiz ${weak}</button><button class="btn c" data-cards="${weak}">Flashcards ${weak}</button></div>
+ </div>
+ <div><h2 style="margin-bottom:10px">Jauges par spécialité</h2><div class="doms">${s.map(d=>{const m=mast(d).all;return `<button class="dom" data-quiz="${d}" aria-label="Quiz ${DOM[d].n}"><div class="r">${ring(m,DOM[d].c)}<b>${pct(m)}</b></div><em style="color:${DOM[d].c}">${d}</em></button>`}).join("")}</div></div>
+ <p class="hint">Balaye <b>← →</b> pour changer d'écran · <b>↑</b> depuis le bas pour les réglages · <b>↓</b> pour fermer une fenêtre</p>`}
+
+function rQuizTab(){const s=specs(),last=S.hist.filter(h=>h.k==="quiz").slice(-1)[0],e=errs();
+ $("#quizTab").innerHTML=`
+ <div><h1>Quiz terminal</h1><p class="mut">${S.len} questions, priorité à celles que tu n'as pas encore réussies.</p></div>
+ <div class="box halo" style="display:grid;gap:14px">
+  <h2>Cible</h2>
+  <div class="chips" role="radiogroup">${["ALL",...s].map((d,i)=>`<label class="chip"><input type="radio" name="qd" value="${d}"${i?"":" checked"}><span>${d==="ALL"?"Toutes":d}</span></label>`).join("")}</div>
+  <button class="btn" id="goQuiz">Lancer le quiz</button>
+ </div>
+ <div class="box" style="display:grid;gap:10px">
+  <h2>Mes erreurs</h2>
+  <p class="mut" style="margin:0">${e.length?e.length+" question"+(e.length>1?"s":"")+" à retravailler.":"Aucune erreur en attente."}</p>
+  ${e.length?`<button class="btn bad" data-quiz="ERR">Rejouer mes erreurs</button>`:""}
+ </div>
+ ${last?`<div class="box"><h2>Dernière session</h2><p class="mut" style="margin:6px 0 0">${esc(last.d)} · ${last.s}/${last.n} · +${last.xp} XP</p></div>`:""}`;
+ $("#goQuiz").onclick=()=>startQuiz(($("input[name=qd]:checked")||{}).value||"ALL")}
+
+function rCours(){const s=specs();
+ $("#cours").innerHTML=`<div><h1>Cours</h1><p class="mut">Fiches de synthèse, puis flashcards du thème.</p></div>
+ ${s.map(d=>`<div style="display:grid;gap:10px"><h2 style="color:${DOM[d].c}">${d} <span class="mut" style="font:400 13px Inter">· ${esc(DOM[d].n)}</span></h2>
+  ${F.map((f,i)=>f.d===d?`<button class="box fiche" data-fiche="${i}"><h3>${esc(f.t)}</h3><span class="mut" style="font-size:14px">${f.p.length} points clés · ${C.filter(c=>c.d===d).length} cartes</span></button>`:"").join("")}</div>`).join("")}
+ <button class="btn c" data-cards="ALL">Toutes les flashcards</button>`}
+
+function rSuivi(){const s=specs(),e=errs();
+ const days=[...Array(7)].map((_,i)=>{const t=new Date();t.setDate(t.getDate()-6+i);const k=day(t);return{l:"DLMMJVS"[t.getDay()],v:S.hist.filter(h=>day(h.t)===k).reduce((a,h)=>a+(h.xp||0),0)}});
+ const mx=Math.max(20,...days.map(d=>d.v));
+ $("#suivi").innerHTML=`<div><h1>Suivi</h1><p class="mut">Maîtrise = questions réussies + cartes sues.</p></div>
+ <div class="box">${s.map(d=>{const m=mast(d);return `<div class="mrow"><header><span style="color:${DOM[d].c};font-weight:600">${d}</span><b>${pct(m.all)} %</b></header>
+  <div class="bar"><i style="width:${pct(m.all)}%;background:${DOM[d].c};box-shadow:0 0 10px ${DOM[d].c}"></i></div>
+  <span class="mut" style="font-size:12px">Quiz ${pct(m.q)} % · Cartes ${pct(m.c)} %</span></div>`}).join("")}</div>
+ <div class="box"><h2>XP sur 7 jours</h2><div class="week">${days.map(d=>`<div><i style="height:${d.v/mx*100}%" title="${d.v} XP"></i>${d.l}</div>`).join("")}</div></div>
+ <div class="box"><h2>Historique</h2>${S.hist.length?`<ul class="list">${S.hist.slice(-8).reverse().map(h=>`<li><span>${h.k==="quiz"?"Quiz":"Cartes"} · ${esc(h.d)}</span><span class="mut" style="white-space:nowrap">${h.s}/${h.n} · +${h.xp} XP</span></li>`).join("")}</ul>`:`<p class="mut">Aucune session pour l'instant. Lance un quiz depuis le hub.</p>`}</div>
+ <div class="box"><h2>À retravailler</h2>${e.length?`<ul class="list">${e.slice(0,6).map(q=>`<li><span>${esc(q.q)}</span><span class="tag" style="color:${DOM[q.d].c}">${q.d}</span></li>`).join("")}</ul><button class="btn bad" data-quiz="ERR" style="width:100%;margin-top:12px">Rejouer mes erreurs</button>`:`<p class="mut">Rien en attente.</p>`}</div>`}
+
+function rAll(){rDash();rQuizTab();rCours();rSuivi()}
+
+/* ---------- feuilles ---------- */
+const stack=[];
+function openOv(el){if(stack.includes(el))return;el.classList.add("on");stack.push(el);document.body.classList.add("dim");el.querySelector(".ovs").scrollTop=0;setTimeout(()=>{const b=el.querySelector(".grab");b&&b.focus({preventScroll:true})},50)}
+function closeOv(){const el=stack.pop();if(!el)return;el.classList.remove("on");
+ if(el.id==="ovQuiz"&&qz&&!qz.done&&qz.res.length)endQuiz(true);
+ if(el.id==="ovCards"&&fc&&!fc.done&&fc.i)endCards(true);
+ if(!stack.length){document.body.classList.remove("dim");rAll()}}
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeOv);
+
+function fx(k){const f=$("#fx");f.className="";void f.offsetWidth;f.className=k;try{navigator.vibrate&&navigator.vibrate(k==="ok"?18:[30,40,30])}catch(e){}}
+
+/* ---------- quiz ---------- */
+let qz=null;
+function startQuiz(t){let pool=t==="ERR"?errs():Q.filter(x=>specs().includes(x.d)&&(t==="ALL"||x.d===t));
+ const fresh=shuf(pool.filter(x=>!(S.qs[x.id]&&S.qs[x.id].ok))),done=shuf(pool.filter(x=>S.qs[x.id]&&S.qs[x.id].ok));
+ const items=fresh.concat(done).slice(0,S.len);if(!items.length)return;
+ qz={items,i:0,ok:0,res:[],xp:0,done:false,label:t==="ERR"?"Erreurs":t==="ALL"?"Toutes":t};
+ openOv($("#ovQuiz"));rQ()}
+function head(){return `<div class="qhead"><span style="color:var(--g)">NEON://QUIZ</span><span class="mut">${Math.min(qz.i+1,qz.items.length)}/${qz.items.length}</span></div>
+ <div class="segs">${qz.items.map((_,i)=>`<i class="${qz.res[i]===1?"ok":qz.res[i]===0?"ko":i===qz.i?"cur":""}"></i>`).join("")}</div>
+ <div style="display:flex;align-items:center;gap:10px;font-size:12px" class="mut"><span style="white-space:nowrap">Précision</span><div class="bar" style="flex:1"><i id="accBar" style="width:${qz.res.length?pct(qz.ok/qz.res.length):0}%;background:${qz.res.length&&qz.ok/qz.res.length<.5?"var(--bad)":"var(--g)"}"></i></div><b class="num" style="color:var(--g);white-space:nowrap">+${qz.xp} XP</b></div>`}
+function rQ(){const q=qz.items[qz.i],ord=shuf([0,1,2,3]);qz.ord=ord;
+ $("#quizBody").innerHTML=head()+`<div class="term"><div class="scan"></div>
+  <div class="ln prompt" style="--d:0s">&gt; module ${q.d} · ${esc(DOM[q.d].n)}</div>
+  <div class="ln qtxt" style="--d:.25s">${esc(q.q)}</div>
+  ${ord.map((k,j)=>`<button class="opt ln" style="--d:${.55+j*.15}s" data-k="${k}"><kbd>${j+1}</kbd><span>${esc(q.o[k])}</span></button>`).join("")}
+  <div id="after"></div></div>`;
+ $("#quizBody").querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.k))}
+function answer(k){const q=qz.items[qz.i];if(qz.res[qz.i]!==undefined)return;const ok=k===0;
+ qz.res[qz.i]=ok?1:0;if(ok){qz.ok++;qz.xp+=10}
+ S.qs[q.id]={ok,n:((S.qs[q.id]||{}).n||0)+1};S.ans.push(ok?1:0);S.ans=S.ans.slice(-50);save();
+ $("#quizBody").querySelectorAll(".opt").forEach(b=>{b.disabled=true;const v=+b.dataset.k;b.classList.add(v===0?"ok":v===k?"ko":"dim")});
+ fx(ok?"ok":"ko");
+ const segs=$("#quizBody").querySelectorAll(".segs i");segs[qz.i].className=ok?"ok":"ko";
+ const ab=$("#accBar");ab.style.width=pct(qz.ok/qz.res.length)+"%";ab.style.background=qz.ok/qz.res.length<.5?"var(--bad)":"var(--g)";
+ $("#quizBody").querySelector(".qhead+.segs+div b").textContent="+"+qz.xp+" XP";
+ const last=qz.i===qz.items.length-1;
+ $("#after").innerHTML=`<div class="ln expl" style="--d:0s">// ${ok?"Correct.":"Incorrect."} ${esc(q.e)}</div><button class="btn" id="nextQ" style="width:100%;margin-top:14px">${last?"Voir le bilan":"Question suivante"}</button>`;
+ $("#nextQ").onclick=next;$("#nextQ").focus({preventScroll:true});$("#nextQ").scrollIntoView({block:"nearest",behavior:"smooth"})}
+function next(){if(qz.i<qz.items.length-1){qz.i++;rQ();$("#ovQuiz .ovs").scrollTop=0}else endQuiz(false)}
+function endQuiz(silent){if(qz.done)return;qz.done=true;const n=qz.res.length;
+ S.hist.push({t:Date.now(),k:"quiz",d:qz.label,s:qz.ok,n,xp:qz.xp});save();if(silent)return;
+ const r=qz.ok/n,wrong=qz.items.filter((_,i)=>qz.res[i]===0);
+ $("#quizBody").innerHTML=`<div class="qhead"><span style="color:var(--g)">NEON://BILAN</span><span class="mut">${esc(qz.label)}</span></div>
+ <div class="box halo" style="text-align:center;display:grid;gap:8px;padding:28px 16px"><div class="big">${qz.ok}/${n}</div><p class="mut" style="margin:0">${r===1?"Sans faute.":r>=.7?"Solide. Encore un effort sur les erreurs.":r>=.4?"En progrès. Revois les fiches concernées.":"À retravailler : commence par les flashcards."}</p><b class="num" style="color:var(--c)">+${qz.xp} XP</b></div>
+ ${wrong.length?`<div class="box"><h2>Corrections</h2><ul class="list">${wrong.map(q=>`<li style="display:grid;gap:4px"><span>${esc(q.q)}</span><span style="color:var(--g)">${esc(q.o[0])}</span></li>`).join("")}</ul></div>`:""}
+ <div class="row"><button class="btn" id="again">Rejouer</button><button class="btn ghost" data-close2>Retour au hub</button></div>`;
+ $("#again").onclick=()=>{const t=qz.label==="Erreurs"?"ERR":qz.label==="Toutes"?"ALL":qz.label;if(t==="ERR"&&!errs().length)return closeOv();startQuiz2(t)};
+ $("[data-close2]").onclick=closeOv;fx(r>=.5?"ok":"ko")}
+function startQuiz2(t){stack.pop();$("#ovQuiz").classList.remove("on");startQuiz(t)}
+
+/* ---------- flashcards ---------- */
+let fc=null;
+function startCards(d){const pool=C.filter(x=>specs().includes(x.d)&&(d==="ALL"||x.d===d));
+ const items=shuf(pool.filter(x=>!S.cs[x.id])).concat(shuf(pool.filter(x=>S.cs[x.id]))).slice(0,10);if(!items.length)return;
+ fc={items,i:0,known:0,xp:0,done:false,label:d==="ALL"?"Toutes":d};openOv($("#ovCards"));rC()}
+function rC(){const c=fc.items[fc.i];
+ $("#cardBody").innerHTML=`<div class="qhead"><span style="color:var(--c)">NEON://CARTES</span><span class="mut">${fc.i+1}/${fc.items.length}</span></div>
+ <div class="bar"><i style="width:${fc.i/fc.items.length*100}%"></i></div>
+ <div class="stage"><div class="fc" id="card" tabindex="0" role="button" aria-label="Retourner la carte"><div class="fc-in">
+  <div class="face"><span class="tag" style="color:${DOM[c.d].c}">${c.d}</span><h3>${esc(c.f)}</h3><small>Touche pour retourner</small></div>
+  <div class="face b"><span class="tag" style="color:var(--g)">RÉPONSE</span><p>${esc(c.b)}</p><small>← à revoir · je sais →</small></div>
+ </div></div></div>
+ <div class="fcbtns"><button class="btn bad" id="cNo">À revoir</button><button class="btn" id="cYes">Je sais</button></div>`;
+ const card=$("#card");let sx=null,dx=0;
+ card.addEventListener("pointerdown",e=>{sx=e.clientX;dx=0;card.style.transition="none"});
+ card.addEventListener("pointermove",e=>{if(sx===null)return;dx=e.clientX-sx;if(Math.abs(dx)>8)card.style.transform=`translateX(${dx}px) rotate(${dx/20}deg)`});
+ const up=()=>{if(sx===null)return;sx=null;card.style.transition="";card.style.transform="";if(dx>80)mark(true);else if(dx<-80)mark(false);else if(Math.abs(dx)<8)flip()};
+ card.addEventListener("pointerup",up);card.addEventListener("pointercancel",()=>{sx=null;card.style.transition="";card.style.transform=""});
+ card.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}};
+ $("#cNo").onclick=()=>mark(false);$("#cYes").onclick=()=>mark(true)}
+function flip(){const c=$("#card");if(!c)return;c.classList.toggle("flip");if(c.classList.contains("flip")){c.classList.remove("zap");void c.offsetWidth;c.classList.add("zap")}}
+function mark(k){const c=fc.items[fc.i],el=$("#card");if(!el||el.dataset.out)return;el.dataset.out=1;
+ S.cs[c.id]=k;if(k){fc.known++;fc.xp+=5}save();fx(k?"ok":"ko");el.classList.add(k?"outR":"outL");
+ setTimeout(()=>{fc.i++;fc.i<fc.items.length?rC():endCards(false)},280)}
+function endCards(silent){if(fc.done)return;fc.done=true;S.hist.push({t:Date.now(),k:"cards",d:fc.label,s:fc.known,n:fc.i,xp:fc.xp});save();if(silent)return;
+ $("#cardBody").innerHTML=`<div class="qhead"><span style="color:var(--c)">NEON://BILAN</span><span class="mut">${esc(fc.label)}</span></div>
+ <div class="box halo" style="text-align:center;display:grid;gap:8px;padding:28px 16px"><div class="big">${fc.known}/${fc.items.length}</div><p class="mut" style="margin:0">cartes sues</p><b class="num" style="color:var(--c)">+${fc.xp} XP</b></div>
+ <div class="row"><button class="btn c" id="cAgain">Nouveau paquet</button><button class="btn ghost" id="cBack">Retour au hub</button></div>`;
+ $("#cAgain").onclick=()=>{const d=fc.label==="Toutes"?"ALL":fc.label;stack.pop();$("#ovCards").classList.remove("on");startCards(d)};$("#cBack").onclick=closeOv}
+
+/* ---------- fiche ---------- */
+function openFiche(i){const f=F[i];
+ $("#ficheBody").innerHTML=`<span class="tag" style="color:${DOM[f.d].c};justify-self:start">${f.d}</span><h1>${esc(f.t)}</h1>
+ <div class="formula">${esc(f.f)}</div><div class="box halo"><ul class="pts">${f.p.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
+ <div class="row"><button class="btn c" data-cards="${f.d}">Flashcards ${f.d}</button><button class="btn" data-quiz="${f.d}">Quiz ${f.d}</button></div>`;
+ openOv($("#ovFiche"))}
+
+/* ---------- réglages ---------- */
+function openSet(){
+ $("#setBody").innerHTML=`<h1>Réglages</h1>
+ <div style="display:grid;gap:10px"><h2>Spécialités suivies</h2><div class="chips">${Object.keys(DOM).map(d=>`<label class="chip"><input type="checkbox" name="sp" value="${d}"${S.spec.includes(d)?" checked":""}><span>${d}</span></label>`).join("")}</div><p class="mut" id="spMsg" style="font-size:13px;margin:0">Le hub, les quiz et les cours ne montrent que ces spécialités.</p></div>
+ <div style="display:grid;gap:10px"><h2>Longueur des quiz</h2><div class="chips">${[5,8,12].map(n=>`<label class="chip"><input type="radio" name="ln" value="${n}"${S.len===n?" checked":""}><span>${n} questions</span></label>`).join("")}</div></div>
+ <div style="display:grid;gap:10px"><h2>Effets</h2><div class="chips"><label class="chip"><input type="checkbox" id="mo"${S.motion?" checked":""}><span>Animations lumineuses</span></label></div></div>
+ <div style="display:grid;gap:6px"><h2>Progression</h2><p class="mut" style="margin:0;font-size:14px">Enregistrée dans ce navigateur uniquement.</p><button class="btn bad" id="rst">Réinitialiser</button>
+  <div class="confirm" id="cf"><p style="margin:0">Effacer XP, historique et maîtrise ?</p><div class="row"><button class="btn bad" id="rstY">Oui, effacer</button><button class="btn ghost" id="rstN">Annuler</button></div></div></div>`;
+ $("#setBody").querySelectorAll("input[name=sp]").forEach(i=>i.onchange=()=>{const v=[...$("#setBody").querySelectorAll("input[name=sp]:checked")].map(x=>x.value);
+  if(!v.length){i.checked=true;$("#spMsg").textContent="Garde au moins une spécialité.";return}S.spec=v;save()});
+ $("#setBody").querySelectorAll("input[name=ln]").forEach(i=>i.onchange=()=>{S.len=+i.value;save()});
+ $("#mo").onchange=e=>{S.motion=e.target.checked;save();calm()};
+ $("#rst").onclick=()=>$("#cf").classList.add("on");$("#rstN").onclick=()=>$("#cf").classList.remove("on");
+ $("#rstY").onclick=()=>{Object.assign(S,{qs:{},cs:{},hist:[],ans:[]});save();$("#cf").classList.remove("on");$("#rst").textContent="Progression effacée"};
+ openOv($("#ovSet"))}
+const calm=()=>document.documentElement.classList.toggle("calm",!S.motion);calm();
+
+/* ---------- navigation ---------- */
+const track=$("#track"),panels=[...document.querySelectorAll(".panel")];
+const cur=()=>Math.round(track.scrollLeft/track.clientWidth);
+function go(i,inst){i=Math.max(0,Math.min(3,i));track.scrollTo({left:i*track.clientWidth,behavior:inst||!S.motion?"auto":"smooth"})}
+function dots(){const i=cur();document.querySelectorAll(".hud button").forEach((b,j)=>{b.classList.toggle("on",j===i);b.setAttribute("aria-current",j===i?"page":"false")});if(S.tab!==i){S.tab=i;save()}}
+track.addEventListener("scroll",dots,{passive:true});
+document.querySelectorAll(".hud button").forEach(b=>b.onclick=()=>go(+b.dataset.i));
+$("#pull").onclick=openSet;
+
+document.addEventListener("click",e=>{const q=e.target.closest("[data-quiz]"),c=e.target.closest("[data-cards]"),f=e.target.closest("[data-fiche]");
+ if(q){if(stack.length)while(stack.length){const el=stack.pop();el.classList.remove("on")}startQuiz(q.dataset.quiz)}
+ else if(c){if(stack.length)while(stack.length){const el=stack.pop();el.classList.remove("on")}startCards(c.dataset.cards)}
+ else if(f)openFiche(+f.dataset.fiche)});
+
+let G=null;
+const atBottom=()=>{const p=panels[cur()];return p.scrollTop+p.clientHeight>=p.scrollHeight-4};
+const ovTop=()=>{const el=stack[stack.length-1];return !el||el.querySelector(".ovs").scrollTop<=2};
+function gs(x,y){G={x,y,t:Date.now(),b:!stack.length&&atBottom(),top:ovTop()}}
+function ge(x,y,tg){if(!G)return;const dx=x-G.x,dy=y-G.y,dt=Date.now()-G.t,g=G;G=null;
+ if(dt>800||Math.abs(dy)<70||Math.abs(dy)<1.4*Math.abs(dx))return;
+ if(tg&&tg.closest&&tg.closest("input,label"))return;
+ if(dy>0&&stack.length&&g.top)closeOv();else if(dy<0&&!stack.length&&g.b)openSet()}
+addEventListener("touchstart",e=>{const t=e.touches[0];gs(t.clientX,t.clientY)},{passive:true});
+addEventListener("touchend",e=>{const t=e.changedTouches[0];ge(t.clientX,t.clientY,e.target)},{passive:true});
+addEventListener("mousedown",e=>{if(!e.target.closest("#card"))gs(e.clientX,e.clientY)});
+addEventListener("mouseup",e=>ge(e.clientX,e.clientY,e.target));
+
+addEventListener("keydown",e=>{if(e.target.matches&&e.target.matches("input"))return;
+ if(e.key==="Escape"){closeOv();return}
+ const top=stack[stack.length-1];
+ if(!top){if(e.key==="ArrowRight")go(cur()+1);else if(e.key==="ArrowLeft")go(cur()-1);else if(e.key==="ArrowUp"&&atBottom()){e.preventDefault();openSet()}return}
+ if(top.id==="ovQuiz"&&qz&&!qz.done){const n=+e.key;if(n>=1&&n<=4&&qz.res[qz.i]===undefined){answer(qz.ord[n-1])}else if(e.key==="Enter"&&qz.res[qz.i]!==undefined&&e.target.id!=="nextQ"){e.preventDefault();next()}}
+ if(top.id==="ovCards"&&fc&&!fc.done&&$("#card")){if(e.key==="ArrowRight")mark(true);else if(e.key==="ArrowLeft")mark(false)}});
+addEventListener("resize",()=>go(S.tab,true));
+
+rAll();requestAnimationFrame(()=>{go(S.tab||0,true);dots()});
+}
+</script>
+</body>
+</html>

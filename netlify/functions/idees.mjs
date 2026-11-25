@@ -1,8 +1,8 @@
-// Boîte à idées (Isole x ! et planning des bénévoles So Caval) : reçoit une suggestion anonyme et la range dans la base Notion
+// Boîte à idées (Isole x !, planning des bénévoles So Caval et Neon Rush STI2D) : reçoit une suggestion anonyme et la range dans la base Notion
 // « Boîte à idées – Isole x ! ». La clé de l'intégration est dans la variable NOTION_TOKEN (Netlify).
 const DB = process.env.NOTION_DB_ID || '421325f758c0811191e0fe2fe26c38a9';
 const TYPES = ['Ergonomie', 'Fonctionnalité', 'Bug', 'Autre'];
-const JEUX = ['Atelier STI2D', 'Jungle collège', 'Planning So Caval'];
+const JEUX = ['Atelier STI2D', 'Jungle collège', 'Planning So Caval', 'Neon Rush STI2D'];
 const ORIGINS = ['https://mike8999.github.io', 'https://isole-x.netlify.app', 'https://planning-benevoles-tbho.netlify.app'];
 
 const cors = (origin) => ({

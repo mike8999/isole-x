@@ -1,0 +1,8 @@
+{
+  "name": "isole-x",
+  "private": true,
+  "description": "Fonctions Netlify (boîte à idées, contenu Neon Rush)",
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}

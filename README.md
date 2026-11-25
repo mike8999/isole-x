@@ -22,6 +22,11 @@ Jeux pour s’entraîner en STI2D.
   - ancienne version 1 conservée : https://mike8999.github.io/isole-x/v3-v1/
   - Isole x ! : 12 chapitres (dont « Expert », 10 défis difficiles) (5 défis pour addition et multiplication, 10 ensuite, avec une vraie progression et un défi ultime difficile) : formules de spécialité SI, SIN, ITEC, EE, AC, problèmes SI ou STI2D selon la spécialité, inéquations, robot Volt, badges, défi chrono, défi du jour, boutique, code de sauvegarde, hors ligne, fonctions, complexes, résultat précis, coups bonus, entraînement ciblé, mode expérimental, tutoriel et aide animés
   - Physic’s & Co : bloc chimie, 40 équations à équilibrer (combustions, oxydoréduction, acides-bases, matériaux et énergie)
+- **Neon Rush STI2D (révisions : quiz terminal, flashcards, schémas animés à compléter) — dernière version** : https://mike8999.github.io/isole-x/neon-rush/
+  - ancienne version 1 conservée : https://mike8999.github.io/isole-x/neon-rush-v1/
+  - Mode professeur (code dans la variable Netlify `NEON_PROF_CODE`) : édition de toutes les questions, cartes, fiches et schémas, enregistrées en ligne (fonction `neon-contenu`, Netlify Blobs) et vues par les élèves au chargement suivant
+  - Schémas en glisser-déposer : circuit DEL, poutre sur deux appuis, chaîne de puissance, chaîne d'information, chaîne cinématique pignon-crémaillère
+  - Boîte à idées vers la base Notion (Jeu = Neon Rush STI2D)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/
