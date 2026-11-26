@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Retour de séance</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  :root { --fond:#f4f1ea; --carte:#fff; --encre:#1f2430; --doux:#6b7080; --bord:#e3ded3;
+          --plus:#1f9d6b; --plus-f:#e3f5ec; --moins:#d9534f; --moins-f:#fbe7e6; --ryt:#c98a10; --ryt-f:#fbf1dc; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; background:var(--fond); color:var(--encre); font-family:Nunito,system-ui,sans-serif; }
+  main { max-width:460px; margin:0 auto; padding:max(14px,env(safe-area-inset-top)) 14px 18px; min-height:100dvh; display:flex; flex-direction:column; }
+  header { text-align:center; margin-bottom:10px; }
+  .cours { display:inline-block; background:var(--encre); color:#fff; border-radius:99px; padding:4px 14px; font-weight:800; font-size:.85rem; }
+  h1 { font-size:1.35rem; margin:10px 0 2px; }
+  .aide { color:var(--doux); font-size:.9rem; margin:0; }
+  .ligne { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+  .titre-ligne { grid-column:1/-1; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--doux); margin:6px 0 -4px 4px; }
+  .seuls { grid-template-columns:repeat(3,1fr); }
+  button.choix { font:inherit; font-weight:700; font-size:1rem; border:2px solid var(--bord); background:var(--carte); color:var(--encre);
+    border-radius:14px; padding:12px 6px; min-height:52px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:transform .08s, background .15s, border-color .15s, opacity .15s; }
+  button.choix:active { transform:scale(.96); }
+  button.choix .coche { width:18px; height:18px; border-radius:5px; border:2px solid currentColor; opacity:.35; flex:none; display:grid; place-items:center; font-size:.75rem; }
+  button.choix[aria-pressed=true] .coche { opacity:1; }
+  button.choix[aria-pressed=true] .coche::after { content:"✓"; }
+  .p[aria-pressed=true] { background:var(--plus-f); border-color:var(--plus); color:#0f6b48; }
+  .m[aria-pressed=true] { background:var(--moins-f); border-color:var(--moins); color:#a3302c; }
+  .r[aria-pressed=true] { background:var(--ryt-f); border-color:var(--ryt); color:#8a5d06; }
+  button.choix:disabled { opacity:.3; cursor:not-allowed; text-decoration:line-through; }
+  .bas { margin-top:auto; padding-top:16px; }
+  #envoyer { width:100%; font:inherit; font-weight:800; font-size:1.1rem; border:0; border-radius:16px; padding:16px; background:var(--encre); color:#fff; cursor:pointer; }
+  #envoyer:disabled { opacity:.35; }
+  .note { text-align:center; color:var(--doux); font-size:.78rem; margin:8px 0 0; }
+  .fin { text-align:center; margin:auto 0; }
+  .fin .gros { font-size:3.5rem; }
+  .erreur { color:var(--moins); text-align:center; font-weight:700; min-height:1.2em; margin:8px 0 0; font-size:.9rem; }
+  .piege { position:absolute; left:-9999px; }
+  /* Mode professeur */
+  .prof label { display:block; font-weight:800; font-size:.85rem; margin:14px 0 4px; }
+  .prof input { width:100%; font:inherit; font-size:1rem; padding:12px; border:2px solid var(--bord); border-radius:12px; background:#fff; }
+  .prof .btns { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .prof .btns button { flex:1; font:inherit; font-weight:800; border:2px solid var(--encre); border-radius:12px; padding:11px; background:#fff; cursor:pointer; }
+  .prof .btns button.princ { background:var(--encre); color:#fff; }
+  #qr { background:#fff; border-radius:16px; padding:14px; margin-top:14px; text-align:center; display:none; }
+  #qr svg, #qr img { width:100%; max-width:320px; height:auto; }
+  #lien { word-break:break-all; font-size:.8rem; color:var(--doux); margin-top:6px; }
+  #ecran { position:fixed; inset:0; background:#fff; display:none; flex-direction:column; align-items:center; justify-content:center; padding:3vh; z-index:9; }
+  #ecran.ouvert { display:flex; }
+  #ecran .qr { width:min(78vh,90vw); }
+  #ecran .qr svg { width:100%; height:auto; }
+  #ecran h2 { font-size:4vh; margin:0 0 2vh; text-align:center; }
+  #ecran p { font-size:2.4vh; color:var(--doux); margin:2vh 0 0; }
+  .alerte { background:var(--ryt-f); border:2px solid var(--ryt); border-radius:12px; padding:10px; font-size:.85rem; margin-top:12px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="ecran" onclick="this.classList.remove('ouvert')"></div>
+
+<script>
+// Adresse du serveur Google Apps Script (Déployer > Application Web > URL /exec)
+const API = '';
+
+const LIGNES = [
+  { titre: 'Pour moi, cette séance était', paires: [['Utile', 'Inutile'], ['Intéressant', 'Ennuyeux'], ['Clair', 'Confus']] },
+  { titre: 'Le rythme', paires: [['Trop rapide', 'Trop lent']], rythme: true },
+];
+const SEULS = [['Agréable', 'p'], ['Enrichissant', 'p'], ['Trop difficile', 'm']];
+// Deux réponses d'une même paire s'excluent
+const OPPOSES = [['Utile', 'Inutile'], ['Intéressant', 'Ennuyeux'], ['Clair', 'Confus'], ['Trop rapide', 'Trop lent'],
+  ['Inutile', 'Enrichissant'], ['Ennuyeux', 'Agréable']];
+
+const app = document.getElementById('app');
+const q = new URLSearchParams(location.search);
+const cours = (q.get('c') || '').trim(), classe = (q.get('k') || '').trim();
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const jour = new Date().toLocaleDateString('fr-CA', { timeZone: 'Europe/Paris' });
+const cle = 'retour:' + cours + '|' + classe + '|' + jour;
+const stock = { get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} } };
+
+if (cours) eleve(); else prof();
+
+/* ---------- Élève ---------- */
+function eleve() {
+  if (stock.get(cle)) return merci(true);
+  const bouton = (nom, cls) => `<button type="button" class="choix ${cls}" data-v="${nom}" aria-pressed="false"><span class="coche"></span>${nom}</button>`;
+  let h = `<header><span class="cours">${esc(cours)}${classe ? ' · ' + esc(classe) : ''}</span>
+    <h1>Qu'as-tu pensé de la séance ?</h1><p class="aide">Coche tout ce qui correspond. C'est anonyme.</p></header>`;
+  LIGNES.forEach(l => {
+    h += `<div class="ligne"><div class="titre-ligne">${l.titre}</div>`;
+    l.paires.forEach(([a, b]) => h += bouton(a, l.rythme ? 'r' : 'p') + bouton(b, l.rythme ? 'r' : 'm'));
+    h += `</div>`;
+  });
+  h += `<div class="ligne seuls"><div class="titre-ligne">Et aussi</div>${SEULS.map(([n, c]) => bouton(n, c)).join('')}</div>
+    <input class="piege" id="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="bas"><button id="envoyer" disabled>Envoyer</button><p class="erreur" id="err"></p>
+    <p class="note">Aucun nom, aucun compte, aucune adresse enregistrés.</p></div>`;
+  app.innerHTML = h;
+
+  const btns = [...app.querySelectorAll('button.choix')];
+  const choisis = () => btns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.v);
+  const maj = () => {
+    const c = choisis();
+    btns.forEach(b => {
+      const bloque = OPPOSES.some(p => p.includes(b.dataset.v) && c.includes(p.find(x => x !== b.dataset.v)));
+      b.disabled = bloque;
+    });
+    document.getElementById('envoyer').disabled = !c.length;
+  };
+  btns.forEach(b => b.addEventListener('click', () => {
+    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); maj();
+  }));
+  document.getElementById('envoyer').addEventListener('click', async e => {
+    const env = e.currentTarget, err = document.getElementById('err');
+    err.textContent = '';
+    if (!API) { err.textContent = 'Le serveur n\'est pas encore branché.'; return; }
+    env.disabled = true; env.textContent = 'Envoi…';
+    try {
+      // text/plain : pas de requête préalable CORS, Apps Script lit le JSON tel quel
+      const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ cours, classe, choix: choisis(), site: document.getElementById('site').value }) });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Erreur');
+      stock.set(cle, '1');
+      merci(false);
+    } catch (x) {
+      err.textContent = (x.message && x.message !== 'Failed to fetch' ? x.message : 'Pas de connexion') + '. Réessaie.';
+      env.disabled = false; env.textContent = 'Envoyer';
+    }
+  });
+}
+
+function merci(deja) {
+  app.innerHTML = `<div class="fin"><div class="gros">${deja ? '👌' : '🙏'}</div>
+    <h1>${deja ? 'Tu as déjà répondu pour cette séance' : 'Merci, c\'est envoyé !'}</h1>
+    <p class="aide">${esc(cours)}${classe ? ' · ' + esc(classe) : ''}</p></div>`;
+}
+
+/* ---------- Professeur : fabriquer le lien et le QR code d'une séance ---------- */
+function prof() {
+  const derniers = JSON.parse(stock.get('retour:derniers') || '[]');
+  app.innerHTML = `<div class="prof"><header><span class="cours">Professeur</span><h1>QR code d'une séance</h1>
+    <p class="aide">Les élèves le scannent en fin d'heure. Date ajoutée automatiquement.</p></header>
+    ${API ? '' : '<div class="alerte">Serveur pas encore branché : colle l\'adresse Apps Script dans la constante API de index.html.</div>'}
+    <label for="fc">Cours ou séance</label><input id="fc" list="lc" placeholder="ex. Diodes et DEL" maxlength="80">
+    <datalist id="lc">${derniers.map(d => `<option value="${esc(d.c)}">`).join('')}</datalist>
+    <label for="fk">Classe</label><input id="fk" list="lk" placeholder="ex. TSIN" maxlength="30">
+    <datalist id="lk">${['TSIN', 'TITEC', 'TEE', 'TAC', 'TSTI2D', '1STI2D', '1SI', 'TSI'].map(c => `<option value="${c}">`).join('')}</datalist>
+    <div class="btns"><button class="princ" id="gen">Créer le QR code</button></div>
+    <div id="qr"><div id="qrimg"></div><div id="lien"></div>
+      <div class="btns"><button id="plein">Plein écran</button><button id="copie">Copier le lien</button><button id="test">Tester</button></div></div></div>`;
+  const fc = document.getElementById('fc'), fk = document.getElementById('fk');
+  if (derniers[0]) fk.value = derniers[0].k || '';
+  let url = '';
+  document.getElementById('gen').onclick = () => {
+    const c = fc.value.trim(), k = fk.value.trim();
+    if (!c) { fc.focus(); return; }
+    url = location.origin + location.pathname + '?c=' + encodeURIComponent(c) + (k ? '&k=' + encodeURIComponent(k) : '');
+    const svg = qrSvg(url);
+    document.getElementById('qrimg').innerHTML = svg;
+    document.getElementById('lien').textContent = url;
+    document.getElementById('qr').style.display = 'block';
+    const n = [{ c, k }].concat(derniers.filter(d => d.c !== c)).slice(0, 15);
+    stock.set('retour:derniers', JSON.stringify(n));
+    const ec = document.getElementById('ecran');
+    ec.innerHTML = `<h2>${esc(c)}${k ? ' · ' + esc(k) : ''}</h2><div class="qr">${svg}</div><p>Scanne pour donner ton avis (anonyme) · touche pour fermer</p>`;
+  };
+  document.getElementById('plein').onclick = () => {
+    const ec = document.getElementById('ecran'); ec.classList.add('ouvert');
+    if (ec.requestFullscreen) ec.requestFullscreen().catch(() => {});
+    ec.onclick = () => { ec.classList.remove('ouvert'); if (document.fullscreenElement) document.exitFullscreen(); };
+  };
+  document.getElementById('copie').onclick = e => {
+    navigator.clipboard.writeText(url).then(() => { e.target.textContent = 'Copié ✓'; setTimeout(() => e.target.textContent = 'Copier le lien', 1500); });
+  };
+  document.getElementById('test').onclick = () => window.open(url, '_blank');
+}
+
+function qrSvg(texte) {
+  const qr = qrcode(0, 'M'); qr.addData(unescape(encodeURIComponent(texte))); qr.make();
+  return qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+}
+</script>
+</body>
+</html>
