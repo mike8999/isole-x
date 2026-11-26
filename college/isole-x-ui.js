@@ -78,15 +78,15 @@ function showWin(){
   else if(state.mode==='random')next=`<button class="bigbtn" data-act="again">Nouvelle équation 🎲</button>`;
   else if(state.mode==='daily')next=`<button class="bigbtn" data-act="home">Carte ▶</button>`;
   else next=`<button class="bigbtn" data-act="expback">Autre équation 🧪</button>`;
-  const S=STATS;S.wins++;S.lastPlay=Date.now();S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
+  const S=STATS;S.wins++;S.lastPlay=Date.now();S.lostFor=S.lastPlay;if(S.lost){S.recov=(S.recov||0)+1;if(S.recov>=RECOV){S.lost--;S.recov=0;S.regained=1}}S.noHint=state.usedHint?0:S.noHint+1;S.bestNoHint=Math.max(S.bestNoHint,S.noHint);
   if(state.goal)S.goals++;else if(sc.simp)S.simp++;if(sc.stars===3)S.perfect++;saveStats();
-  const nb=checkBadges(),after=petStage();
+  const nb=checkBadges(),after=petStage();setTimeout(()=>{STATS.regained=0},0);
   modal(`<div class="winpet">${creatureSVG(after,'happy')}</div><h2>${esc(state.target)} est isolé !</h2>${state.par?`<div class="stars">${starHTML(sc.stars)}</div>`:''}
    <div class="pts">${sc.points} points ${sc.simp?'<span class="simp">✨ simplification maximale +50</span>':'<span class="nosimp">pas simplifié au maximum</span>'}</div>
    <div>${state.moves} coup${state.moves>1?'s':''}${state.par?` — maxi ${state.par} pour ★★★`:''}</div>
    <div class="sol">${mathEq(state.eq)}</div>${sol?`<div class="solline">${sol}</div>`:''}
    ${state.mode==='daily'?`<div class="evo">📅 ${dbonus?`Défi du jour réussi ! Série : <b>${DAILY.streak} jour${DAILY.streak>1?'s':''}</b> · +${dbonus} 🪙`:'Déjà réussi aujourd’hui : reviens demain !'}</div>`:''}
-   ${after>before?`<div class="evo">🎊 ${petName()} a grandi : ${OPTS.char==='rainix'?'elle':'il'} est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
+   ${STATS.regained&&after>before?`<div class="evo">💪 ${petName()} a repris des forces : ${OPTS.char==='rainix'?'elle':'il'} est de nouveau <b>${PET_NAMES[after]}</b> !</div>`:after>before?`<div class="evo">🎊 ${petName()} a grandi : ${OPTS.char==='rainix'?'elle':'il'} est maintenant <b>${PET_NAMES[after]}</b> !</div>`:''}
    ${after===before&&PET_STEPS[after+1]?`<div class="petnext">Encore ${PET_STEPS[after+1]-totalStars()} ★ pour que ${petName()} grandisse.</div>`:''}
    ${nb.slice(0,2).map(b=>`<div class="newbadge">🏅 Nouveau badge : <b>${b.icon} ${esc(b.name)}</b></div>`).join('')}${nb.length>2?`<div class="newbadge">🏅 … et ${nb.length-2} autre${nb.length>3?'s':''} badge${nb.length>3?'s':''} !</div>`:''}
    <div class="btns"><button class="ghostbtn" data-act="replay">⟲ Rejouer</button><button class="ghostbtn" data-act="menu">Carte</button>${next}</div>`,'win');
@@ -232,7 +232,14 @@ const UNLOCK=15;
 const unlocked=i=>TEACHER||i===0||worldStars(UNLOCK_FROM[i]??i-1)>=UNLOCK;
 const PET_STEPS=[0,5,20,50,100,170];
 const PET_NAMES=['un œuf','un bébé','un petit','un ado','un grand','légendaire'];
-const petStage=()=>{const t=totalStars();let s=0;PET_STEPS.forEach((v,i)=>{if(t>=v)s=i});return s};
+const baseStage=()=>{const t=totalStars();let s=0;PET_STEPS.forEach((v,i)=>{if(t>=v)s=i});return s};
+/* forme du compagnon : il rétrécit si l'élève l'abandonne trop longtemps, il regagne sa taille en résolvant des équations */
+const RECOV=3;
+const petStage=()=>{const b=baseStage();return Math.max(b>0?1:0,b-(STATS.lost||0))};
+function absenceCheck(){const d=sleepDays();if(d<7||STATS.lostFor===STATS.lastPlay)return 0;
+  const n=d>=21?3:d>=14?2:1,b=baseStage(),room=Math.max(0,b-1),add=Math.min(n,room-(STATS.lost||0));
+  STATS.lostFor=STATS.lastPlay;if(add>0){STATS.lost=(STATS.lost||0)+add;STATS.recov=0}saveStats();return add>0?add:0}
+function petFeel(){const d=sleepDays();if(baseStage()===0)return'idle';if(STATS.lost)return'sad';if(d>=3)return'sleep';if(d>=2)return'sad';return'idle'}
 const BADGES=[
  {k:'first',icon:'🥚',name:'Premier défi',d:'Réussir un premier défi',ok:()=>STATS.wins>=1},
  {k:'w10',icon:'⭐',name:'Dix défis',d:'Réussir 10 défis',ok:()=>STATS.wins>=10},
@@ -310,11 +317,12 @@ function toHome(){closeModal();renderHome();showScreen('home')}
 function toMenu(){toWorld(state.ci)}
 function backFromGame(){if(state.mode==='exp')showExp();else if(state.mode==='level')toWorld(state.ci);else if(state.mode==='random')showTrain();else toHome()}
 function renderHome(){
-  const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1],zz=st>0&&sleepDays()>=3;
-  $('#petCard').innerHTML=`<div class="bigpet" title="Changer de compagnon">${creatureSVG(st,zz?'sleep':'idle')}</div><div class="petinfo"><div class="petname">${petName()} <span>${PET_NAMES[st]}</span></div>
-    ${zz?`<div class="petsleep">😴 ${petName()} s’est endormi${OPTS.char==='rainix'?'e':''} : ça fait ${sleepDays()} jours ! Réussis un défi pour ${OPTS.char==='rainix'?'la':'le'} réveiller.</div>`:''}
-    <div class="petbar"><i style="width:${nxt?Math.round(100*(t-PET_STEPS[st])/(nxt-PET_STEPS[st])):100}%"></i></div>
-    <div class="petnext">★ ${t} étoile${t>1?'s':''}${nxt?` · encore ${nxt-t} pour ${OPTS.char==='rainix'?'qu’elle':'qu’il'} grandisse`:' · niveau maximum !'}</div></div>`;
+  const st=petStage(),t=totalStars(),nxt=PET_STEPS[st+1],fe=petFeel(),zz=fe==='sleep',ell=OPTS.char==='rainix',dd=sleepDays();
+  $('#petCard').innerHTML=`<div class="bigpet" title="Changer de compagnon">${creatureSVG(st,fe)}</div><div class="petinfo"><div class="petname">${petName()} <span>${PET_NAMES[st]}</span></div>
+    ${STATS.lost?`<div class="petsleep petlost">😢 ${petName()} a rétréci${ell?'e':''} : tu l’as laissé${ell?'e':''} seul${ell?'e':''} trop longtemps. Résous encore ${RECOV-(STATS.recov||0)} équation${RECOV-(STATS.recov||0)>1?'s':''} pour qu’${ell?'elle':'il'} reprenne des forces.</div>`:fe==='sad'?`<div class="petsleep">😤 ${petName()} boude : ça fait ${dd} jours que tu n’es pas venu. Résous une équation pour ${ell?'la':'le'} consoler !</div>`:''}
+    ${zz&&!STATS.lost?`<div class="petsleep">😴 ${petName()} s’est endormi${OPTS.char==='rainix'?'e':''} : ça fait ${sleepDays()} jours ! Réussis un défi pour ${OPTS.char==='rainix'?'la':'le'} réveiller.</div>`:''}
+    <div class="petbar"><i style="width:${STATS.lost?Math.round(100*(STATS.recov||0)/RECOV):nxt?Math.round(100*(t-PET_STEPS[st])/(nxt-PET_STEPS[st])):100}%"></i></div>
+    <div class="petnext">★ ${t} étoile${t>1?'s':''}${STATS.lost?` · forces : ${STATS.recov||0}/${RECOV} équations`:nxt?` · encore ${nxt-t} pour ${OPTS.char==='rainix'?'qu’elle':'qu’il'} grandisse`:' · niveau maximum !'}</div></div>`;
   $('#homeBtns').innerHTML=`<button class="hb" data-h="badges">🏅<b>Badges</b><small>${Object.keys(GOT).length}/${BADGES.length}</small></button>
     <button class="hb" data-h="chrono">⚡<b>Défi chrono</b><small>record : ${STATS.chronoBest}</small></button>
     <button class="hb" data-h="train">🎲<b>Entraînement</b><small>par thème</small></button>
@@ -836,7 +844,15 @@ function showChars(){const st=Math.max(1,petStage());
 const PET_SAY={happy:['Bien joué !','Super !','Bravo !','Continue comme ça !','Oui !','Parfait !'],sad:['Oups…','Presque !','Essaie autrement.','Pas grave, réessaie !']};
 let sayT,idleT;
 function petSay(txt,m=''){const b=document.getElementById('petsay');if(!b||SILENT||!txt)return;b.textContent=txt;b.className='show '+m;clearTimeout(sayT);sayT=setTimeout(()=>b.className='',2000)}
+const PET_TAP=['Hi hi !','Ça chatouille !','Coucou !','On continue ?','Je suis là !'];
+document.addEventListener('click',e=>{const p=e.target.closest&&e.target.closest('#pet,#petCard .petinfo');if(!p||p.id!=='pet')return;petMood('happy',PET_TAP[Math.floor(Math.random()*PET_TAP.length)])});
+/* petites scènes au repos : saut, regard, danse, étirement */
+const ACTS=['act-hop','act-look','act-dance','act-stretch','act-spin'];
+setInterval(()=>{if(document.hidden||OPTS.calm||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const els=[...document.querySelectorAll('#pet:not(.happy):not(.sad):not(.bout),#petCard .bigpet')].filter(x=>x.offsetParent);
+  els.forEach(el=>{const svg=el.querySelector('svg.pet');if(!svg||svg.classList.contains('sleep')||svg.classList.contains('st0')&&Math.random()<.5)return;if(Math.random()<.45)return;
+    const a=svg.classList.contains('sad')?'act-sulk':ACTS[Math.floor(Math.random()*ACTS.length)];el.classList.add(a);setTimeout(()=>el.classList.remove(a),1300)})},4200);
 function petIdleKick(){clearTimeout(idleT);idleT=setTimeout(()=>{if(!$('#game').classList.contains('hidden')&&!state.won&&$('#modal').classList.contains('hidden'))petSay('Courage ! Besoin d’un coup de pouce ? Touche 💡')},35000)}
 
-applyOpts();renderHome();checkSaveLink();
+absenceCheck();applyOpts();renderHome();checkSaveLink();
 if(location.hash==='#labo')showExp();
