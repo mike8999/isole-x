@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moniteur Arduino – capteurs en direct</title>
+<style>
+:root{--bg:#f3f1ec;--panel:#fff;--ink:#1d2430;--mut:#667085;--line:#d9d6cf;--acc:#00798c;--ok:#2f8f4e;--err:#c0392b;--mono:ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:#1d2430;color:#fff}
+header h1{font-size:17px;margin:0 auto 0 0;font-weight:650}
+.pill{font:600 12px var(--mono);padding:4px 10px;border-radius:99px;background:#3a4252;color:#cfd5df}
+.pill.on{background:var(--ok);color:#fff}.pill.demo{background:#e09f1f;color:#1d2430}
+button,select,input,textarea{font:inherit}
+.btn{border:1px solid transparent;border-radius:8px;padding:7px 13px;background:var(--acc);color:#fff;cursor:pointer;font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:transparent;border-color:#5b6475;color:#e8ebf0}
+main .btn.ghost,.box .btn.ghost{border-color:var(--line);color:var(--ink);background:#fff}
+.btn.sm{padding:4px 10px;font-size:13px}
+header select{background:#2b3240;color:#fff;border:1px solid #5b6475;border-radius:8px;padding:6px 8px}
+header select:disabled{opacity:.5}
+main{max-width:1200px;margin:0 auto;padding:14px 16px 40px;display:grid;gap:14px}
+.banner{background:#fff4e0;border:1px solid #e09f1f;border-radius:10px;padding:10px 14px}
+.banner.err{background:#fdecea;border-color:#e6a39b}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:10px;padding:10px 12px}
+.card .top{display:flex;align-items:center;gap:8px}
+.card .nom{font-weight:650;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .val{font:700 40px/1.1 var(--mono);margin:6px 0 2px;white-space:nowrap;overflow:hidden}
+.card .val small{font-size:18px;font-weight:600;color:var(--mut);margin-left:6px}
+.card .meta{font:12px var(--mono);color:var(--mut);display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.reg{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:7px;font-size:13px}
+.reg label{display:grid;gap:2px}
+.reg input,.reg select{border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:100%;background:#fff;min-width:0}
+.reg input[type=color]{padding:1px 2px;height:30px}
+.reg .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.reg .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.reg summary{font-weight:600;cursor:pointer}
+.formule{font:13px var(--mono);background:#f6f5f1;border-radius:6px;padding:5px 7px}
+.ico{border:0;background:none;cursor:pointer;font-size:17px;padding:2px 4px;color:var(--mut);border-radius:6px}
+.ico:hover,.ico.on{background:#eeece6;color:var(--ink)}
+.reg label.chk{display:flex;align-items:center;gap:6px;align-self:end;padding-bottom:6px}
+.chk input{width:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.bar h2{font-size:15px;margin:0 auto 0 0}
+.bar select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:4px;min-height:19px}
+.legend span::before{content:"";display:inline-block;width:16px;height:3px;background:var(--c);vertical-align:middle;margin-right:6px;border-radius:2px}
+#cv{width:100%;height:360px;display:block}
+details.panel>summary{cursor:pointer;font-weight:600}
+#log{font:12px/1.5 var(--mono);background:#1d2430;color:#b8f5c8;border-radius:8px;padding:8px 10px;height:170px;overflow:auto;white-space:pre;margin-top:8px}
+.ov{position:fixed;inset:0;background:rgba(20,24,32,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.ov.open{display:flex}
+.box{background:#fff;border-radius:12px;max-width:660px;width:100%;max-height:90vh;overflow:auto;padding:16px 20px;position:relative}
+.box h2{margin:0 0 8px;font-size:19px}.box h3{font-size:15px;margin:14px 0 4px}
+.box .x{position:absolute;top:8px;right:10px}
+.box pre{background:#1d2430;color:#e8ebf0;border-radius:8px;padding:8px 10px;overflow:auto;font:12.5px/1.5 var(--mono);margin:6px 0}
+.box code{font-family:var(--mono);background:#f0eee8;border-radius:4px;padding:0 4px}
+.box pre code{background:none;padding:0}
+.box ul,.box ol{padding-left:20px;margin:4px 0}.box li{margin:3px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0}
+.chip span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
+.chip input:checked+span{background:var(--acc);border-color:var(--acc);color:#fff}
+.chip input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
+.isite{position:absolute;left:-9999px;width:1px;height:1px}
+.msg{margin:0;min-height:1.4em}.msg.ok{color:var(--ok)}.msg.err{color:var(--err)}
+.mut{color:var(--mut)}
+.empty{grid-column:1/-1;color:var(--mut);padding:18px;text-align:center;border:1px dashed var(--line);border-radius:10px;background:#fff}
+@media(max-width:600px){.card .val{font-size:32px}#cv{height:260px}header h1{flex-basis:100%}}
+</style>
+</head>
+<body>
+<header>
+ <h1>Moniteur Arduino</h1>
+ <span class="pill" id="etat">Déconnecté</span>
+ <select id="baud" title="Vitesse en bauds : la même valeur que Serial.begin() dans le programme Arduino">
+  <option>9600</option><option>19200</option><option>38400</option><option>57600</option><option>115200</option>
+ </select>
+ <button class="btn" id="bCo">Connecter l'Arduino</button>
+ <button class="btn ghost" id="bDemo">Mode démo</button>
+ <button class="btn ghost" id="bAide">Aide</button>
+ <button class="btn ghost" id="bIdee">Boîte à idées</button>
+</header>
+
+<main>
+ <div class="banner err" id="nonSupport" hidden></div>
+ <div class="banner" id="info" hidden></div>
+
+ <section class="cards" id="cards"></section>
+
+ <section class="panel">
+  <div class="bar">
+   <h2>Courbe en temps réel</h2>
+   <label>Fenêtre <select id="fen"><option value="10">10 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="300">5 min</option></select></label>
+   <button class="btn ghost sm" id="bFig">Figer</button>
+   <button class="btn ghost sm" id="bEff">Effacer</button>
+  </div>
+  <div class="legend" id="leg"></div>
+  <canvas id="cv"></canvas>
+ </section>
+
+ <details class="panel" id="dLog"><summary>Données reçues (texte brut)</summary><div id="log"></div></details>
+</main>
+
+<div class="ov" id="ovAide" role="dialog" aria-label="Aide"><div class="box">
+ <button class="btn ghost sm x" data-close>Fermer</button>
+ <h2>Mode d'emploi</h2>
+ <ol>
+  <li>Téléverse le programme dans l'Arduino avec l'IDE Arduino, puis <b>ferme le moniteur série</b> de l'IDE (un seul logiciel à la fois peut utiliser le port).</li>
+  <li>Choisis la vitesse en haut de la page : la même que <code>Serial.begin()</code> (9600 par défaut).</li>
+  <li>Clique sur <b>Connecter l'Arduino</b> et choisis le port dans la liste (souvent « USB-SERIAL CH340 » ou « Arduino Uno »).</li>
+ </ol>
+ <p><a href="moniteur_capteurs.ino" download>Télécharger le programme Arduino d'exemple (.ino)</a></p>
+
+ <h3>Ce que l'Arduino doit envoyer</h3>
+ <p style="margin:0">Une ligne par mesure (<code>Serial.println</code> à la fin). Plusieurs voies : valeurs séparées par des points-virgules. Le nom devant la valeur est facultatif.</p>
+<pre><code>512
+23.5;512;1
+Temp:61;Pot:512;Lum:730</code></pre>
+ <p class="mut" style="margin:0">Le format du traceur série de l'IDE Arduino (valeurs séparées par des virgules ou des espaces) est aussi accepté. Avec des points-virgules, la virgule décimale est acceptée (<code>23,5</code>).</p>
+
+ <h3>Conversion de la valeur brute</h3>
+ <p style="margin:0"><code>analogRead()</code> donne un nombre entre 0 et 1023 (pour 0 à 5 V sur une Uno). Le bouton ⚙ de chaque voie permet de le convertir en grandeur physique avec <b>grandeur = a × brut + b</b> : choisis un capteur dans la liste, entre a et b, ou calcule-les à partir de deux points de mesure connus.</p>
+
+ <h3>Si ça ne marche pas</h3>
+ <ul>
+  <li>Navigateur : <b>Chrome ou Edge sur ordinateur</b>. Firefox, Safari, les iPhone et les tablettes ne gèrent pas la liaison série.</li>
+  <li>Le port n'apparaît pas : installe le pilote CH340 (cartes compatibles Arduino), change de câble USB (certains ne font que la charge).</li>
+  <li>« Impossible d'ouvrir le port » : le moniteur ou le traceur série de l'IDE est encore ouvert, ou un autre onglet utilise l'Arduino.</li>
+  <li>Caractères bizarres dans « Données reçues » : la vitesse ne correspond pas à <code>Serial.begin()</code>.</li>
+ </ul>
+ <p class="mut">Sans Arduino, le <b>mode démo</b> simule trois capteurs pour essayer la page.</p>
+</div></div>
+
+<div class="ov" id="ovIdee" role="dialog" aria-label="Boîte à idées"><div class="box">
+ <button class="btn ghost sm x" data-close>Fermer</button>
+ <div style="display:grid;gap:12px">
+  <h2>Boîte à idées</h2>
+  <p class="mut" style="margin:0">Une idée pour améliorer la page, un capteur à ajouter, un bug ? C'est anonyme : ton nom n'est pas envoyé.</p>
+  <div class="chips" id="iTypes"></div>
+  <textarea id="ideeTxt" maxlength="600" placeholder="Mon idée : …"></textarea>
+  <input class="isite" id="ideeSite" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="mut" style="font-size:12px;text-align:right" id="ideeCount">0/600</div>
+  <p class="msg" id="ideeMsg"></p>
+  <button class="btn" id="ideeSend">Envoyer</button>
+ </div>
+</div></div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const MONO=getComputedStyle(document.documentElement).getPropertyValue("--mono");
+const COUL=["#d1495b","#00798c","#e09f1f","#30638e","#6a4c93","#3c8d2f","#b5651d","#4b5563"];
+const PRESETS={
+ brut:{l:"Valeur brute (0–1023)",a:1,b:0,u:"",d:0},
+ v5:{l:"Tension 0–5 V (Uno)",a:5/1023,b:0,u:"V",d:2},
+ v33:{l:"Tension 0–3,3 V (ESP32, 12 bits)",a:3.3/4095,b:0,u:"V",d:2},
+ pct:{l:"Pourcentage 0–100 %",a:100/1023,b:0,u:"%",d:0},
+ lm35:{l:"LM35 → °C",a:500/1023,b:0,u:"°C",d:1},
+ tmp36:{l:"TMP36 → °C",a:500/1023,b:-50,u:"°C",d:1},
+ perso:{l:"Personnalisé (a et b)"}
+};
+const KEY="moniteur-arduino";
+const MAXPTS=60000;
+
+/* ---------- réglages mémorisés dans ce navigateur ---------- */
+let cfg={baud:9600,fen:30,voies:[]};
+try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg))}catch(e){}};
+$("#baud").value=String(cfg.baud);
+$("#fen").value=String(cfg.fen);
+
+/* ---------- état ---------- */
+let etat="off",nVues=0,data=[],stats=[],t0=performance.now(),fige=null,dirty=true;
+let logL=[],logDirty=false;
+
+function voie(i,lab){
+ while(cfg.voies.length<=i){const k=cfg.voies.length;
+  cfg.voies.push({nom:"Voie "+(k+1),auto:true,preset:"brut",a:1,b:0,u:"",d:0,show:true,c:COUL[k%COUL.length],open:false})}
+ const v=cfg.voies[i];
+ if(lab&&v.auto&&v.nom!==lab){v.nom=lab;const n=document.querySelector(`.card[data-i="${i}"] .nom`);if(n)n.textContent=lab;legende();save()}
+ if(i>=nVues){nVues=i+1;cartes();save()}
+ return v;
+}
+
+/* ---------- lecture d'une ligne reçue ---------- */
+function ligne(s){
+ s=s.replace(/\r/g,"").trim();if(!s)return;
+ journal(s);
+ const parts=s.includes(";")?s.split(";"):s.split(/[\s,]+/);
+ const vals=[],labs=[];let ok=false;
+ parts.forEach((p,i)=>{
+  p=p.trim();let lab=null;
+  const m=p.match(/^([A-Za-zÀ-ÿ_][^:=]*?)\s*[:=]\s*(.*)$/);
+  if(m){lab=m[1].trim();p=m[2]}
+  labs[i]=lab;
+  const x=Number(p.replace(",","."));
+  if(p!==""&&isFinite(x)){vals[i]=x;ok=true}else vals[i]=null;
+ });
+ if(!ok)return;
+ const t=(performance.now()-t0)/1000;
+ vals.forEach((x,i)=>{if(x==null)return;voie(i,labs[i]);
+  const st=stats[i]||(stats[i]={raw:x,min:x,max:x});st.raw=x;if(x<st.min)st.min=x;if(x>st.max)st.max=x});
+ data.push({t,v:vals});
+ if(data.length>MAXPTS+5000)data.splice(0,5000);
+ dirty=true;
+}
+function journal(s){logL.push(s);if(logL.length>300)logL.splice(0,100);logDirty=true}
+
+/* ---------- liaison série (Web Serial) ---------- */
+let port=null,reader=null,pipe=null,volontaire=false;
+const SERIE="serial" in navigator;
+if(!SERIE){
+ const nb=$("#nonSupport");nb.hidden=false;
+ nb.innerHTML=window.isSecureContext
+  ?"Ce navigateur ne gère pas la liaison série avec l'Arduino. Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b> sur un ordinateur. Le mode démo fonctionne quand même."
+  :"La liaison série demande une page sécurisée : ouvre la page depuis son adresse <b>https://</b> (GitHub Pages) et non depuis un fichier.";
+ $("#bCo").disabled=true;
+}
+async function connecter(){
+ if(etat==="on"){deconnecter();return}
+ if(etat==="demo")arreterDemo();
+ let p;
+ try{p=await navigator.serial.requestPort()}catch(e){return} // fenêtre fermée sans choisir
+ try{await p.open({baudRate:cfg.baud})}
+ catch(e){info("Impossible d'ouvrir le port. Ferme le moniteur série de l'IDE Arduino (ou l'autre onglet qui l'utilise), puis réessaie.","err");return}
+ port=p;if(!data.length)t0=performance.now();
+ setEtat("on");journal(`— connecté à ${cfg.baud} bauds —`);
+ lire();
+}
+async function lire(){
+ const dec=new TextDecoderStream();
+ pipe=port.readable.pipeTo(dec.writable).catch(()=>{});
+ reader=dec.readable.getReader();
+ let buf="";
+ try{
+  for(;;){
+   const {value,done}=await reader.read();if(done)break;
+   buf+=value;let k;
+   while((k=buf.indexOf("\n"))>=0){ligne(buf.slice(0,k));buf=buf.slice(k+1)}
+   if(buf.length>2000)buf="";
+  }
+ }catch(e){}
+ finally{try{reader.releaseLock()}catch(e){}reader=null}
+ await pipe;
+ try{await port.close()}catch(e){}
+ port=null;setEtat("off");journal("— déconnecté —");
+ if(!volontaire)info("Liaison interrompue : l'Arduino a été débranché ou le port a été fermé.","err");
+ volontaire=false;
+}
+async function deconnecter(){if(!reader)return;volontaire=true;try{await reader.cancel()}catch(e){}}
+
+/* ---------- mode démo ---------- */
+let demoT=null;
+function demo(){
+ if(etat==="demo"){arreterDemo();return}
+ if(etat==="on")return;
+ if(!data.length)t0=performance.now();
+ setEtat("demo");journal("— mode démo : trois capteurs simulés —");
+ demoT=setInterval(()=>{const t=(performance.now()-t0)/1000;
+  const temp=Math.round(56+5*Math.sin(t/9)+Math.random()*1.5);
+  const pot=Math.round(511+480*Math.sin(t/4));
+  const lum=Math.round(700+120*Math.sin(t/2.3)+(Math.random()-.5)*50);
+  ligne(`Temp:${temp};Pot:${pot};Lum:${lum}`)},200);
+}
+function arreterDemo(){clearInterval(demoT);demoT=null;setEtat("off");journal("— fin du mode démo —")}
+
+function setEtat(s){
+ etat=s;const p=$("#etat");
+ p.className="pill"+(s==="on"?" on":s==="demo"?" demo":"");
+ p.textContent=s==="on"?"Connecté":s==="demo"?"Démo":"Déconnecté";
+ $("#bCo").textContent=s==="on"?"Déconnecter":"Connecter l'Arduino";
+ $("#bDemo").textContent=s==="demo"?"Arrêter la démo":"Mode démo";
+ $("#bDemo").disabled=s==="on";
+ $("#baud").disabled=s==="on";
+ dirty=true;
+}
+let infoT=null;
+function info(txt,type){const b=$("#info");b.className="banner"+(type==="err"?" err":"");b.textContent=txt;b.hidden=false;
+ clearTimeout(infoT);infoT=setTimeout(()=>b.hidden=true,9000)}
+if(SERIE)navigator.serial.addEventListener("disconnect",e=>{if(port&&e.target===port&&reader)reader.cancel().catch(()=>{})});
+
+/* ---------- cartes des voies ---------- */
+const fmt=(x,d)=>x.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const conv=(v,x)=>v.a*x+v.b;
+const nomV=(v,i)=>v.nom||"Voie "+(i+1);
+const num=x=>String(+(+x).toPrecision(6));
+
+function cartes(){
+ const box=$("#cards");
+ if(!nVues){box.innerHTML=`<div class="empty">Branche l'Arduino puis clique sur <b>Connecter l'Arduino</b>, ou essaie le <b>mode démo</b>.</div>`;legende();return}
+ box.innerHTML=cfg.voies.slice(0,nVues).map((v,i)=>`
+ <div class="card" style="--c:${v.c}" data-i="${i}">
+  <div class="top"><span class="nom">${esc(nomV(v,i))}</span>
+   <button class="ico${v.open?" on":""}" data-act="reg" title="Réglages et conversion" aria-label="Réglages de la voie">⚙</button></div>
+  <div class="val"><span class="v">--</span><small>${esc(v.u)}</small></div>
+  <div class="meta"><span class="mm">min -- · max --</span><span class="raw">brut --</span></div>
+  ${v.open?reglages(v,i):""}
+ </div>`).join("");
+ legende();dirty=true;
+}
+function reglages(v,i){
+ return `<div class="reg">
+  <label>Nom<input data-k="nom" value="${esc(v.nom)}" maxlength="30"></label>
+  <label>Conversion<select data-k="preset">${Object.entries(PRESETS).map(([k,p])=>`<option value="${k}"${k===v.preset?" selected":""}>${p.l}</option>`).join("")}</select></label>
+  <div class="formule"><span class="fu">${esc(v.u||"grandeur")}</span> = a × brut + b</div>
+  <div class="g2"><label>a<input data-k="a" type="number" step="any" value="${num(v.a)}"></label><label>b<input data-k="b" type="number" step="any" value="${num(v.b)}"></label></div>
+  <div class="g2"><label>Unité<input data-k="u" value="${esc(v.u)}" maxlength="8"></label><label>Décimales<input data-k="d" type="number" min="0" max="6" value="${v.d}"></label></div>
+  <details><summary>Calculer a et b avec deux points</summary>
+   <p class="mut" style="margin:4px 0">Deux mesures connues : pour la valeur brute x, la grandeur vaut y.</p>
+   <div class="g4"><label>x₁<input data-p="x1" type="number" step="any" value="0"></label><label>y₁<input data-p="y1" type="number" step="any" value="0"></label>
+   <label>x₂<input data-p="x2" type="number" step="any" value="1023"></label><label>y₂<input data-p="y2" type="number" step="any" value="5"></label></div>
+   <button class="btn sm" data-act="2pts" style="margin-top:6px">Calculer a et b</button>
+  </details>
+  <div class="g2"><label class="chk"><input type="checkbox" data-k="show"${v.show?" checked":""}> Sur la courbe</label><label>Couleur<input type="color" data-k="c" value="${v.c}"></label></div>
+ </div>`;
+}
+function majCarte(card,v){
+ card.querySelector(".val small").textContent=v.u;
+ const fu=card.querySelector(".fu");if(fu)fu.textContent=v.u||"grandeur";
+ const q=k=>card.querySelector(`[data-k="${k}"]`);
+ if(q("a")&&document.activeElement!==q("a"))q("a").value=num(v.a);
+ if(q("b")&&document.activeElement!==q("b"))q("b").value=num(v.b);
+ if(q("u")&&document.activeElement!==q("u"))q("u").value=v.u;
+ if(q("d")&&document.activeElement!==q("d"))q("d").value=v.d;
+ if(q("preset"))q("preset").value=v.preset;
+}
+const cardsBox=$("#cards");
+cardsBox.addEventListener("input",e=>{
+ const el=e.target,k=el.dataset.k;if(!k)return;
+ const card=el.closest(".card"),i=+card.dataset.i,v=cfg.voies[i];
+ if(k==="nom"){v.nom=el.value.trim();v.auto=false;card.querySelector(".nom").textContent=nomV(v,i)}
+ else if(k==="u"){v.u=el.value.trim()}
+ else if(k==="a"||k==="b"){const x=Number(el.value);if(el.value!==""&&isFinite(x)){v[k]=x;v.preset="perso"}}
+ else if(k==="d"){v.d=Math.max(0,Math.min(6,parseInt(el.value,10)||0))}
+ else if(k==="show"){v.show=el.checked}
+ else if(k==="c"){v.c=el.value;card.style.setProperty("--c",v.c)}
+ else if(k==="preset"){v.preset=el.value;const P=PRESETS[el.value];if(P.a!=null){v.a=P.a;v.b=P.b;v.u=P.u;v.d=P.d}}
+ majCarte(card,v);legende();save();dirty=true;
+});
+cardsBox.addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]");if(!b)return;
+ const card=b.closest(".card"),i=+card.dataset.i,v=cfg.voies[i];
+ if(b.dataset.act==="reg"){v.open=!v.open;save();cartes()}
+ if(b.dataset.act==="2pts"){
+  const g=k=>Number(card.querySelector(`[data-p="${k}"]`).value);
+  const x1=g("x1"),y1=g("y1"),x2=g("x2"),y2=g("y2");
+  if(![x1,y1,x2,y2].every(isFinite)||x1===x2){info("Les deux valeurs brutes x₁ et x₂ doivent être différentes.","err");return}
+  v.a=(y2-y1)/(x2-x1);v.b=y1-v.a*x1;v.preset="perso";
+  majCarte(card,v);save();dirty=true;
+ }
+});
+function majValeurs(){
+ cfg.voies.slice(0,nVues).forEach((v,i)=>{
+  const card=document.querySelector(`.card[data-i="${i}"]`),st=stats[i];if(!card)return;
+  if(!st){card.querySelector(".v").textContent="--";card.querySelector(".mm").textContent="min -- · max --";card.querySelector(".raw").textContent="brut --";return}
+  const a=conv(v,st.min),b=conv(v,st.max);
+  card.querySelector(".v").textContent=fmt(conv(v,st.raw),v.d);
+  card.querySelector(".mm").textContent=`min ${fmt(Math.min(a,b),v.d)} · max ${fmt(Math.max(a,b),v.d)}`;
+  card.querySelector(".raw").textContent="brut "+num(st.raw);
+ });
+}
+function legende(){
+ $("#leg").innerHTML=cfg.voies.slice(0,nVues).filter(v=>v.show).map((v)=>{const i=cfg.voies.indexOf(v);
+  return `<span style="--c:${v.c}">${esc(nomV(v,i))}${v.u?" ("+esc(v.u)+")":""}</span>`}).join("");
+}
+
+/* ---------- courbe ---------- */
+const cv=$("#cv"),ctx=cv.getContext("2d");
+const pas=(r,n)=>{const s=r/n,p=Math.pow(10,Math.floor(Math.log10(s))),f=s/p;return (f<1.5?1:f<3?2:f<7?5:10)*p};
+const fmtT=(t,fen)=>{t=Math.round(t);return fen>=300?`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`:t+" s"};
+function tFin(){
+ const t=etat==="off"?(data.length?data[data.length-1].t:0):(performance.now()-t0)/1000;
+ return Math.max(cfg.fen,t);
+}
+function trace(){
+ const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+ const W=Math.round(r.width*dpr),H=Math.round(r.height*dpr);
+ if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ const w=r.width,h=r.height;ctx.clearRect(0,0,w,h);
+ const fen=cfg.fen,tB=fige??tFin(),tA=tB-fen;
+ const L=62,R=14,T=10,B=26,pw=w-L-R,ph=h-T-B;
+ const vues=cfg.voies.slice(0,nVues).map((v,i)=>({v,i})).filter(o=>o.v.show);
+ let lo=0,hi=data.length;while(lo<hi){const m=(lo+hi)>>1;if(data[m].t<tA)lo=m+1;else hi=m}
+ const st=Math.max(0,lo-1);
+ let mn=Infinity,mx=-Infinity;
+ for(let k=st;k<data.length;k++){const d=data[k];if(d.t>tB)break;
+  for(const o of vues){const x=d.v[o.i];if(x==null)continue;const y=conv(o.v,x);if(y<mn)mn=y;if(y>mx)mx=y}}
+ ctx.font="12px "+MONO;ctx.lineWidth=1;
+ // axe du temps
+ const sx=pas(fen,6);
+ ctx.fillStyle="#667085";ctx.textAlign="center";ctx.textBaseline="top";
+ for(let t=Math.ceil(tA/sx)*sx;t<=tB+1e-9;t+=sx){if(t<0)continue;const px=Math.round(L+(t-tA)/fen*pw)+.5;
+  ctx.strokeStyle="#ece9e2";ctx.beginPath();ctx.moveTo(px,T);ctx.lineTo(px,T+ph);ctx.stroke();
+  ctx.fillText(fmtT(t,fen),px,T+ph+6)}
+ ctx.strokeStyle="#c9c5bc";ctx.strokeRect(L+.5,T+.5,pw-1,ph-1);
+ if(!isFinite(mn)){
+  ctx.fillStyle="#667085";ctx.textBaseline="middle";ctx.font="14px system-ui,sans-serif";
+  ctx.fillText(!nVues?"En attente de données…":vues.length?"Pas de mesure dans cette fenêtre":"Aucune voie cochée « Sur la courbe »",L+pw/2,T+ph/2);
+  return;
+ }
+ if(mx-mn<1e-9){const c=Math.abs(mn)*0.05||1;mn-=c;mx+=c}
+ const pad=(mx-mn)*0.06;mn-=pad;mx+=pad;
+ const sy=pas(mx-mn,5);mn=Math.floor(mn/sy)*sy;mx=Math.ceil(mx/sy)*sy;
+ const dec=Math.max(0,-Math.floor(Math.log10(sy)+1e-9));
+ const X=t=>L+(t-tA)/fen*pw,Y=y=>T+(1-(y-mn)/(mx-mn))*ph;
+ ctx.textAlign="right";ctx.textBaseline="middle";
+ for(let y=mn;y<=mx+sy/2;y+=sy){const py=Math.round(Y(y))+.5;
+  ctx.strokeStyle="#ece9e2";ctx.beginPath();ctx.moveTo(L,py);ctx.lineTo(L+pw,py);ctx.stroke();
+  ctx.fillStyle="#667085";ctx.fillText(fmt(Math.abs(y)<sy/1e6?0:y,dec),L-6,py)}
+ ctx.save();ctx.beginPath();ctx.rect(L,T,pw,ph);ctx.clip();
+ const n=data.length-st,stride=Math.max(1,Math.floor(n/(pw*2)));
+ ctx.lineWidth=2;ctx.lineJoin="round";
+ for(const o of vues){
+  ctx.strokeStyle=o.v.c;ctx.beginPath();let stylo=false;
+  for(let k=st;k<data.length;k+=stride){const d=data[k];if(d.t>tB)break;const x=d.v[o.i];
+   if(x==null){stylo=false;continue}
+   const px=X(d.t),py=Y(conv(o.v,x));stylo?ctx.lineTo(px,py):ctx.moveTo(px,py);stylo=true}
+  ctx.stroke();
+ }
+ ctx.restore();
+}
+
+/* ---------- boucle d'affichage ---------- */
+function frame(){
+ if(dirty||(etat!=="off"&&fige==null)){trace();majValeurs();dirty=false}
+ if(logDirty&&$("#dLog").open){const lg=$("#log");lg.textContent=logL.join("\n");lg.scrollTop=lg.scrollHeight;logDirty=false}
+ requestAnimationFrame(frame);
+}
+new ResizeObserver(()=>dirty=true).observe(cv);
+
+/* ---------- boutons ---------- */
+$("#bCo").onclick=connecter;
+$("#bDemo").onclick=demo;
+$("#baud").onchange=e=>{cfg.baud=+e.target.value;save()};
+$("#fen").onchange=e=>{cfg.fen=+e.target.value;save();dirty=true};
+$("#bFig").onclick=()=>{fige=fige==null?tFin():null;$("#bFig").textContent=fige==null?"Figer":"Reprendre";dirty=true};
+$("#bEff").onclick=()=>{data=[];stats=[];t0=performance.now();fige=null;$("#bFig").textContent="Figer";dirty=true};
+$("#dLog").addEventListener("toggle",()=>logDirty=true);
+
+/* ---------- fenêtres ---------- */
+const ouvrir=o=>o.classList.add("open");
+document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-close]"))o.classList.remove("open")}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".ov.open").forEach(o=>o.classList.remove("open"))});
+$("#bAide").onclick=()=>ouvrir($("#ovAide"));
+
+/* ---------- boîte à idées (base Notion « Boîte à idées – Isole x ! », Jeu = Moniteur Arduino) ---------- */
+const IDEES="https://isole-x.netlify.app/.netlify/functions/idees";
+const TYPES=[["Ergonomie","Plus pratique"],["Fonctionnalité","Nouvelle idée"],["Bug","Bug"],["Autre","Autre"]];
+$("#iTypes").innerHTML=TYPES.map(([v,l],k)=>`<label class="chip"><input type="radio" name="itype" value="${v}"${k===1?" checked":""}><span>${l}</span></label>`).join("");
+$("#bIdee").onclick=()=>{ouvrir($("#ovIdee"));setTimeout(()=>$("#ideeTxt").focus(),50)};
+$("#ideeTxt").oninput=e=>$("#ideeCount").textContent=e.target.value.length+"/600";
+$("#ideeSend").onclick=async()=>{
+ const t=$("#ideeTxt"),m=$("#ideeMsg"),b=$("#ideeSend"),texte=t.value.trim();
+ if(texte.length<5){m.className="msg err";m.textContent="Écris au moins quelques mots.";return}
+ b.disabled=true;m.className="msg";m.textContent="Envoi…";
+ try{
+  const r=await fetch(IDEES,{method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({texte,type:document.querySelector("input[name=itype]:checked").value,jeu:"Moniteur Arduino",
+    ecran:`Moniteur Arduino · ${etat} · ${nVues} voie(s)`,site:$("#ideeSite").value})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error(j.error||"Erreur "+r.status);
+  t.value="";$("#ideeCount").textContent="0/600";m.className="msg ok";m.textContent="Merci, ton idée a bien été envoyée.";b.textContent="Envoyer une autre idée";
+ }catch(e){m.className="msg err";
+  m.textContent=(navigator.onLine===false?"Pas de connexion Internet.":e.message&&e.message!=="Failed to fetch"?e.message:"Serveur injoignable, réessaie plus tard.")+" Ton texte est gardé."}
+ b.disabled=false;
+};
+
+cartes();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

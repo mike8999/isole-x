@@ -27,9 +27,12 @@ Jeux pour s’entraîner en STI2D.
   - Mode professeur (code dans la variable Netlify `NEON_PROF_CODE`) : édition de toutes les questions, cartes, fiches et schémas, enregistrées en ligne (fonction `neon-contenu`, Netlify Blobs) et vues par les élèves au chargement suivant
   - Schémas en glisser-déposer : circuit DEL, poutre sur deux appuis, chaîne de puissance, chaîne d'information, chaîne cinématique pignon-crémaillère
   - Boîte à idées vers la base Notion (Jeu = Neon Rush STI2D)
-- **Moniteur Arduino (valeurs de capteurs en direct par liaison série, Chrome ou Edge sur ordinateur)** : https://mike8999.github.io/isole-x/moniteur-arduino/
-  - Plusieurs voies séparées par `;` (nom facultatif, ex. `Temp:61;Pot:512`), courbe en temps réel, conversion grandeur = a × brut + b (capteurs prédéfinis ou calcul à deux points), mode démo sans Arduino
-  - Programme d'exemple : `moniteur-arduino/moniteur_capteurs.ino` ; boîte à idées vers la base Notion (Jeu = Moniteur Arduino)
+- **Moniteur Arduino (valeurs de capteurs en direct : câble USB, Bluetooth HC-05/HC-06 ou Wi-Fi ESP32) — dernière version** : https://mike8999.github.io/isole-x/moniteur-arduino/
+  - ancienne version 1 conservée (USB seul) : https://mike8999.github.io/isole-x/moniteur-arduino-v1/
+  - Plusieurs voies séparées par `;` (nom facultatif, ex. `Temp:61;Pot:512`), courbe en temps réel, conversion grandeur = a × brut + b (capteurs prédéfinis Uno et ESP32, calcul à deux points), mode démo sans Arduino
+  - USB (Chrome ou Edge sur ordinateur) : `moniteur_capteurs.ino` ; Bluetooth (Android avec Chrome 148 ou plus, ou ordinateur) : `moniteur_bluetooth.ino` (Uno + HC-05/HC-06 sur D10/D11)
+  - Wi-Fi (tous les téléphones, iPhone compris) : `moniteur_esp32_wifi.ino`, l'ESP32 crée le réseau « Moniteur-ESP32 » et sert la page sur http://192.168.4.1 ; ce programme est fabriqué par `fabriquer_esp32.py` à partir de `index.html` (à relancer après chaque modification de la page)
+  - Boîte à idées vers la base Notion (Jeu = Moniteur Arduino)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/

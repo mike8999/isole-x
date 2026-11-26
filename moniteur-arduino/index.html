@@ -54,7 +54,12 @@ details.panel>summary{cursor:pointer;font-weight:600}
 .ov{position:fixed;inset:0;background:rgba(20,24,32,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
 .ov.open{display:flex}
 .box{background:#fff;border-radius:12px;max-width:660px;width:100%;max-height:90vh;overflow:auto;padding:16px 20px;position:relative}
-.box h2{margin:0 0 8px;font-size:19px}.box h3{font-size:15px;margin:14px 0 4px}
+.box h2{margin:0 0 8px;font-size:19px}.box h3{font-size:15px;margin:16px 0 4px;padding-top:10px;border-top:1px solid var(--line)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.tabs a{border:1px solid var(--line);border-radius:99px;padding:3px 11px;text-decoration:none;color:var(--ink);font-size:13px}
+.box p{margin:4px 0}
+.pill.wifi{background:#30638e;color:#fff}
+.esp .web{display:none}
 .box .x{position:absolute;top:8px;right:10px}
 .box pre{background:#1d2430;color:#e8ebf0;border-radius:8px;padding:8px 10px;overflow:auto;font:12.5px/1.5 var(--mono);margin:6px 0}
 .box code{font-family:var(--mono);background:#f0eee8;border-radius:4px;padding:0 4px}
@@ -81,7 +86,8 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
  <select id="baud" title="Vitesse en bauds : la même valeur que Serial.begin() dans le programme Arduino">
   <option>9600</option><option>19200</option><option>38400</option><option>57600</option><option>115200</option>
  </select>
- <button class="btn" id="bCo">Connecter l'Arduino</button>
+ <button class="btn" id="bCo" title="Câble USB, ou module Bluetooth HC-05/HC-06 déjà associé">Connecter l'Arduino</button>
+ <button class="btn ghost" id="bWifi">Wi-Fi (ESP32)</button>
  <button class="btn ghost" id="bDemo">Mode démo</button>
  <button class="btn ghost" id="bAide">Aide</button>
  <button class="btn ghost" id="bIdee">Boîte à idées</button>
@@ -110,30 +116,69 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 <div class="ov" id="ovAide" role="dialog" aria-label="Aide"><div class="box">
  <button class="btn ghost sm x" data-close>Fermer</button>
  <h2>Mode d'emploi</h2>
- <ol>
-  <li>Téléverse le programme dans l'Arduino avec l'IDE Arduino, puis <b>ferme le moniteur série</b> de l'IDE (un seul logiciel à la fois peut utiliser le port).</li>
-  <li>Choisis la vitesse en haut de la page : la même que <code>Serial.begin()</code> (9600 par défaut).</li>
-  <li>Clique sur <b>Connecter l'Arduino</b> et choisis le port dans la liste (souvent « USB-SERIAL CH340 » ou « Arduino Uno »).</li>
- </ol>
- <p><a href="moniteur_capteurs.ino" download>Télécharger le programme Arduino d'exemple (.ino)</a></p>
+ <div class="tabs web"><a href="#a-usb">Câble USB</a><a href="#a-bt">Bluetooth</a><a href="#a-wifi">Wi-Fi (ESP32)</a><a href="#a-format">Format des données</a><a href="#a-pb">Si ça ne marche pas</a></div>
+ <table style="width:100%;border-collapse:collapse;font-size:13px;margin:6px 0" class="web">
+  <tr style="text-align:left;border-bottom:1px solid var(--line)"><th>Liaison</th><th>Ordinateur</th><th>Android</th><th>iPhone</th></tr>
+  <tr><td>Câble USB</td><td>Chrome, Edge</td><td>rarement</td><td>non</td></tr>
+  <tr><td>Bluetooth HC-05/06</td><td>Chrome, Edge</td><td>Chrome à jour</td><td>non</td></tr>
+  <tr><td>Wi-Fi ESP32</td><td>tous</td><td>tous</td><td>tous</td></tr>
+ </table>
 
- <h3>Ce que l'Arduino doit envoyer</h3>
- <p style="margin:0">Une ligne par mesure (<code>Serial.println</code> à la fin). Plusieurs voies : valeurs séparées par des points-virgules. Le nom devant la valeur est facultatif.</p>
+ <div class="web">
+ <h3 id="a-usb">Câble USB (ordinateur)</h3>
+ <ol>
+  <li>Téléverse le programme avec l'IDE Arduino, puis <b>ferme le moniteur série</b> de l'IDE (un seul logiciel à la fois peut utiliser le port).</li>
+  <li>Choisis la vitesse en haut de la page : la même que <code>Serial.begin()</code> (9600 par défaut).</li>
+  <li>Clique sur <b>Connecter l'Arduino</b> et choisis le port (souvent « USB-SERIAL CH340 » ou « Arduino Uno »).</li>
+ </ol>
+ <p><a href="moniteur_capteurs.ino" download>Programme Arduino Uno, liaison USB (.ino)</a></p>
+
+ <h3 id="a-bt">Bluetooth avec un module HC-05 ou HC-06 (Android ou ordinateur)</h3>
+ <p>Câblage sur une Uno :</p>
+ <ul>
+  <li>VCC → 5 V, GND → GND</li>
+  <li>TXD du module → D10 de l'Arduino</li>
+  <li>RXD du module ← D11 de l'Arduino <b>par un pont diviseur</b> (1 kΩ en série, 2 kΩ vers GND) : le module accepte 3,3 V, pas 5 V</li>
+ </ul>
+ <ol>
+  <li>Téléverse le programme Bluetooth. Le module clignote vite : il attend une connexion.</li>
+  <li>Dans les réglages Bluetooth du téléphone (ou de l'ordinateur), associe le module « HC-05 » ou « HC-06 » (code 1234 ou 0000).</li>
+  <li>Dans la page, vitesse <b>9600</b>, puis <b>Connecter l'Arduino</b> et choisis le module dans la liste.</li>
+ </ol>
+ <p class="mut">Android : Chrome à jour (version 148 ou plus). Sur ordinateur, le module associé apparaît comme un port série de plus.</p>
+ <p><a href="moniteur_bluetooth.ino" download>Programme Arduino Uno + HC-05/HC-06 (.ino)</a></p>
+ </div>
+
+ <h3 id="a-wifi">Wi-Fi avec un ESP32 (tous les téléphones, iPhone compris)</h3>
+ <p>L'ESP32 crée son propre réseau Wi-Fi et contient cette page. Pas besoin d'Internet ni du réseau du lycée.</p>
+ <ol>
+  <li class="web">Dans l'IDE Arduino, installe les cartes « esp32 by Espressif » (gestionnaire de cartes), puis téléverse le programme ESP32. Change le nom du réseau si plusieurs groupes travaillent dans la même salle.</li>
+  <li>Sur le téléphone, connecte-toi au Wi-Fi <b>Moniteur-ESP32</b> (mot de passe <b>A_REMPLACER</b>). Si le téléphone dit « pas d'accès Internet », choisis de rester connecté.</li>
+  <li>Ouvre <b>http://192.168.4.1</b> dans le navigateur : les mesures s'affichent toutes seules.</li>
+ </ol>
+ <p class="web">Câblage : capteurs sur GPIO 34, 35 et 32 (entrées de l'ADC1 uniquement, car l'ADC2 ne fonctionne pas quand le Wi-Fi est actif), alimentés en <b>3,3 V</b>. Valeurs brutes de 0 à 4095 : prends les conversions « ESP32 » dans ⚙.</p>
+ <p class="mut">Si la page ne s'ouvre pas : coupe les données mobiles du téléphone, il essaie sinon de passer par la 4G. Le même programme envoie aussi les mesures par câble USB, à 115200 bauds.</p>
+ <p class="web"><a href="moniteur_esp32_wifi.ino" download>Programme ESP32 Wi-Fi (.ino, contient la page)</a></p>
+
+ <h3 id="a-format">Ce que la carte doit envoyer</h3>
+ <p>Une ligne par mesure (<code>Serial.println</code> à la fin). Plusieurs voies : valeurs séparées par des points-virgules. Le nom devant la valeur est facultatif.</p>
 <pre><code>512
 23.5;512;1
 Temp:61;Pot:512;Lum:730</code></pre>
- <p class="mut" style="margin:0">Le format du traceur série de l'IDE Arduino (valeurs séparées par des virgules ou des espaces) est aussi accepté. Avec des points-virgules, la virgule décimale est acceptée (<code>23,5</code>).</p>
+ <p class="mut">Le format du traceur série de l'IDE Arduino (valeurs séparées par des virgules ou des espaces) est aussi accepté. Avec des points-virgules, la virgule décimale est acceptée (<code>23,5</code>).</p>
 
  <h3>Conversion de la valeur brute</h3>
- <p style="margin:0"><code>analogRead()</code> donne un nombre entre 0 et 1023 (pour 0 à 5 V sur une Uno). Le bouton ⚙ de chaque voie permet de le convertir en grandeur physique avec <b>grandeur = a × brut + b</b> : choisis un capteur dans la liste, entre a et b, ou calcule-les à partir de deux points de mesure connus.</p>
+ <p><code>analogRead()</code> donne un nombre entre 0 et 1023 sur une Uno (0 à 5 V), entre 0 et 4095 sur un ESP32 (0 à 3,3 V). Le bouton ⚙ de chaque voie le convertit en grandeur physique avec <b>grandeur = a × brut + b</b> : choisis un capteur dans la liste, entre a et b, ou calcule-les à partir de deux points de mesure connus.</p>
 
- <h3>Si ça ne marche pas</h3>
+ <div class="web">
+ <h3 id="a-pb">Si ça ne marche pas</h3>
  <ul>
-  <li>Navigateur : <b>Chrome ou Edge sur ordinateur</b>. Firefox, Safari, les iPhone et les tablettes ne gèrent pas la liaison série.</li>
-  <li>Le port n'apparaît pas : installe le pilote CH340 (cartes compatibles Arduino), change de câble USB (certains ne font que la charge).</li>
-  <li>« Impossible d'ouvrir le port » : le moniteur ou le traceur série de l'IDE est encore ouvert, ou un autre onglet utilise l'Arduino.</li>
+  <li>Le port n'apparaît pas : installe le pilote CH340 (cartes compatibles Arduino), change de câble USB (certains ne font que la charge). En Bluetooth : associe d'abord le module dans les réglages.</li>
+  <li>« Impossible d'ouvrir le port » : le moniteur ou le traceur série de l'IDE est encore ouvert, ou un autre onglet utilise la carte.</li>
   <li>Caractères bizarres dans « Données reçues » : la vitesse ne correspond pas à <code>Serial.begin()</code>.</li>
+  <li>Firefox, Safari et les iPhone ne gèrent pas la liaison série : passe par le Wi-Fi avec un ESP32.</li>
  </ul>
+ </div>
  <p class="mut">Sans Arduino, le <b>mode démo</b> simule trois capteurs pour essayer la page.</p>
 </div></div>
 
@@ -158,16 +203,19 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const MONO=getComputedStyle(document.documentElement).getPropertyValue("--mono");
 const COUL=["#d1495b","#00798c","#e09f1f","#30638e","#6a4c93","#3c8d2f","#b5651d","#4b5563"];
 const PRESETS={
- brut:{l:"Valeur brute (0–1023)",a:1,b:0,u:"",d:0},
+ brut:{l:"Valeur brute",a:1,b:0,u:"",d:0},
  v5:{l:"Tension 0–5 V (Uno)",a:5/1023,b:0,u:"V",d:2},
  v33:{l:"Tension 0–3,3 V (ESP32, 12 bits)",a:3.3/4095,b:0,u:"V",d:2},
  pct:{l:"Pourcentage 0–100 %",a:100/1023,b:0,u:"%",d:0},
  lm35:{l:"LM35 → °C",a:500/1023,b:0,u:"°C",d:1},
  tmp36:{l:"TMP36 → °C",a:500/1023,b:-50,u:"°C",d:1},
+ pct32:{l:"Pourcentage 0–100 % (ESP32)",a:100/4095,b:0,u:"%",d:0},
+ lm35e:{l:"LM35 → °C (ESP32)",a:330/4095,b:0,u:"°C",d:1},
  perso:{l:"Personnalisé (a et b)"}
 };
 const KEY="moniteur-arduino";
 const MAXPTS=60000;
+const ESP32=false; // true dans la copie de la page enregistrée dans l'ESP32 (fabriquer_esp32.py)
 
 /* ---------- réglages mémorisés dans ce navigateur ---------- */
 let cfg={baud:9600,fen:30,voies:[]};
@@ -216,16 +264,21 @@ function journal(s){logL.push(s);if(logL.length>300)logL.splice(0,100);logDirty=
 /* ---------- liaison série (Web Serial) ---------- */
 let port=null,reader=null,pipe=null,volontaire=false;
 const SERIE="serial" in navigator;
-if(!SERIE){
+const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const ANDROID=/Android/.test(navigator.userAgent);
+if(ESP32)document.body.classList.add("esp");
+else if(!SERIE){
  const nb=$("#nonSupport");nb.hidden=false;
- nb.innerHTML=window.isSecureContext
-  ?"Ce navigateur ne gère pas la liaison série avec l'Arduino. Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b> sur un ordinateur. Le mode démo fonctionne quand même."
-  :"La liaison série demande une page sécurisée : ouvre la page depuis son adresse <b>https://</b> (GitHub Pages) et non depuis un fichier.";
+ nb.innerHTML=IOS?"Sur iPhone et iPad, la liaison USB ou Bluetooth avec la carte n'existe pas. Utilise la version <b>Wi-Fi avec un ESP32</b> (bouton « Wi-Fi (ESP32) »). Le mode démo fonctionne quand même."
+  :ANDROID?"Ce navigateur ne gère pas la liaison série. Sur Android, utilise <b>Chrome à jour</b> (version 148 ou plus) avec un module Bluetooth, ou la version <b>Wi-Fi avec un ESP32</b>."
+  :!window.isSecureContext?"La liaison série demande une page sécurisée : ouvre la page depuis son adresse <b>https://</b> (GitHub Pages) et non depuis un fichier."
+  :"Ce navigateur ne gère pas la liaison série avec la carte. Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b> sur un ordinateur, ou passe par le Wi-Fi avec un ESP32. Le mode démo fonctionne quand même.";
  $("#bCo").disabled=true;
 }
 async function connecter(){
  if(etat==="on"){deconnecter();return}
  if(etat==="demo")arreterDemo();
+ if(etat==="wifi")arreterWifi();
  let p;
  try{p=await navigator.serial.requestPort()}catch(e){return} // fenêtre fermée sans choisir
  try{await p.open({baudRate:cfg.baud})}
@@ -256,11 +309,36 @@ async function lire(){
 }
 async function deconnecter(){if(!reader)return;volontaire=true;try{await reader.cancel()}catch(e){}}
 
+/* ---------- Wi-Fi : page servie par l'ESP32, qui répond une ligne de mesures sur /mesures ---------- */
+let wifiT=null,wifiErr=0;
+const PERIODE_WIFI=200;
+function wifi(){
+ if(!ESP32){ouvrirAide("a-wifi");return}
+ if(etat==="wifi"){arreterWifi();return}
+ if(etat==="demo")arreterDemo();
+ if(!data.length)t0=performance.now();
+ setEtat("wifi");journal("— lecture Wi-Fi de l'ESP32 —");wifiErr=0;
+ const tour=async()=>{
+  const debut=performance.now();
+  try{
+   const r=await fetch("/mesures",{cache:"no-store"});
+   if(!r.ok)throw new Error(r.status);
+   (await r.text()).split("\n").forEach(ligne);
+   if(wifiErr>=5)info("Liaison Wi-Fi rétablie.");
+   wifiErr=0;
+  }catch(e){if(++wifiErr===5)info("ESP32 injoignable : vérifie que le téléphone est toujours connecté au Wi-Fi de l'ESP32 et que la carte est alimentée.","err")}
+  if(etat==="wifi")wifiT=setTimeout(tour,Math.max(20,PERIODE_WIFI-(performance.now()-debut)));
+ };
+ tour();
+}
+function arreterWifi(){clearTimeout(wifiT);wifiT=null;setEtat("off");journal("— lecture Wi-Fi arrêtée —")}
+
 /* ---------- mode démo ---------- */
 let demoT=null;
 function demo(){
  if(etat==="demo"){arreterDemo();return}
  if(etat==="on")return;
+ if(etat==="wifi")arreterWifi();
  if(!data.length)t0=performance.now();
  setEtat("demo");journal("— mode démo : trois capteurs simulés —");
  demoT=setInterval(()=>{const t=(performance.now()-t0)/1000;
@@ -273,8 +351,9 @@ function arreterDemo(){clearInterval(demoT);demoT=null;setEtat("off");journal("�
 
 function setEtat(s){
  etat=s;const p=$("#etat");
- p.className="pill"+(s==="on"?" on":s==="demo"?" demo":"");
- p.textContent=s==="on"?"Connecté":s==="demo"?"Démo":"Déconnecté";
+ p.className="pill"+(s==="on"?" on":s==="demo"?" demo":s==="wifi"?" wifi":"");
+ p.textContent=s==="on"?"Connecté":s==="demo"?"Démo":s==="wifi"?"Wi-Fi":"Déconnecté";
+ $("#bWifi").textContent=ESP32?(s==="wifi"?"Arrêter la lecture":"Lire les mesures"):"Wi-Fi (ESP32)";
  $("#bCo").textContent=s==="on"?"Déconnecter":"Connecter l'Arduino";
  $("#bDemo").textContent=s==="demo"?"Arrêter la démo":"Mode démo";
  $("#bDemo").disabled=s==="on";
@@ -449,7 +528,11 @@ $("#dLog").addEventListener("toggle",()=>logDirty=true);
 const ouvrir=o=>o.classList.add("open");
 document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-close]"))o.classList.remove("open")}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".ov.open").forEach(o=>o.classList.remove("open"))});
-$("#bAide").onclick=()=>ouvrir($("#ovAide"));
+$("#bAide").onclick=()=>ouvrirAide();
+$("#bWifi").onclick=wifi;
+function ouvrirAide(id){ouvrir($("#ovAide"));const box=$("#ovAide .box");
+ box.scrollTop=0;if(id){const h=document.getElementById(id);if(h)box.scrollTop=h.offsetTop-12}}
+$("#ovAide").addEventListener("click",e=>{const a=e.target.closest('.tabs a');if(!a)return;e.preventDefault();ouvrirAide(a.getAttribute("href").slice(1))});
 
 /* ---------- boîte à idées (base Notion « Boîte à idées – Isole x ! », Jeu = Moniteur Arduino) ---------- */
 const IDEES="https://isole-x.netlify.app/.netlify/functions/idees";
@@ -472,6 +555,10 @@ $("#ideeSend").onclick=async()=>{
  b.disabled=false;
 };
 
+if(ESP32){cfg.baud=115200;
+ // sur l'ESP32 (pas d'Internet) : ni liaison série ni boîte à idées, lecture Wi-Fi lancée tout de suite
+ ["#bCo","#baud","#bIdee"].forEach(q=>$(q).hidden=true);
+ setEtat("off");wifi();}
 cartes();
 requestAnimationFrame(frame);
 </script>
