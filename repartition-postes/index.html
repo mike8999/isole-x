@@ -164,7 +164,11 @@ nav.tabs{margin:0 0 8px}
 .block{position:relative}.block .bh{padding-right:34px}
 .grip{position:absolute;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:16px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .grip:hover{background:rgba(255,255,255,.18)}
-.task h3{margin-right:34px}
+.task h3{margin-right:70px}
+.done{position:absolute;top:4px;right:38px;width:30px;height:30px;font:800 15px system-ui,sans-serif;border-radius:50%;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;opacity:.55;cursor:pointer;display:grid;place-items:center;padding:0}.done:hover{opacity:1;background:rgba(255,255,255,.18)}
+.task.fait{filter:grayscale(1);opacity:.6;border-style:dotted}.task.fait h3{text-decoration:line-through}.task.fait .done{opacity:1;background:#4a8a35;border-color:#9fd38a;color:#fff;filter:none}
+.task.hold,.block.hold{transform:scale(.97);transition:transform .3s}
+html.dragging,html.dragging body{overflow:hidden}
 .block,.task{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #mvbar{position:fixed;z-index:1001;background:var(--gold1);border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 10px var(--gold1);pointer-events:none}
 .wheel.wide .wi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 14px}
@@ -243,12 +247,12 @@ function renderCat(){
   const c=S.cats.find(x=>x.id===cat),k=catStats(c);
   let h=`<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>${esc(c.name)}</h1>
   <span class="badge"><b>${k.ok}/${k.n}</b> complètes</span><span class="badge ${k.holes?'warn':''}"><b>${k.holes}</b> à pourvoir</span>
-  <button class="bigbtn" data-addtask="${c.id}">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="${c.id}">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter.</p>`;
+  <button class="bigbtn" data-addtask="${c.id}">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="${c.id}">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>`;
   h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>
   ${sel?`<div class="tip"><span>${sel==='__all'?'<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider.':`<b>${esc(mName(sel))}</b> : touche un poste pour l’ajouter ou la retirer.`}</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
   <div class="jetons">${S.members.length?allJeton():''}${sortM(S.members).map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
   h+=k.ts.length?`<div class="tasks">${k.ts.map(t=>{const d=need(t),n=nb(t),ms=miss(t);
-      return `<div class="task ${full(t)?'ok':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
+      return `<div class="task ${full(t)?'ok':''} ${t.done?'fait':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="done" data-done="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?'Poste fait, remettre à faire':'Marquer le poste comme fait'}" title="${t.done?'Fait : touche pour remettre « à faire »':'À faire : touche quand c’est fait'}">✓</button><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
       <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}${t.hours?`<span>${fmtH(+t.hours)} h</span>`:''}<span class="count ${ms?'short':''}">${cnt(t)}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
       <div class="slots">${sortIds(t.who).map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(ms,4)},()=>'<span class="slot">libre</span>').join('')}${ms>4&&t.need!==0?`<span class="slot">+${ms-4}</span>`:''}${t.who.length?`<button class="clr" data-clear="${t.id}" aria-label="Retirer tous les bénévoles de ${esc(t.name)}">Vider</button>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
   return h+'</div>';
@@ -332,7 +336,8 @@ function sameOrder(kind,id,tid,after){const A=(kind==='c'?S.cats:S.tasks).map(x=
 /* appui maintenu sur une carte (catégorie ou poste) pour la déplacer, dépôt entre deux cartes */
 let lp=null,noClick=false;
 function bar(){let b=document.getElementById('mvbar');if(!b){b=document.createElement('div');b.id='mvbar';document.body.appendChild(b)}return b}
-function mvStart(){const p=lp;lp=null;if(!p)return;clearTimeout(p.timer);const r=p.el.getBoundingClientRect(),g=p.el.cloneNode(true);
+function lpCancel(){if(lp){clearTimeout(lp.timer);lp.el.classList.remove('hold');lp=null}}
+function mvStart(){const p=lp;lp=null;if(!p)return;clearTimeout(p.timer);p.el.classList.remove('hold');const r=p.el.getBoundingClientRect(),g=p.el.cloneNode(true);
   g.classList.add('mvghost');g.removeAttribute('href');g.style.width=r.width+'px';g.style.height=r.height+'px';
   mv={kind:p.kind,id:p.id,el:p.el,dx:p.x-r.left,dy:p.y-r.top,tgt:null,after:false,ghost:g};document.body.appendChild(g);
   p.el.classList.add('moving');document.documentElement.classList.add('dragging');noClick=true;try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}
@@ -347,13 +352,15 @@ function mvMove(x,y){
   mv.tgt=tid;const G=5;Object.assign(b.style,{display:'block'},vert?{left:br.left+'px',width:br.width+'px',top:(mv.after?br.bottom+G:br.top-G)-2+'px',height:'4px'}:{top:br.top+'px',height:br.height+'px',left:(mv.after?br.right+G:br.left-G)-2+'px',width:'4px'})}
 root.addEventListener('pointerdown',e=>{if(e.button>0||modal||mv)return;if(e.target.closest('button,input,select,textarea,.jeton'))return;const el=e.target.closest(mvSel);if(!el)return;
   const kind=el.matches('.task')?'t':'c',mouse=e.pointerType==='mouse';lp={kind,id:kind==='c'?el.dataset.cid:el.dataset.task,el,x:e.clientX,y:e.clientY,cx:e.clientX,cy:e.clientY,mouse};
-  lp.timer=setTimeout(mvStart,mouse?300:450)});
+  el.classList.add('hold');lp.timer=setTimeout(mvStart,mouse?300:380)});
 window.addEventListener('pointermove',e=>{
-  if(lp){lp.cx=e.clientX;lp.cy=e.clientY;if(Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>8){if(lp.mouse)mvStart();else{clearTimeout(lp.timer);lp=null}}return}
+  if(lp){lp.cx=e.clientX;lp.cy=e.clientY;if(Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>(lp.mouse?8:12)){if(lp.mouse)mvStart();else lpCancel()}return}
   if(!mv)return;e.preventDefault();mvMove(e.clientX,e.clientY)},{passive:false});
-window.addEventListener('touchmove',e=>{if(mv)e.preventDefault()},{passive:false});
-function mvEnd(drop){if(lp){clearTimeout(lp.timer);lp=null}const m=mv;mv=null;if(!m)return;m.ghost.remove();bar().style.display='none';m.el.classList.remove('moving');document.documentElement.classList.remove('dragging');setTimeout(()=>{noClick=false},60);if(drop&&m.tgt)moveItem(m.kind,m.id,m.tgt,m.after)}
-window.addEventListener('pointerup',()=>mvEnd(true));window.addEventListener('pointercancel',()=>mvEnd(false));
+/* au toucher : une fois le déplacement lancé, on bloque le défilement et on suit le doigt même si le navigateur interrompt les événements pointeur */
+for(const o of[window,document])o.addEventListener('touchmove',e=>{if(!mv)return;e.preventDefault();if(mv.pc){const t=e.touches[0];if(t)mvMove(t.clientX,t.clientY)}},{passive:false});
+window.addEventListener('touchend',()=>{if(mv&&mv.pc)mvEnd(true)});window.addEventListener('touchcancel',()=>{if(mv&&mv.pc)mvEnd(false)});
+function mvEnd(drop){lpCancel();const m=mv;mv=null;if(!m)return;m.ghost.remove();bar().style.display='none';m.el.classList.remove('moving');document.documentElement.classList.remove('dragging');setTimeout(()=>{noClick=false},60);if(drop&&m.tgt)moveItem(m.kind,m.id,m.tgt,m.after)}
+window.addEventListener('pointerup',()=>{if(!mv||!mv.pc)mvEnd(true)});window.addEventListener('pointercancel',e=>{if(mv&&e.pointerType!=='mouse'){mv.pc=true;return}mvEnd(false)});
 window.addEventListener('click',e=>{if(noClick){e.preventDefault();e.stopPropagation();noClick=false}},true);
 root.addEventListener('contextmenu',e=>{if(e.target.closest(mvSel)&&!e.target.closest('input,textarea'))e.preventDefault()});
 root.addEventListener('dragstart',e=>{if(e.target.closest?.(mvSel))e.preventDefault()});
@@ -403,6 +410,7 @@ root.addEventListener('click',e=>{
     navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n')).then(()=>status('Tableau copié : colle-le dans Excel ou Sheets.'),()=>status('La copie a été refusée par le navigateur.','warn'));return}
   if(b.dataset.addtask!==undefined)return taskDialog(b.dataset.addtask);
   if(b.dataset.clear){const t=S.tasks.find(x=>x.id===b.dataset.clear);commit(()=>{t.who=[]});return status('Poste « '+t.name+' » vidé. « Annuler » le remet comme avant.')}
+  if(b.dataset.done){const t=S.tasks.find(x=>x.id===b.dataset.done);commit(()=>{t.done=!t.done});return status(t.done?'« '+t.name+' » : fait ✓':'« '+t.name+' » : à faire')}
   if(b.dataset.edit)return taskDialog(null,S.tasks.find(t=>t.id===b.dataset.edit));
   if(b.dataset.del){const t=S.tasks.find(t=>t.id===b.dataset.del);return confirmDlg(`Supprimer le poste « ${esc(t.name)} » ?`,()=>{S.tasks=S.tasks.filter(x=>x.id!==t.id)})}
   if(b.dataset.delm){const m=S.members.find(m=>m.id===b.dataset.delm);return confirmDlg(`Retirer ${esc(m.name)} de l’équipe ? Ses ${S.tasks.filter(t=>t.who.includes(m.id)).length} affectation(s) seront effacées.`,()=>{S.members=S.members.filter(x=>x.id!==m.id);S.tasks.forEach(t=>t.who=t.who.filter(w=>w!==m.id));if(sel===m.id)sel=null})}
