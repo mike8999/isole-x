@@ -12,6 +12,7 @@ Jeux pour s’entraîner en STI2D.
   - ancienne version 11 conservée : https://mike8999.github.io/isole-x/v3-v11/
   - ancienne version 10 conservée : https://mike8999.github.io/isole-x/v3-v10/
   - ancienne version 9 conservée : https://mike8999.github.io/isole-x/v3-v9/
+  - ancienne version 15 conservée : https://mike8999.github.io/isole-x/repartition-postes-v15/
   - ancienne version 8 conservée : https://mike8999.github.io/isole-x/v3-v8/
   - ancienne version 7 conservée : https://mike8999.github.io/isole-x/v3-v7/
   - ancienne version 6 conservée : https://mike8999.github.io/isole-x/v3-v6/

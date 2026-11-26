@@ -147,7 +147,7 @@ nav.tabs{margin:0 0 8px}
 .ptab h1{font:700 22px system-ui,sans-serif;margin:0 0 2px}.ptab .pdate{margin:0 0 8px;opacity:.75}
 .ptab h2{font:700 16px system-ui,sans-serif;margin:14px 0 4px}
 .ptab table{width:100%;border-collapse:collapse;table-layout:fixed}
-.ptab th:nth-child(1){width:34%}.ptab th:nth-child(2){width:12%}.ptab th:nth-child(3){width:8%}.ptab th:nth-child(4){width:8%}
+.ptab th:nth-child(1){width:38%}.ptab th:nth-child(2){width:14%}.ptab th:nth-child(3){width:10%}
 .ptab th,.ptab td{border:1px solid #bbb;padding:4px 6px;text-align:left;vertical-align:top}
 .ptab th{background:#eee}.ptab td small{display:block;opacity:.7}.ptab em{color:#a3261a;font-style:normal;font-weight:600}
 #printzone{display:none}
@@ -171,9 +171,9 @@ body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
 .block{position:relative}.block .bh{padding-right:34px}
 .grip{position:absolute;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:16px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .grip:hover{background:rgba(255,255,255,.18)}
-.task h3{margin-right:70px}
-.done{position:absolute;top:4px;right:38px;width:30px;height:30px;font:800 15px system-ui,sans-serif;border-radius:50%;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;opacity:.55;cursor:pointer;display:grid;place-items:center;padding:0}.done:hover{opacity:1;background:rgba(255,255,255,.18)}
-.task.fait{filter:grayscale(1);opacity:.6;border-style:dotted}.task.fait h3{text-decoration:line-through}.task.fait .done{opacity:1;background:#4a8a35;border-color:#9fd38a;color:#fff;filter:none}
+.task h3{margin-right:44px}.task{touch-action:manipulation}
+.done{position:absolute;top:4px;right:4px;width:36px;height:36px;font:800 18px system-ui,sans-serif;border-radius:50%;border:2px solid #1f9e2c;background:rgba(0,0,0,.2);color:#3ddc4a;opacity:.9;cursor:pointer;display:grid;place-items:center;padding:0}.done:hover{opacity:1;background:rgba(255,255,255,.18)}
+.task.fait{border-style:dotted;border-color:rgba(255,255,240,.3);background:rgba(0,0,0,.12)}.task.fait>*:not(.done){filter:grayscale(1);opacity:.6}.task.fait h3{text-decoration:line-through}.task.fait .done{opacity:1;background:#14a823;border-color:#b6f5a8;color:#fff;filter:none}
 .task.hold,.block.hold{transform:scale(.97);transition:transform .3s}
 html.dragging,html.dragging body{overflow:hidden}
 .block,.task{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
@@ -181,10 +181,20 @@ html.dragging,html.dragging body{overflow:hidden}
 .wheel.wide .wi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 14px}
 .moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
-.bdel{position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:14px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
+.bdel{position:absolute;bottom:8px;right:8px;width:33px;height:33px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:15.4px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
 .dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
-html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</style><script src="api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Répartition des postes", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
+html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
+.hbtn{width:44px;height:44px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#fffbea,#e9dcae 70%);color:#3b2a0a;display:grid;place-items:center;font:800 21px system-ui,sans-serif;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35);cursor:pointer;flex:none;padding:0}
+.hbtn:hover{filter:brightness(1.08)}.title .hbtn{align-self:flex-start}
+#coach{position:fixed;top:0;right:0;bottom:0;left:0;z-index:300;pointer-events:none}
+#coachRing{position:fixed;border-radius:14px;box-shadow:0 0 0 4px var(--gold1),0 0 0 9999px rgba(10,20,8,.55);transition:all .25s}
+#coachHand{position:fixed;font-size:42px;margin:-8px 0 0 -14px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5));transition:left .25s,top .25s}
+@media(prefers-reduced-motion:no-preference){#coachHand{animation:tap 1.1s ease-in-out infinite}@keyframes tap{50%{transform:translateY(-10px) scale(1.05)}}}
+#coachCap{position:fixed;left:50%;transform:translateX(-50%);width:min(92vw,520px);pointer-events:auto;background:var(--card);color:var(--ink);border-radius:16px;padding:14px 16px;box-shadow:0 5px 0 #b8ad8a,0 16px 40px rgba(0,0,0,.5);font:600 17px/1.4 system-ui,sans-serif}
+#coachCap .cnum{display:inline-block;font:700 14px var(--hand);background:var(--gold2);color:#3a2a00;border-radius:8px;padding:1px 8px;margin-right:6px}
+#coachCap .acts{margin-top:12px}#coachCap .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink)}
+</style><script src="api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Répartition des postes", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
 {
 const $=s=>document.querySelector(s),root=$('#root');
 let S=JSON.parse(document.getElementById('state').textContent);let mv=null;
@@ -228,7 +238,7 @@ async function save(){
   saving=false;
 }
 async function refresh(){
-  if(pending||saving||modal||drag||mv||lp||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  if(pending||saving||modal||drag||mv||lp||tour||document.activeElement?.matches?.('input.txt,.ttl'))return;
   try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
     if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
 }
@@ -239,37 +249,37 @@ const jeton=(id,from,hours)=>`<span class="jeton ${sel===id?'sel':''}${isB(id)?'
 function renderHead(){
   const T=S.tasks,withNeed=T.filter(t=>need(t)),ok=withNeed.filter(full).length;
   const holes=withNeed.reduce((a,t)=>a+miss(t),0);
-  return `<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement" ${S.locked?'disabled':''}><div class="drow"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement" ${S.locked?'disabled':''}><button type="button" class="lockbtn ${S.locked?'on':''}" id="lock" aria-pressed="${!!S.locked}" title="${S.locked?'Verrouillée : code pour déverrouiller':'Déverrouillée : code pour verrouiller'}">${S.locked?'🔒 Verrouillée':'🔓 Déverrouillée'}</button></div></div></div>
+  return `<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement" ${S.locked?'disabled':''}><div class="drow"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement" ${S.locked?'disabled':''}><button type="button" class="lockbtn ${S.locked?'on':''}" id="lock" aria-pressed="${!!S.locked}" title="${S.locked?'Verrouillée : code pour déverrouiller':'Déverrouillée : code pour verrouiller'}">${S.locked?'🔒 Verrouillée':'🔓 Déverrouillée'}</button></div></div><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div>
   <div class="stats"><div class="stat"><b>${vol().length}</b><span>bénévoles</span></div><div class="stat"><b>${ok}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div></div>
   <nav class="tabs">${[['planning','Catégories'],['benevoles','Fiche bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
-  <div class="tools"><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>
+  <div class="tools"><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>
   <div class="status" id="status"></div>`;
 }
 function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>need(t));return{ts,ok:wn.filter(full).length,n:wn.length,holes:wn.reduce((a,t)=>a+miss(t),0)}}
 function renderLanding(){
   return '<div class="blocks">'+S.cats.map(c=>{const k=catStats(c),pc=k.n?Math.round(k.ok/k.n*100):0;
     return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}" data-cid="${c.id}" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="${c.id}" aria-label="Supprimer la catégorie ${esc(c.name)}" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} poste${k.ts.length>1?'s':''}</div></a>`}).join('')
-  +`<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>`;
+  +`<button class="block new" id="newcat"><h2>+ Ajouter une catégorie</h2></button></div>`;
 }
 function renderCat(){
   const c=S.cats.find(x=>x.id===cat),k=catStats(c);
   let h=`<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>${esc(c.name)}</h1>${S.locked?'<span class="badge lockbadge">🔒 Verrouillée</span>':''}
   <span class="badge"><b>${k.ok}/${k.n}</b> complètes</span><span class="badge ${k.holes?'warn':''}"><b>${k.holes}</b> à pourvoir</span>
-  <button class="bigbtn" data-addtask="${c.id}">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="${c.id}">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>`;
-  h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>
+  <button class="bigbtn" data-addtask="${c.id}">Ajouter un poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Touche deux fois un poste pour le modifier. Pour le déplacer, garde le doigt appuyé dessus une demi-seconde.</p>`;
+  h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici. Double-clic sur un poste pour le modifier.</p>
   ${sel?`<div class="tip"><span>${sel==='__all'?'<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider.':`<b>${esc(mName(sel))}</b> : touche un poste pour l’ajouter ou la retirer.`}</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
   <div class="jetons">${S.members.length?allJeton():''}${sortM(S.members).map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
   h+=k.ts.length?`<div class="tasks">${k.ts.map(t=>{const d=need(t),n=nb(t),ms=miss(t);
-      return `<div class="task ${full(t)?'ok':''} ${t.done?'fait':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="done" data-done="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?'Poste fait, remettre à faire':'Marquer le poste comme fait'}" title="${t.done?'Fait : touche pour remettre « à faire »':'À faire : touche quand c’est fait'}">✓</button><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
-      <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}${t.hours?`<span>${fmtH(+t.hours)} h</span>`:''}<span class="count ${ms?'short':''}">${cnt(t)}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
-      <div class="slots">${sortIds(t.who).map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(ms,4)},()=>'<span class="slot">libre</span>').join('')}${ms>4&&t.need!==0?`<span class="slot">+${ms-4}</span>`:''}${t.who.length?`<button class="clr" data-clear="${t.id}" aria-label="Retirer tous les bénévoles de ${esc(t.name)}">Vider</button>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
+      return `<div class="task ${full(t)?'ok':''} ${t.done?'fait':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Double-clic pour modifier · maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="done" data-done="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?'Poste fait, remettre à faire':'Marquer le poste comme fait'}" title="${t.done?'Fait : touche pour remettre « à faire »':'À faire : touche quand c’est fait'}">✓</button>
+      <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}<span class="count ${ms?'short':''}">${cnt(t)}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
+      <div class="slots">${sortIds(t.who).map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(ms,4)},()=>'<span class="slot">libre</span>').join('')}${ms>4&&t.need!==0?`<span class="slot">+${ms-4}</span>`:''}${t.who.length?`<button class="clr" data-clear="${t.id}" aria-label="Retirer tous les bénévoles de ${esc(t.name)}">Vider</button>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « Ajouter un poste ».</p></div>';
   return h+'</div>';
 }
-function catDialog(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>`;render();setTimeout(()=>$('#f-cname')?.focus(),0)}
+function catDialog(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class="modal"><form class="dlg" id="cform"><h2>Ajouter une catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>`;render();setTimeout(()=>$('#f-cname')?.focus(),0)}
 function renderPeople(){
   const holes=S.tasks.filter(t=>need(t)&&miss(t));
   let h=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${miss(t)} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
-  return h+'<div class="people">'+sortM(S.members).map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}</h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}${t.hours?' · '+fmtH(+t.hours)+' h':''}</em></li>`).join('')}</ul>`:'<p class="empty">Aucun poste pour l’instant</p>'}</section>`}).join('')+'</div>';
+  return h+'<div class="people">'+sortM(S.members).map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}</h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}</em></li>`).join('')}</ul>`:'<p class="empty">Aucun poste pour l’instant</p>'}</section>`}).join('')+'</div>';
 }
 function renderTeam(){
   return `<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">${sortM(S.members).map(m=>`<span class="plaque${bm(m)?' bureau':''}"><input class="txt pq" ${S.locked?'disabled':''} data-rename="${m.id}" value="${esc(m.name)}" style="width:${Math.max(3,m.name.length+1)}ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="${m.id}" aria-label="Retirer ${esc(m.name)}" title="Retirer">🗑</button></span>`).join('')}</div>
@@ -287,11 +297,11 @@ function taskDialog(catId,t){if(S.locked)return status(LOCKMSG,'warn');
   const isNew=!t;t=t||{name:'',cat:catId||(S.cats[0]&&S.cats[0].id)||'',when:'',hours:'',need:1,note:''};
   modal=`<div class="modal"><form class="dlg" id="tform" data-id="${isNew?'':t.id}"><h2>${isNew?'Nouveau poste':'Modifier le poste'}</h2>
   <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="${esc(t.name)}">
-  ${isNew?`<input type="hidden" id="f-cat" value="${esc(t.cat)}">`:'<span class="f">Catégorie</span>'+wheel('f-cat',[...S.cats.map(c=>c.id),'__new'],S.cats.some(c=>c.id===t.cat)?t.cat:(S.cats[0]?.id||'__new'),v=>v==='__new'?'+ Nouvelle catégorie…':(S.cats.find(c=>c.id===v)?.name||''),'Catégorie',false,'wide')}
+  ${isNew?`<input type="hidden" id="f-cat" value="${esc(t.cat)}">`:'<span class="f">Catégorie</span>'+wheel('f-cat',[...S.cats.map(c=>c.id),'__new'],S.cats.some(c=>c.id===t.cat)?t.cat:(S.cats[0]?.id||'__new'),v=>v==='__new'?'+ Ajouter une catégorie…':(S.cats.find(c=>c.id===v)?.name||''),'Catégorie',false,'wide')}
   <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;${S.cats.length?'display:none':''}">
   ${(()=>{const [d,c]=parseWhen(t.when),days=DAYS.includes(d)?DAYS:[...DAYS,d],slots=SLOTS.includes(c)?SLOTS:['—',c,...SLOTS.slice(1)];const nx=v=>v==='—'?'Non précisé':v;
     return `<div class="two wheels"><div><span class="f">Jour</span>${wheel('f-day',days,d,v=>v==='J'?'J (jour même)':nx(v),'Jour')}</div><div><span class="f">Créneau</span>${wheel('f-slot',slots,c,nx,'Créneau')}</div></div>`})()}
-  <div class="two wheels"><div><span class="f">Durée</span>${wheel('f-hours',HVALS,+t.hours||0,v=>fmtH(v)+' h','Durée en heures')}</div><div><span class="f">Nombre de personnes</span>${wheel('f-need',NVALS,t.need||1,v=>v+(v>1?' personnes':' personne'),'Nombre de personnes',t.need===0)}</div></div>
+  <div><span class="f">Nombre de personnes</span>${wheel('f-need',NVALS,t.need||1,v=>v+(v>1?' personnes':' personne'),'Nombre de personnes',t.need===0)}</div>
   <label class="chk"><input type="checkbox" id="f-all" ${t.need===0?'checked':''}>Tous les bénévoles (le jeton « Tous » remplit ce poste)</label>
   <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="${esc(t.note)}" placeholder="Matériel, lieu, responsable…">
   <div class="acts">${isNew?'':`<button type="button" class="ghostbtn del" data-del="${t.id}">Supprimer</button>`}<button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Enregistrer</button></div></form></div>`;
@@ -301,10 +311,10 @@ function taskDialog(catId,t){if(S.locked)return status(LOCKMSG,'warn');
 function tableHTML(){
   const dt=S.date?new Date(S.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
   return `<div class="ptab"><h1>${esc(S.title)}</h1>${dt?`<p class="pdate">${dt}</p>`:''}`+S.cats.map(c=>{const ts=S.tasks.filter(t=>t.cat===c.id);if(!ts.length)return'';
-    return `<h2>${esc(c.name)}</h2><table><thead><tr><th>Poste</th><th>Quand</th><th>Durée</th><th>Effectif</th><th>Bénévoles</th></tr></thead><tbody>${ts.map(t=>{const ms=miss(t);
-      return `<tr><td>${esc(t.name)}${t.note?`<small>${esc(t.note)}</small>`:''}</td><td>${esc(t.when)}</td><td>${t.hours?fmtH(+t.hours)+' h':''}</td><td>${cnt(t)}</td><td>${t.need===0&&vol().length&&nb(t)>=vol().length?'Tous les bénévoles':sortIds(t.who).map(mName).map(esc).join(', ')}${ms?` <em>(${ms} à trouver)</em>`:''}</td></tr>`}).join('')}</tbody></table>`}).join('')+'</div>';
+    return `<h2>${esc(c.name)}</h2><table><thead><tr><th>Poste</th><th>Quand</th><th>Effectif</th><th>Bénévoles</th></tr></thead><tbody>${ts.map(t=>{const ms=miss(t);
+      return `<tr><td>${esc(t.name)}${t.note?`<small>${esc(t.note)}</small>`:''}</td><td>${esc(t.when)}</td><td>${cnt(t)}</td><td>${t.need===0&&vol().length&&nb(t)>=vol().length?'Tous les bénévoles':sortIds(t.who).map(mName).map(esc).join(', ')}${ms?` <em>(${ms} à trouver)</em>`:''}</td></tr>`}).join('')}</tbody></table>`}).join('')+'</div>';
 }
-function apercu(){modal=`<div class="modal"><div class="dlg wide"><h2>Aperçu</h2><div class="apbox">${tableHTML()}</div><p class="apmsg" id="apmsg" role="status"></p><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button><button class="ghostbtn" id="csv">Copier pour Excel</button><button class="bigbtn" id="imprimer">🖨 Imprimer</button></div></div></div>`;render()}
+function apercu(){modal=`<div class="modal"><div class="dlg wide"><h2>Export Excel</h2><div class="apbox">${tableHTML()}</div><p class="apmsg" id="apmsg" role="status"></p><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button><button class="ghostbtn" id="csv">Copier pour Excel</button><button class="bigbtn" id="imprimer">🖨 Imprimer</button></div></div></div>`;render()}
 function imprimer(){let z=document.getElementById('printzone');if(!z){z=document.createElement('div');z.id='printzone';document.body.appendChild(z)}z.innerHTML=tableHTML();window.print()}
 
 /* roue de sélection (heures, nombre de personnes) */
@@ -344,7 +354,7 @@ const mvSel='.block[data-cid],.task',cardOf=(k,id)=>document.querySelector(k==='
 function stepItem(kind,id,dir){const A=kind==='c'?S.cats:S.tasks.filter(t=>t.cat===S.tasks.find(x=>x.id===id)?.cat),i=A.findIndex(x=>x.id===id),o=A[i+dir];if(!o)return;moveItem(kind,id,o.id,dir>0);setTimeout(()=>cardOf(kind,id)?.focus(),0)}
 function sameOrder(kind,id,tid,after){const A=(kind==='c'?S.cats:S.tasks).map(x=>x.id),B=A.filter(x=>x!==id),j=B.indexOf(tid);B.splice(after?j+1:j,0,id);return A.join()===B.join()}
 /* appui maintenu sur une carte (catégorie ou poste) pour la déplacer, dépôt entre deux cartes */
-let lp=null,noClick=false;
+let lp=null,noClick=false,lastTap={id:null,t:0};
 function bar(){let b=document.getElementById('mvbar');if(!b){b=document.createElement('div');b.id='mvbar';document.body.appendChild(b)}return b}
 function lpCancel(){if(lp){clearTimeout(lp.timer);lp.el.classList.remove('hold');lp=null}}
 function mvStart(){const p=lp;lp=null;if(!p)return;clearTimeout(p.timer);p.el.classList.remove('hold');const r=p.el.getBoundingClientRect(),g=p.el.cloneNode(true);
@@ -400,14 +410,16 @@ function endDrag(cancel){
 window.addEventListener('pointerup',()=>endDrag(false));
 window.addEventListener('pointercancel',()=>endDrag(true));
 root.addEventListener('keydown',e=>{const j=e.target.closest?.('.jeton');if(j&&(e.key==='Enter'||e.key===' ')&&!S.locked){e.preventDefault();sel=sel===j.dataset.j?null:j.dataset.j;render()}
-  const t=e.target.closest?.('.task');if(t&&e.target===t&&sel&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(t.dataset.task,sel)}});
+  const t=e.target.closest?.('.task');if(t&&e.target===t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();if(sel)toggle(t.dataset.task,sel);else if(!S.locked)taskDialog(null,S.tasks.find(x=>x.id===t.dataset.task))}});
 
 root.addEventListener('click',e=>{
   if(e.target.closest('.bdel'))e.preventDefault();
   if(e.target.closest('.jeton'))return;
   const b=e.target.closest('button,a');
-  if(!b){const t=e.target.closest('.task');if(t&&sel)toggle(t.dataset.task,sel);return}
+  if(!b){const t=e.target.closest('.task');if(!t)return;if(sel){toggle(t.dataset.task,sel);return}
+    const now=Date.now();if(lastTap.id===t.dataset.task&&now-lastTap.t<450){lastTap={id:null,t:0};if(!S.locked)taskDialog(null,S.tasks.find(x=>x.id===t.dataset.task));return}lastTap={id:t.dataset.task,t:now};return}
   if(b.id==='cancel'){e.preventDefault();return closeDlg()}
+  if(b.id==='aide')return tourStart();
   if(b.id==='lock')return lockDlg();
   if(b.id==='okc'){const f=okFn;modal=null;okFn=null;return commit(f)}
   if(b.id==='undo')return undo();
@@ -416,8 +428,8 @@ root.addEventListener('click',e=>{
   if(b.id==='reset')return resetDlg();
   if(b.id==='apercu')return apercu();
   if(b.id==='imprimer')return imprimer();
-  if(b.id==='csv'){const M=sortM(S.members),rows=[['Catégorie','Poste','Quand','Durée (h)','Effectif',...M.map(m=>m.name)]];
-    for(const c of S.cats)for(const t of S.tasks.filter(t=>t.cat===c.id))rows.push([c.name,t.name,t.when,t.hours,t.need===0?'tous':t.need,...M.map(m=>t.who.includes(m.id)?'X':'')]);
+  if(b.id==='csv'){const M=sortM(S.members),rows=[['Catégorie','Poste','Quand','Effectif',...M.map(m=>m.name)]];
+    for(const c of S.cats)for(const t of S.tasks.filter(t=>t.cat===c.id))rows.push([c.name,t.name,t.when,t.need===0?'tous':t.need,...M.map(m=>t.who.includes(m.id)?'X':'')]);
     navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n')).then(()=>status('Tableau copié : colle-le dans Excel ou Sheets.'),()=>status('La copie a été refusée par le navigateur.','warn'));return}
   if(b.dataset.addtask!==undefined)return taskDialog(b.dataset.addtask);
   if(b.dataset.clear){const t=S.tasks.find(x=>x.id===b.dataset.clear);commit(()=>{t.who=[]});return status('Poste « '+t.name+' » vidé. « Annuler » le remet comme avant.')}
@@ -453,15 +465,47 @@ root.addEventListener('submit',e=>{
     const name=$('#f-name').value.trim();if(!name)return;
     let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim(),mk=cat==='__new'||!S.cats.length;
     if(mk&&!nc){$('#f-newcat').style.display='';return $('#f-newcat').focus()}
-    const all=$('#f-all').checked,data={name,when:joinWhen($('#f-day').value,$('#f-slot').value),hours:parseFloat($('#f-hours').value)||0,need:all?0:Math.max(1,parseInt($('#f-need').value)||1),note:$('#f-note').value.trim()};
+    const all=$('#f-all').checked,data={name,when:joinWhen($('#f-day').value,$('#f-slot').value),need:all?0:Math.max(1,parseInt($('#f-need').value)||1),note:$('#f-note').value.trim()};
     const id=f.dataset.id;modal=null;
     commit(()=>{if(mk){cat=uid('c');S.cats.push({id:cat,name:nc})}
       if(id)Object.assign(S.tasks.find(t=>t.id===id),data,{cat});else S.tasks.push({id:uid('t'),cat,who:[],...data})});
   }
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal)closeDlg();else if(sel){sel=null;render()}}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(tour)tourStop();else if(modal)closeDlg();else if(sel){sel=null;render()}}
   if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo()}});
-window.addEventListener('hashchange',()=>{readHash();scrollTo(0,0);render()});
+/* aide : visite guidée de l'écran affiché (main animée et étapes numérotées, comme dans Isole x !) */
+let tour=null;
+const TOURS={
+  planning:[['.block[data-cid]','Chaque carte est une catégorie de postes. Touche-la pour l’ouvrir et répartir les bénévoles.'],
+    ['.block[data-cid]','Pour ranger les catégories, maintiens le doigt (ou le clic) sur une carte puis dépose-la entre deux autres cartes.'],
+    ['.bdel','La poubelle supprime la catégorie et ses postes, après confirmation.'],
+    ['#newcat','« Ajouter une catégorie » crée un nouveau groupe de postes.'],
+    ['nav.tabs','« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms.'],
+    ['#apercu','« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer.'],
+    ['#lock','Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie.'],
+    ['#ideeOpen','Une idée, un bug ? La boîte à idées est anonyme.']],
+  cat:[['#bench','Voici les jetons des bénévoles. Glisse un jeton sur un poste, ou touche un jeton puis les postes où l’affecter.'],
+    ['.jeton.tous','Le jeton « Tous » remplit d’un coup les postes cochés « Tous les bénévoles ».'],
+    ['.task','Double-clic (ou deux touchers) sur un poste pour le modifier. Maintiens appuyé pour le déplacer.'],
+    ['.task .done','La coche verte indique que le poste est fait. Touche-la de nouveau pour le remettre « à faire ».'],
+    ['.task .clr','« Vider » retire tous les bénévoles du poste.'],
+    ['[data-addtask]','« Ajouter un poste » crée un poste : jour, créneau et nombre de personnes se choisissent avec les roulettes.'],
+    ['#undo','« Annuler » défait la dernière modification.']],
+  benevoles:[['.chap','En haut, les postes où il manque encore du monde.'],['.people','Puis la fiche de chaque bénévole avec ses postes.']],
+  equipe:[['.plaque','Touche un prénom pour le corriger directement dans sa plaque. La poubelle retire la personne.'],
+    ['#addm','Ajoute un nouveau bénévole ici.'],['#reset','« Remise à zéro » remplace toute la liste d’un coup.']]};
+const vis=q=>[...document.querySelectorAll(q)].find(e=>e.offsetParent!==null&&e.getClientRects().length);
+function tourStart(){sel=null;render();const k=view==='planning'?(cat?'cat':'planning'):view;const st=(TOURS[k]||[]).filter(([q])=>vis(q));if(!st.length)return;
+  tour={st,i:0};let c=document.getElementById('coach');if(!c){c=document.createElement('div');c.id='coach';c.innerHTML='<div id="coachRing"></div><div id="coachHand" aria-hidden="true">👆</div><div id="coachCap" role="dialog" aria-live="polite"></div>';document.body.appendChild(c)}
+  c.style.display='';c.querySelector('#coachCap').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.go==='x')return tourStop();tour.i+=+b.dataset.go;if(tour.i>=tour.st.length||tour.i<0)return tourStop();tourShow(true)};tourShow(true)}
+function tourShow(scroll){if(!tour)return;const [q,txt]=tour.st[tour.i],el=vis(q),cap=$('#coachCap'),n=tour.st.length,last=tour.i===n-1;
+  if(!el)return tourStop();if(scroll){el.scrollIntoView({block:'center',behavior:'smooth'});cap.innerHTML=`<span class="cnum">${tour.i+1}/${n}</span> ${txt}<div class="acts"><button class="ghostbtn" data-go="x">Passer ✕</button>${tour.i?'<button class="ghostbtn" data-go="-1">◀</button>':''}<button class="bigbtn" data-go="1">${last?'Terminé ✓':'Suivant ▶'}</button></div>`;setTimeout(()=>{cap.querySelector('.bigbtn')?.focus({preventScroll:true});tourShow(false)},350)}
+  const r=el.getBoundingClientRect(),P=6;Object.assign($('#coachRing').style,{left:r.left-P+'px',top:r.top-P+'px',width:r.width+2*P+'px',height:r.height+2*P+'px'});
+  Object.assign($('#coachHand').style,{left:Math.min(innerWidth-40,r.left+Math.min(r.width/2,90))+'px',top:Math.min(innerHeight-50,r.top+Math.min(r.height/2,60))+'px'});
+  const low=r.top+r.height/2<innerHeight/2;cap.style.top=low?'':'14px';cap.style.bottom=low?'calc(14px + env(safe-area-inset-bottom))':''}
+function tourStop(){tour=null;const c=document.getElementById('coach');if(c)c.style.display='none'}
+window.addEventListener('scroll',()=>{if(tour)tourShow(false)},true);window.addEventListener('resize',()=>{if(tour)tourShow(false)});
+window.addEventListener('hashchange',()=>{tourStop();readHash();scrollTo(0,0);render()});
 render();
 status('Chargement des données…');fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{ready=true;document.documentElement.classList.remove('loading');if(d.state){S=d.state;etag=d.etag;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status('Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}).catch(()=>status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn'));
 setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
