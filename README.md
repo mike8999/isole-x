@@ -27,6 +27,9 @@ Jeux pour s’entraîner en STI2D.
   - Mode professeur (code dans la variable Netlify `NEON_PROF_CODE`) : édition de toutes les questions, cartes, fiches et schémas, enregistrées en ligne (fonction `neon-contenu`, Netlify Blobs) et vues par les élèves au chargement suivant
   - Schémas en glisser-déposer : circuit DEL, poutre sur deux appuis, chaîne de puissance, chaîne d'information, chaîne cinématique pignon-crémaillère
   - Boîte à idées vers la base Notion (Jeu = Neon Rush STI2D)
+- **Moniteur Arduino (valeurs de capteurs en direct par liaison série, Chrome ou Edge sur ordinateur)** : https://mike8999.github.io/isole-x/moniteur-arduino/
+  - Plusieurs voies séparées par `;` (nom facultatif, ex. `Temp:61;Pot:512`), courbe en temps réel, conversion grandeur = a × brut + b (capteurs prédéfinis ou calcul à deux points), mode démo sans Arduino
+  - Programme d'exemple : `moniteur-arduino/moniteur_capteurs.ino` ; boîte à idées vers la base Notion (Jeu = Moniteur Arduino)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/
