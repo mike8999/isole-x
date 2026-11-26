@@ -154,10 +154,10 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
 body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
-.block.new{grid-column:1/-1;min-height:56px!important}
+.block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
 @media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
 
 .jeton.bureau{border:2px dashed var(--gold2);background:#efe3b8}
@@ -186,7 +186,7 @@ html.dragging,html.dragging body{overflow:hidden}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
 html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
 .hbtn{width:44px;height:44px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#fffbea,#e9dcae 70%);color:#3b2a0a;display:grid;place-items:center;font:800 21px system-ui,sans-serif;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35);cursor:pointer;flex:none;padding:0}
-.hbtn:hover{filter:brightness(1.08)}.title .hbtn{align-self:flex-start}
+.hbtn:hover{filter:brightness(1.08)}.hbtn.hsm{width:38px;height:38px;font-size:18px;margin-left:auto}
 #coach{position:fixed;top:0;right:0;bottom:0;left:0;z-index:300;pointer-events:none}
 #coachRing{position:fixed;border-radius:14px;box-shadow:0 0 0 4px var(--gold1),0 0 0 9999px rgba(10,20,8,.55);transition:all .25s}
 #coachHand{position:fixed;font-size:42px;margin:-8px 0 0 -14px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5));transition:left .25s,top .25s}
@@ -244,7 +244,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }, renderHead2 = function() {
     const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
     const holes = withNeed.reduce((a, t) => a + miss(t), 0);
-    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button></div></div><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
+    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
   }, catStats2 = function(c) {
     const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
     return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
@@ -252,7 +252,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     return '<div class="blocks">' + S.cats.map((c) => {
       const k = catStats2(c), pc = k.n ? Math.round(k.ok / k.n * 100) : 0;
       return '<a class="block '.concat(k.n && k.ok === k.n ? "ok" : "", '" href="#cat-').concat(c.id, '" data-cid="').concat(c.id, '" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="').concat(c.id, '" aria-label="Supprimer la catégorie ').concat(esc(c.name), '" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>').concat(esc(c.name), "</h2>").concat(k.holes ? '<span class="pill short">'.concat(k.holes, " à pourvoir</span>") : '<span class="pill ok">Complet ✓</span>', '</div><div class="pr"><div class="prog"><i style="width:').concat(pc, '%"></i></div><span>').concat(k.ok, "/").concat(k.n, '</span></div><div class="meta">').concat(k.ts.length, " poste").concat(k.ts.length > 1 ? "s" : "", "</div></a>");
-    }).join("") + '<button class="block new" id="newcat"><h2>+ Ajouter une catégorie</h2></button></div>';
+    }).join("") + '<div class="catacts"><button class="block new" id="newcat"><h2>+ Ajouter une catégorie</h2></button>'.concat(S.cats.length ? '<button class="block new delcats" id="delcats"><h2>🗑 Supprimer une catégorie</h2></button>' : "", "</div></div>");
   }, renderCat2 = function() {
     const c = S.cats.find((x) => x.id === cat), k = catStats2(c);
     let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), "</h1>").concat(S.locked ? '<span class="badge lockbadge">🔒 Verrouillée</span>' : "", '\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">Ajouter un poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Touche deux fois un poste pour le modifier. Pour le déplacer, garde le doigt appuyé dessus une demi-seconde.</p>');
@@ -270,6 +270,16 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       var _a;
       return (_a = $("#f-cname")) == null ? void 0 : _a.focus();
     }, 0);
+  }, delCatsDlg2 = function() {
+    if (S.locked) return status2(LOCKMSG, "warn");
+    if (!S.cats.length) return;
+    modal = '<div class="modal"><form class="dlg" id="dform"><h2>Supprimer une catégorie</h2><span class="f">Catégorie à supprimer</span>'.concat(wheel2("f-delc", S.cats.map((c) => c.id), S.cats[0].id, (v) => {
+      var _a;
+      return ((_a = S.cats.find((c) => c.id === v)) == null ? void 0 : _a.name) || "";
+    }, "Catégorie à supprimer", false, "wide"), '\n  <label class="chk"><input type="checkbox" id="f-delall">Supprimer toutes les catégories (').concat(S.cats.length, ')</label><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Supprimer…</button></div></form></div>');
+    render2();
+    initWheels2();
+    setTimeout(initWheels2, 0);
   }, renderPeople2 = function() {
     const holes = S.tasks.filter((t) => need(t) && miss(t));
     let h = '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
@@ -604,7 +614,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     const c = document.getElementById("coach");
     if (c) c.style.display = "none";
   };
-  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
@@ -879,6 +889,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       return render2();
     }
     if (b.id === "newcat") return catDialog2();
+    if (b.id === "delcats") return delCatsDlg2();
     if (b.id === "reset") return resetDlg2();
     if (b.id === "apercu") return apercu2();
     if (b.id === "imprimer") return imprimer2();
@@ -965,6 +976,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       $("#f-newcat").style.display = i.value === "__new" ? "" : "none";
       if (i.value === "__new") $("#f-newcat").focus();
     }
+    if (i.id === "f-delall") document.querySelector('.wheel[data-for="f-delc"]').classList.toggle("off", i.checked);
     if (i.id === "f-all") document.querySelector('.wheel[data-for="f-need"]').classList.toggle("off", i.checked);
   });
   root.addEventListener("submit", (e) => {
@@ -989,6 +1001,22 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
         S.members = names.map((n) => old.find((m) => m.name.toLowerCase() === n.toLowerCase()) || { id: uid("m"), name: n });
         const keep = new Set(S.members.map((m) => m.id));
         S.tasks.forEach((t) => t.who = wipe ? [] : t.who.filter((w) => keep.has(w)));
+      });
+    }
+    if (f.id === "dform") {
+      if ($("#f-delall").checked) {
+        const n2 = S.tasks.length;
+        return confirmDlg2("Supprimer les ".concat(S.cats.length, " catégories et leurs ").concat(n2, " poste(s) ? « Annuler » permet de revenir en arrière."), () => {
+          S.cats = [];
+          S.tasks = [];
+        });
+      }
+      const c = S.cats.find((x) => x.id === $("#f-delc").value);
+      if (!c) return;
+      const n = S.tasks.filter((t) => t.cat === c.id).length;
+      return confirmDlg2("Supprimer la catégorie « ".concat(esc(c.name), " »").concat(n ? " et ses ".concat(n, " poste(s)") : "", " ?"), () => {
+        S.cats = S.cats.filter((x) => x.id !== c.id);
+        S.tasks = S.tasks.filter((t) => t.cat !== c.id);
       });
     }
     if (f.id === "cform") {
@@ -1066,6 +1094,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       [".block[data-cid]", "Pour ranger les catégories, maintiens le doigt (ou le clic) sur une carte puis dépose-la entre deux autres cartes."],
       [".bdel", "La poubelle supprime la catégorie et ses postes, après confirmation."],
       ["#newcat", "« Ajouter une catégorie » crée un nouveau groupe de postes."],
+      ["#delcats", "« Supprimer une catégorie » : choisis-la avec la roulette, ou coche « toutes » pour tout effacer."],
       ["nav.tabs", "« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms."],
       ["#apercu", "« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer."],
       ["#lock", "Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie."],

@@ -154,10 +154,10 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
 body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
-.block.new{grid-column:1/-1;min-height:56px!important}
+.block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
 @media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
 
 .jeton.bureau{border:2px dashed var(--gold2);background:#efe3b8}
@@ -186,7 +186,7 @@ html.dragging,html.dragging body{overflow:hidden}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
 html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
 .hbtn{width:44px;height:44px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#fffbea,#e9dcae 70%);color:#3b2a0a;display:grid;place-items:center;font:800 21px system-ui,sans-serif;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35);cursor:pointer;flex:none;padding:0}
-.hbtn:hover{filter:brightness(1.08)}.title .hbtn{align-self:flex-start}
+.hbtn:hover{filter:brightness(1.08)}.hbtn.hsm{width:38px;height:38px;font-size:18px;margin-left:auto}
 #coach{position:fixed;top:0;right:0;bottom:0;left:0;z-index:300;pointer-events:none}
 #coachRing{position:fixed;border-radius:14px;box-shadow:0 0 0 4px var(--gold1),0 0 0 9999px rgba(10,20,8,.55);transition:all .25s}
 #coachHand{position:fixed;font-size:42px;margin:-8px 0 0 -14px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5));transition:left .25s,top .25s}
@@ -249,7 +249,7 @@ const jeton=(id,from,hours)=>`<span class="jeton ${sel===id?'sel':''}${isB(id)?'
 function renderHead(){
   const T=S.tasks,withNeed=T.filter(t=>need(t)),ok=withNeed.filter(full).length;
   const holes=withNeed.reduce((a,t)=>a+miss(t),0);
-  return `<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement" ${S.locked?'disabled':''}><div class="drow"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement" ${S.locked?'disabled':''}><button type="button" class="lockbtn ${S.locked?'on':''}" id="lock" aria-pressed="${!!S.locked}" title="${S.locked?'Verrouillée : code pour déverrouiller':'Déverrouillée : code pour verrouiller'}">${S.locked?'🔒 Verrouillée':'🔓 Déverrouillée'}</button></div></div><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div>
+  return `<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement" ${S.locked?'disabled':''}><div class="drow"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement" ${S.locked?'disabled':''}><button type="button" class="lockbtn ${S.locked?'on':''}" id="lock" aria-pressed="${!!S.locked}" title="${S.locked?'Verrouillée : code pour déverrouiller':'Déverrouillée : code pour verrouiller'}">${S.locked?'🔒 Verrouillée':'🔓 Déverrouillée'}</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>
   <div class="stats"><div class="stat"><b>${vol().length}</b><span>bénévoles</span></div><div class="stat"><b>${ok}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div></div>
   <nav class="tabs">${[['planning','Catégories'],['benevoles','Fiche bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
   <div class="tools"><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>
@@ -259,7 +259,7 @@ function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>ne
 function renderLanding(){
   return '<div class="blocks">'+S.cats.map(c=>{const k=catStats(c),pc=k.n?Math.round(k.ok/k.n*100):0;
     return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}" data-cid="${c.id}" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="${c.id}" aria-label="Supprimer la catégorie ${esc(c.name)}" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} poste${k.ts.length>1?'s':''}</div></a>`}).join('')
-  +`<button class="block new" id="newcat"><h2>+ Ajouter une catégorie</h2></button></div>`;
+  +`<div class="catacts"><button class="block new" id="newcat"><h2>+ Ajouter une catégorie</h2></button>${S.cats.length?`<button class="block new delcats" id="delcats"><h2>🗑 Supprimer une catégorie</h2></button>`:''}</div></div>`;
 }
 function renderCat(){
   const c=S.cats.find(x=>x.id===cat),k=catStats(c);
@@ -276,6 +276,8 @@ function renderCat(){
   return h+'</div>';
 }
 function catDialog(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class="modal"><form class="dlg" id="cform"><h2>Ajouter une catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>`;render();setTimeout(()=>$('#f-cname')?.focus(),0)}
+function delCatsDlg(){if(S.locked)return status(LOCKMSG,'warn');if(!S.cats.length)return;modal=`<div class="modal"><form class="dlg" id="dform"><h2>Supprimer une catégorie</h2><span class="f">Catégorie à supprimer</span>${wheel('f-delc',S.cats.map(c=>c.id),S.cats[0].id,v=>S.cats.find(c=>c.id===v)?.name||'','Catégorie à supprimer',false,'wide')}
+  <label class="chk"><input type="checkbox" id="f-delall">Supprimer toutes les catégories (${S.cats.length})</label><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Supprimer…</button></div></form></div>`;render();initWheels();setTimeout(initWheels,0)}
 function renderPeople(){
   const holes=S.tasks.filter(t=>need(t)&&miss(t));
   let h=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${miss(t)} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
@@ -425,6 +427,7 @@ root.addEventListener('click',e=>{
   if(b.id==='undo')return undo();
   if(b.id==='unsel'){sel=null;return render()}
   if(b.id==='newcat')return catDialog();
+  if(b.id==='delcats')return delCatsDlg();
   if(b.id==='reset')return resetDlg();
   if(b.id==='apercu')return apercu();
   if(b.id==='imprimer')return imprimer();
@@ -448,6 +451,7 @@ root.addEventListener('change',e=>{
   if(i.id==='ttl'){const v=i.value.trim()||'Répartition des postes';return commit(()=>{S.title=v})}
   if(i.id==='date')return commit(()=>{S.date=i.value});
   if(i.id==='f-cat'){$('#f-newcat').style.display=i.value==='__new'?'':'none';if(i.value==='__new')$('#f-newcat').focus()}
+  if(i.id==='f-delall')document.querySelector('.wheel[data-for="f-delc"]').classList.toggle('off',i.checked);
   if(i.id==='f-all')document.querySelector('.wheel[data-for="f-need"]').classList.toggle('off',i.checked);
 });
 root.addEventListener('submit',e=>{
@@ -456,6 +460,8 @@ root.addEventListener('submit',e=>{
   if(f.id==='rform'){const seen=new Set(),names=$('#f-list').value.split(/[\n,;]+/).map(x=>x.trim()).filter(x=>x&&!seen.has(x.toLowerCase())&&seen.add(x.toLowerCase()));
     const wipe=$('#f-wipe').checked;modal=null;sel=null;
     return commit(()=>{const old=S.members;S.members=names.map(n=>old.find(m=>m.name.toLowerCase()===n.toLowerCase())||{id:uid('m'),name:n});const keep=new Set(S.members.map(m=>m.id));S.tasks.forEach(t=>t.who=wipe?[]:t.who.filter(w=>keep.has(w)))})}
+  if(f.id==='dform'){if($('#f-delall').checked){const n=S.tasks.length;return confirmDlg(`Supprimer les ${S.cats.length} catégories et leurs ${n} poste(s) ? « Annuler » permet de revenir en arrière.`,()=>{S.cats=[];S.tasks=[]})}
+    const c=S.cats.find(x=>x.id===$('#f-delc').value);if(!c)return;const n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} poste(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
   if(f.id==='cform'){const v=$('#f-cname').value.trim();if(!v)return;const id=uid('c');modal=null;commit(()=>S.cats.push({id,name:v}));location.hash='cat-'+id;return}
   if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
   if(f.id==='lform'){if($('#f-code').value.trim()!==CODE){$('#lmsg').textContent='Code incorrect.';$('#f-code').value='';return $('#f-code').focus()}
@@ -480,6 +486,7 @@ const TOURS={
     ['.block[data-cid]','Pour ranger les catégories, maintiens le doigt (ou le clic) sur une carte puis dépose-la entre deux autres cartes.'],
     ['.bdel','La poubelle supprime la catégorie et ses postes, après confirmation.'],
     ['#newcat','« Ajouter une catégorie » crée un nouveau groupe de postes.'],
+    ['#delcats','« Supprimer une catégorie » : choisis-la avec la roulette, ou coche « toutes » pour tout effacer.'],
     ['nav.tabs','« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms.'],
     ['#apercu','« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer.'],
     ['#lock','Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie.'],
