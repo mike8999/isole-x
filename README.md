@@ -44,10 +44,20 @@ Jeux pour s’entraîner en STI2D.
   - ancienne version 3 conservée : https://mike8999.github.io/isole-x/college-v3/
   - ancienne version 2 conservée : https://mike8999.github.io/isole-x/college-v2/
   - ancienne version 1 conservée : https://mike8999.github.io/isole-x/college-v1/
+- **Répartition des postes (bénévoles So Caval) — dernière version** : https://mike8999.github.io/isole-x/repartition-postes/
+  - ancienne version 8 conservée : https://mike8999.github.io/isole-x/repartition-postes-v8/
+  - ancienne version 7 conservée : https://mike8999.github.io/isole-x/repartition-postes-v7/
+  - ancienne version 6 conservée : https://mike8999.github.io/isole-x/repartition-postes-v6/
+  - ancienne version 5 conservée : https://mike8999.github.io/isole-x/repartition-postes-v5/
+  - ancienne version 4 conservée : https://mike8999.github.io/isole-x/repartition-postes-v4/
+  - ancienne version 3 conservée : https://mike8999.github.io/isole-x/repartition-postes-v3/
+  - ancienne version 2 conservée : https://mike8999.github.io/isole-x/repartition-postes-v2/
+  - ancienne version 1 conservée : https://mike8999.github.io/isole-x/repartition-postes-v1/
+  - Données partagées : serveur Google Apps Script (`repartition-postes/serveur-apps-script.gs`), adresse dans `repartition-postes/api.js`
 
 
 Apparence (bouton « Apparence », dans les réglages) : 9 thèmes communs aux trois jeux (établi, jungle, nuit, tableau blanc, contraste élevé gratuits ou propres au jeu ; océan, espace, prestige à débloquer ; « Le labo des SII » gratuit dans l'atelier, « Bonbon » à débloquer dans la Jungle avec les pièces), style du plateau, forme de l'inconnue, couleur des boutons, taille des jetons.
 
 Boîte à idées (💡, sur l'accueil de l'atelier et de la Jungle) : suggestions anonymes (plus pratique, nouvelle idée, bug, autre) envoyées dans la base Notion « Boîte à idées – Isole x ! » par la fonction Netlify `netlify/functions/idees.mjs` (variable d'environnement `NOTION_TOKEN` = clé de l'intégration Notion).
 
-Nouveautés issues de la boîte à idées (fichier `nouveautes.css` + moteur et interface) : dans la pioche, glisser un jeton sur un autre propose **additionner ou multiplier** (x·x = x²) ; jeton **( )** : glisser « ( » devant un terme puis toucher le dernier terme (après un −, les signes s'inversent : −a + b = −(a − b)) ; **déplacer un terme** dans son membre (ou un facteur dans son produit) en le déposant sur un signe ou un bord, sans compter de coup ; outils **1/□, □², √□** toujours dans la pioche, utilisables sur un bloc (refusé avec un contre-exemple si ce n'est pas tout le membre) ; mascotte en haut à droite qui cligne des yeux, se réjouit, fronce les sourcils et encourage. Jungle : compagnon au choix dans les réglages (Pépix, Buzix le chien, Catix la chatte), qui s'endort après 3 jours sans défi réussi.
+Nouveautés issues de la boîte à idées (fichier `nouveautes.css` + moteur et interface) : dans la pioche, glisser un jeton sur un autre propose **additionner ou multiplier** (x·x = x²) ; jeton **( )** : glisser « ( » devant un terme puis toucher le dernier terme (après un −, les signes s'inversent : −a + b = −(a − b)) ; **déplacer un terme** dans son membre (ou un facteur dans son produit) en le déposant sur un signe ou un bord, sans compter de coup ; outils **1/□, □², √□** toujours dans la pioche, utilisables sur un bloc (refusé avec un contre-exemple si ce n'est pas tout le membre) ; mascotte en haut à droite qui cligne des yeux, se réjouit, fronce les sourcils et encourage. Jungle : compagnon au choix dans les réglages (Pépix, Buzix le chien, Catix la chatte), qui s'endort après 3 jours sans défi réussi. Le compagnon fait de petites scènes au repos, réagit quand on le touche, boude après 2 jours, rétrécit après 7, 14 ou 21 jours d'absence et reprend un niveau toutes les 3 équations résolues.
