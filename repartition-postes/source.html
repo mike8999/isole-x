@@ -154,7 +154,7 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
 body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
 .block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
@@ -466,7 +466,7 @@ root.addEventListener('submit',e=>{
   if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
   if(f.id==='lform'){if($('#f-code').value.trim()!==CODE){$('#lmsg').textContent='Code incorrect.';$('#f-code').value='';return $('#f-code').focus()}
     if(!ready){$('#lmsg').textContent='Chargement des données en cours, réessaie dans quelques secondes.';return}
-    const v=!S.locked;S.locked=v;modal=null;sel=null;render();queueSave();return status(v?'Répartition verrouillée : consultation seule.':'Répartition déverrouillée : les modifications sont possibles.')}
+    const v=!S.locked;S.locked=v;if(v)tourStop();modal=null;sel=null;render();queueSave();return status(v?'Répartition verrouillée : consultation seule.':'Répartition déverrouillée : les modifications sont possibles.')}
   if(f.id==='tform'){
     const name=$('#f-name').value.trim();if(!name)return;
     let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim(),mk=cat==='__new'||!S.cats.length;
@@ -502,7 +502,7 @@ const TOURS={
   equipe:[['.plaque','Touche un prénom pour le corriger directement dans sa plaque. La poubelle retire la personne.'],
     ['#addm','Ajoute un nouveau bénévole ici.'],['#reset','« Remise à zéro » remplace toute la liste d’un coup.']]};
 const vis=q=>[...document.querySelectorAll(q)].find(e=>e.offsetParent!==null&&e.getClientRects().length);
-function tourStart(){sel=null;render();const k=view==='planning'?(cat?'cat':'planning'):view;const st=(TOURS[k]||[]).filter(([q])=>vis(q));if(!st.length)return;
+function tourStart(){if(S.locked)return;sel=null;render();const k=view==='planning'?(cat?'cat':'planning'):view;const st=(TOURS[k]||[]).filter(([q])=>vis(q));if(!st.length)return;
   tour={st,i:0};let c=document.getElementById('coach');if(!c){c=document.createElement('div');c.id='coach';c.innerHTML='<div id="coachRing"></div><div id="coachHand" aria-hidden="true">👆</div><div id="coachCap" role="dialog" aria-live="polite"></div>';document.body.appendChild(c)}
   c.style.display='';c.querySelector('#coachCap').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.go==='x')return tourStop();tour.i+=+b.dataset.go;if(tour.i>=tour.st.length||tour.i<0)return tourStop();tourShow(true)};tourShow(true)}
 function tourShow(scroll){if(!tour)return;const [q,txt]=tour.st[tour.i],el=vis(q),cap=$('#coachCap'),n=tour.st.length,last=tour.i===n-1;
