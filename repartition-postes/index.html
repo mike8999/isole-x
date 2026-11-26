@@ -151,6 +151,12 @@ nav.tabs{margin:0 0 8px}
 .ptab th,.ptab td{border:1px solid #bbb;padding:4px 6px;text-align:left;vertical-align:top}
 .ptab th{background:#eee}.ptab td small{display:block;opacity:.7}.ptab em{color:#a3261a;font-style:normal;font-weight:600}
 #printzone{display:none}
+.drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
+.lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
+.lockbadge{background:#7a2a1c!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
+body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
 .block.new{grid-column:1/-1;min-height:56px!important}
 @media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
 
@@ -202,14 +208,22 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
       status2("Chargement des données en cours, patiente quelques secondes…", "warn");
       return;
     }
+    if (S.locked) {
+      modal = null;
+      render2();
+      status2(LOCKMSG, "warn");
+      return;
+    }
     hist.push(JSON.stringify(S));
     if (hist.length > 40) hist.shift();
     fn();
     render2();
     queueSave2();
   }, undo2 = function() {
-    if (!hist.length) return;
+    if (!hist.length || S.locked) return;
+    const lk = !!S.locked;
     S = JSON.parse(hist.pop());
+    S.locked = lk;
     render2();
     queueSave2();
   }, queueSave2 = function() {
@@ -220,7 +234,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
   }, renderHead2 = function() {
     const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
     const holes = withNeed.reduce((a, t) => a + miss(t), 0);
-    return '<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement"></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
+    return '<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
   }, catStats2 = function(c) {
     const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
     return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
@@ -231,7 +245,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
     }).join("") + '<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>';
   }, renderCat2 = function() {
     const c = S.cats.find((x) => x.id === cat), k = catStats2(c);
-    let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), '</h1>\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="').concat(c.id, '">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>');
+    let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), "</h1>").concat(S.locked ? '<span class="badge lockbadge">🔒 Verrouillée</span>' : "", '\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="').concat(c.id, '">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>');
     h += '<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>\n  '.concat(sel ? '<div class="tip"><span>'.concat(sel === "__all" ? "<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider." : "<b>".concat(esc(mName(sel)), "</b> : touche un poste pour l’ajouter ou la retirer."), '</span><button class="ghostbtn" id="unsel">Terminé</button></div>') : "", '\n  <div class="jetons">').concat(S.members.length ? allJeton() : "").concat(sortM(S.members).map((m) => jeton(m.id, "", true)).join("") || '<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>', "</div></aside>");
     h += k.ts.length ? '<div class="tasks">'.concat(k.ts.map((t) => {
       const d = need(t), n = nb(t), ms = miss(t);
@@ -239,6 +253,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
     }).join(""), "</div>") : '<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
     return h + "</div>";
   }, catDialog2 = function() {
+    if (S.locked) return status2(LOCKMSG, "warn");
     modal = '<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>';
     render2();
     setTimeout(() => {
@@ -253,7 +268,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
       return '<section class="chap"><h2>'.concat(jeton(m.id, "", false), "</h2>").concat(ts.length ? "<ul>".concat(ts.map((t) => "<li><span>".concat(esc(t.name), "</span><em>").concat(esc(t.when)).concat(t.hours ? " · " + fmtH(+t.hours) + " h" : "", "</em></li>")).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant</p>', "</section>");
     }).join("") + "</div>";
   }, renderTeam2 = function() {
-    return '<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">'.concat(sortM(S.members).map((m) => '<span class="plaque'.concat(bm(m) ? " bureau" : "", '"><input class="txt pq" data-rename="').concat(m.id, '" value="').concat(esc(m.name), '" style="width:').concat(Math.max(3, m.name.length + 1), 'ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="').concat(m.id, '" aria-label="Retirer ').concat(esc(m.name), '" title="Retirer">🗑</button></span>')).join(""), '</div>\n  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>');
+    return '<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">'.concat(sortM(S.members).map((m) => '<span class="plaque'.concat(bm(m) ? " bureau" : "", '"><input class="txt pq" ').concat(S.locked ? "disabled" : "", ' data-rename="').concat(m.id, '" value="').concat(esc(m.name), '" style="width:').concat(Math.max(3, m.name.length + 1), 'ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="').concat(m.id, '" aria-label="Retirer ').concat(esc(m.name), '" title="Retirer">🗑</button></span>')).join(""), '</div>\n  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>');
   }, render2 = function() {
     const e0 = $("#status"), st = (e0 == null ? void 0 : e0.textContent) || "", sc = (e0 == null ? void 0 : e0.className) || "status";
     if (cat && !S.cats.some((c) => c.id === cat)) {
@@ -263,12 +278,14 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
     const inCat = view === "planning" && cat;
     document.body.classList.toggle("hasdock", !!inCat);
     document.body.classList.toggle("selecting", !!sel);
+    document.body.classList.toggle("locked", !!S.locked);
     root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
     const e = $("#status");
     e.textContent = st;
     e.className = sc;
   }, taskDialog2 = function(catId, t) {
     var _a;
+    if (S.locked) return status2(LOCKMSG, "warn");
     const isNew = !t;
     t = t || { name: "", cat: catId || S.cats[0] && S.cats[0].id || "", when: "", hours: "", need: 1, note: "" };
     modal = '<div class="modal"><form class="dlg" id="tform" data-id="'.concat(isNew ? "" : t.id, '"><h2>').concat(isNew ? "Nouveau poste" : "Modifier le poste", '</h2>\n  <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="').concat(esc(t.name), '">\n  <span class="f">Catégorie</span>').concat(wheel2("f-cat", [...S.cats.map((c) => c.id), "__new"], S.cats.some((c) => c.id === t.cat) ? t.cat : ((_a = S.cats[0]) == null ? void 0 : _a.id) || "__new", (v) => {
@@ -344,12 +361,18 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
     if (d === "—" || d === "J") return c;
     return d + " · " + c;
   }, resetDlg2 = function() {
+    if (S.locked) return status2(LOCKMSG, "warn");
     modal = '<div class="modal"><form class="dlg" id="rform"><h2>Remise à zéro de la liste</h2><p>Un prénom par ligne. Les prénoms déjà présents gardent leurs postes, les prénoms retirés sont enlevés des postes.</p>\n  <textarea class="txt" id="f-list" rows="10" aria-label="Liste des bénévoles">'.concat(esc(sortM(S.members).map((m) => m.name).join("\n")), '</textarea>\n  <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>\n  <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>');
     render2();
     setTimeout(() => {
       var _a;
       return (_a = $("#f-list")) == null ? void 0 : _a.focus();
     }, 0);
+  }, lockDlg2 = function() {
+    const on = !!S.locked;
+    modal = '<div class="modal"><form class="dlg" id="lform"><h2>'.concat(on ? "Déverrouiller" : "Verrouiller", " la répartition</h2><p>").concat(on ? "Entre le code pour pouvoir de nouveau modifier." : "Une fois verrouillée, tout le monde peut consulter, imprimer et utiliser la boîte à idées, mais personne ne peut rien modifier.", '</p><label class="f" for="f-code">Code</label><input class="txt" id="f-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="lmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">').concat(on ? "🔓 Déverrouiller" : "🔒 Verrouiller", "</button></div></form></div>");
+    render2();
+    setTimeout(() => $("#f-code") && $("#f-code").focus(), 0);
   }, confirmDlg2 = function(msg, fn) {
     okFn = fn;
     modal = '<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>'.concat(msg, '</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>');
@@ -524,7 +547,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
       f.who = f.who.filter((w) => w !== d.id);
     });
   };
-  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2;
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
@@ -554,6 +577,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
   const cnt = (t) => hasB(t) && !nb(t) ? "Bureau" : nb(t) + "/" + (t.need === 0 ? "tous" : need(t));
   let ready = false;
   document.documentElement.classList.add("loading");
+  const LOCKMSG = "Répartition verrouillée : déverrouille-la avec le cadenas (code) pour modifier.";
   async function save() {
     if (saving) {
       timer = setTimeout(save, 500);
@@ -626,10 +650,11 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
   const DAYS = ["—", "J-7", "J-1", "J"], SLOTS = ["—", "Matin", "Après-midi", "Journée", h2(8, 10), h2(10, 12), h2(12, 14), h2(14, 16), h2(16, 18), h2(18, 20), h2(8, 18)];
   const HVALS = Array.from({ length: 49 }, (_, i) => i / 2), NVALS = Array.from({ length: 40 }, (_, i) => i + 1);
   let okFn = null;
+  const CODE = "8579";
   const mvSel = ".block[data-cid],.task", cardOf = (k, id) => document.querySelector(k === "c" ? '.block[data-cid="'.concat(id, '"]') : '.task[data-task="'.concat(id, '"]'));
   let lp = null, noClick = false;
   root.addEventListener("pointerdown", (e) => {
-    if (e.button > 0 || modal || mv) return;
+    if (e.button > 0 || modal || mv || S.locked) return;
     if (e.target.closest("button,input,select,textarea,.jeton")) return;
     const el = e.target.closest(mvSel);
     if (!el) return;
@@ -703,7 +728,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
   });
   root.addEventListener("pointerdown", (e) => {
     const j = e.target.closest(".jeton");
-    if (!j || e.button > 0 || !j.closest(".bench,.slots")) return;
+    if (!j || e.button > 0 || S.locked || !j.closest(".bench,.slots")) return;
     drag = { id: j.dataset.j, from: j.dataset.from, x: e.clientX, y: e.clientY, el: j, ghost: null, hot: null, touch: e.pointerType !== "mouse" };
     j.classList.add("grab");
     try {
@@ -747,7 +772,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
   root.addEventListener("keydown", (e) => {
     var _a, _b, _c, _d;
     const j = (_b = (_a = e.target).closest) == null ? void 0 : _b.call(_a, ".jeton");
-    if (j && (e.key === "Enter" || e.key === " ")) {
+    if (j && (e.key === "Enter" || e.key === " ") && !S.locked) {
       e.preventDefault();
       sel = sel === j.dataset.j ? null : j.dataset.j;
       render2();
@@ -771,6 +796,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
       e.preventDefault();
       return closeDlg2();
     }
+    if (b.id === "lock") return lockDlg2();
     if (b.id === "okc") {
       const f = okFn;
       modal = null;
@@ -908,6 +934,24 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</styl
       const v = $("#newc").value.trim();
       if (v) commit2(() => S.cats.push({ id: uid("c"), name: v }));
       return;
+    }
+    if (f.id === "lform") {
+      if ($("#f-code").value.trim() !== CODE) {
+        $("#lmsg").textContent = "Code incorrect.";
+        $("#f-code").value = "";
+        return $("#f-code").focus();
+      }
+      if (!ready) {
+        $("#lmsg").textContent = "Chargement des données en cours, réessaie dans quelques secondes.";
+        return;
+      }
+      const v = !S.locked;
+      S.locked = v;
+      modal = null;
+      sel = null;
+      render2();
+      queueSave2();
+      return status2(v ? "Répartition verrouillée : consultation seule." : "Répartition déverrouillée : les modifications sont possibles.");
     }
     if (f.id === "tform") {
       const name = $("#f-name").value.trim();

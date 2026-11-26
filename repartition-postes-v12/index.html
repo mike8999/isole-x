@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Répartition des postes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ludique et clair, dans la famille d'Isole x ! (plateau vert).
+   IDEA: un plateau de jeu en feutre : chaque bénévole est un jeton crème qu'on pose sur les cartes des tâches.
+   PICTURE: le banc des jetons en haut, puis les tâches en tuiles où les jetons se posent.
+   COLOUR and TYPE: feutre vert, jetons crème, or pour la sélection et les postes complets ; police manuscrite + system-ui.
+   LAYOUT: titre et badges, banc collant, panneaux par catégorie avec grille de tuiles. */
+:root{--felt1:#5b8a3f;--felt2:#2f5224;--felt3:#24411b;--card:#f4efdc;--ink:#2b2a22;--gold1:#ffe27a;--gold2:#e2a826;--line:rgba(255,255,240,.35);--red:#ff9a8a;
+--hand:"Segoe Print","Comic Neue","Comic Sans MS","Chalkboard SE",cursive}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--felt3)}
+body{margin:0;min-height:100vh;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fffbea;overflow-x:hidden;overflow-x:clip;
+background:radial-gradient(ellipse at 50% 20%,rgba(255,255,255,.10),transparent 60%),repeating-radial-gradient(circle at 20% 30%,rgba(0,0,0,.035) 0 2px,transparent 2px 5px),linear-gradient(160deg,var(--felt1),var(--felt2) 70%,var(--felt3));background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+.wrap{width:min(1120px,100%);margin:auto;padding:18px 16px 60px}
+.title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:inline-grid;place-items:center;width:52px;height:60px;border-radius:10px;background:linear-gradient(145deg,var(--gold1),var(--gold2));color:#4a2c00;font:700 30px var(--hand);box-shadow:0 4px 0 #9b6f10,0 0 18px rgba(255,214,90,.7);border:2px solid #fff3b8;flex:none}
+.ttl{font:700 clamp(28px,5vw,46px)/1.1 var(--hand);color:#fffbea;background:none;border:0;border-bottom:2px dashed transparent;text-shadow:0 3px 0 rgba(0,0,0,.25);flex:1;padding:0}
+.ttl:hover,.ttl:focus{border-bottom-color:var(--line);outline:none}
+.sub{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:10px 0 14px}
+.date{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;color-scheme:dark;min-height:40px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.22);border:0;border-radius:8px;padding:4px 10px;font:600 15px system-ui,sans-serif;white-space:nowrap}
+.badge b{color:var(--gold1);font-size:19px}.badge.warn{background:rgba(120,30,15,.55)}.badge.warn b{color:#ffd2c7}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.chip{border:2px solid var(--line);background:rgba(255,255,255,.06);padding:8px 16px;border-radius:999px;text-decoration:none;color:inherit;min-height:44px;display:inline-flex;align-items:center;font-weight:600}
+.chip[aria-current]{background:var(--card);color:var(--ink);border-color:var(--card)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
+.bigbtn{background:linear-gradient(var(--gold1),var(--gold2));color:#3a2a00;border:0;border-radius:12px;padding:10px 18px;font-weight:700;box-shadow:0 3px 0 #9b6f10;min-height:44px;cursor:pointer}
+.bigbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #9b6f10}
+.ghostbtn{background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:12px;padding:9px 16px;min-height:44px;cursor:pointer}
+.ghostbtn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:3px solid var(--gold1);outline-offset:2px}
+.status{font-size:14px;min-height:20px;margin:-4px 0 10px}.status.warn{color:var(--red);opacity:1}
+.bench{position:sticky;top:0;z-index:10;background:rgba(36,65,27,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.bench.hot{border-color:var(--gold1);box-shadow:0 0 0 3px rgba(255,226,122,.4)}
+.bench h2,.chap h2{font:700 18px var(--hand);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.bench h2 small,.chap h2 small{font:400 13px system-ui;opacity:.8}
+.jetons{display:flex;flex-wrap:wrap;gap:8px}
+.jeton{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:4px 12px;border-radius:9px;background:var(--card);color:var(--ink);font:600 16px system-ui,sans-serif;box-shadow:0 3px 0 #b8ad8a,0 4px 8px rgba(0,0,0,.3);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;white-space:nowrap;border:2px solid transparent}
+.jeton small{font:600 12px system-ui;background:rgba(0,0,0,.08);border-radius:6px;padding:1px 5px}
+.jeton.sel{background:linear-gradient(145deg,var(--gold1),var(--gold2));color:#4a2c00;border-color:#fff3b8;box-shadow:0 3px 0 #9b6f10,0 0 14px rgba(255,214,90,.9)}
+.jeton.lift{opacity:.35}
+.ghost{position:fixed;left:0;top:0;z-index:100;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.tip{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border-radius:12px;padding:8px 12px;font-size:14px;margin-top:10px}
+.tip button{margin-left:auto}
+.chap{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.lnk{background:none;border:0;color:var(--gold1);font:600 14px system-ui;cursor:pointer;padding:8px 4px;min-height:40px}
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:8px}
+.task{position:relative;border:2px solid var(--line);border-radius:12px;background:rgba(255,255,255,.08);padding:7px 9px 8px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.task:hover{background:rgba(255,255,255,.13)}
+.task.ok{border-color:var(--gold2);background:rgba(255,226,122,.12)}
+.task.mine{box-shadow:0 0 0 3px var(--gold1)}
+body.dragging .task{border-style:dashed}
+.task.hot{border-style:solid!important;border-color:var(--gold1);background:rgba(255,226,122,.3);box-shadow:inset 0 0 0 2px var(--gold1)}
+.jeton{-webkit-touch-callout:none}
+html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
+.jeton.grab{outline:3px solid var(--gold1);outline-offset:1px}
+.task h3{font:600 15px/1.25 system-ui,sans-serif;margin:0 28px 2px 0}
+.meta{font-size:13px;color:#fffbea;display:flex;gap:4px 8px;flex-wrap:wrap}
+.count{font-weight:700;color:var(--gold1)}.task:not(.ok) .count.short{color:#fff;background:#a3261a;border-radius:6px;padding:0 6px}
+.note{font-size:13px;opacity:.95;margin-top:1px}
+.slots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;min-height:30px}
+.slots .jeton{font-size:14px;min-height:28px;padding:1px 8px;border-radius:7px;box-shadow:0 2px 0 #b8ad8a,0 2px 5px rgba(0,0,0,.3)}
+.slot{min-width:52px;min-height:28px;border-radius:7px;border:2px dashed rgba(255,255,240,.7);border-radius:9px;display:grid;place-items:center;font-size:13px;color:#fffbea}
+.edit{position:absolute;top:4px;right:4px;width:30px;height:30px;font-size:14px;border-radius:50%;border:2px solid var(--line);background:rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center}
+.edit:hover{background:rgba(255,255,255,.18)}
+.empty{opacity:.7;font-style:italic;margin:4px 0}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.people ul{list-style:none;margin:0;padding:0}.people li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.people li em{font-style:normal;opacity:.8;font-size:14px;white-space:nowrap;flex:none}
+.lst{list-style:none;padding:0;margin:0}.lst li{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.txt{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:rgba(0,0,0,.2);font-size:16px;width:100%;flex:1}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.x{background:none;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;opacity:.8;flex:none}.x:hover{background:rgba(255,255,255,.12);opacity:1}
+.modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(10,20,8,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:200}
+.dlg{background:var(--card);color:var(--ink);border-radius:18px;padding:22px;width:min(520px,100%);max-height:92vh;overflow:auto;box-shadow:0 6px 0 #b8ad8a,0 20px 50px rgba(0,0,0,.5)}
+.dlg h2{font:700 26px var(--hand);margin:0 0 12px}
+.dlg label.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.dlg .txt{background:#fffdf4;border-color:#cfc6a6;color:var(--ink)}
+.dlg .ghostbtn{background:#e8e0c4;border-color:#cfc6a6}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.chk{display:flex;gap:8px;align-items:center;margin-top:8px}.chk input{width:20px;height:20px;accent-color:var(--gold2)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:flex-end}.acts .del{margin-right:auto;color:#a3261a}
+
+.blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px}
+.block{display:flex;flex-direction:column;gap:5px;text-decoration:none;color:inherit;background:rgba(0,0,0,.18);border:2px solid var(--line);border-radius:14px;padding:10px 12px;transition:background .15s,transform .12s,border-color .15s;cursor:pointer;font:inherit;text-align:left}
+.block:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.block.ok{border-color:var(--gold2);background:rgba(255,226,122,.1)}
+.block h2{font:700 19px/1.15 var(--hand);margin:0}.bh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px}.bh h2{overflow-wrap:anywhere}.pr{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;white-space:nowrap}.pr .prog{flex:1}
+.block .meta{font-size:13px;opacity:.8}
+.prog{height:6px;border-radius:99px;background:rgba(0,0,0,.25);overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--gold1),var(--gold2));border-radius:99px}
+.block .go{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{border-radius:99px;padding:1px 8px;font-size:12px;white-space:nowrap;flex:none;font-weight:700;background:rgba(0,0,0,.25)}.pill.short{color:#fff;background:#a3261a}.pill.ok{color:var(--gold1)}
+.block.new{border-style:dashed;align-items:center;justify-content:center;opacity:.85;min-height:76px}.block.new h2{font-size:17px}
+.cathead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:6px}
+.cathead h1{font:700 clamp(24px,4vw,34px)/1.1 var(--hand);margin:0 auto 0 4px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;align-items:start}
+.dock{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;margin:0;order:2}
+.dock .jetons{flex-direction:column;align-items:stretch;gap:6px}.dock .jeton{min-height:34px;padding:2px 10px}.dock .jeton{justify-content:space-between}
+.dock .hint{font-size:13px;opacity:.9;margin:0 0 8px}.mhint{display:none}
+@media(max-width:899px){.board{grid-template-columns:minmax(0,1fr) 90px;gap:8px}.mhint{display:block;font-size:14px;margin:-4px 0 10px}
+ .tasks{grid-template-columns:minmax(0,1fr)}
+ .dock{top:8px;max-height:calc(100vh - 80px);padding:6px;border-radius:12px;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .dock h2{font-size:14px;margin:0 0 6px;justify-content:center}.dock .hint{display:none}
+ .dock .jetons{gap:5px}.dock .jeton{font-size:14px;min-height:42px;padding:2px 4px;justify-content:center;overflow:hidden;text-overflow:ellipsis}.dock .jeton small{display:none}
+ .dock,.board>*{min-width:0} .dock .jetons{display:block}.dock .jeton{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;min-width:0;margin-bottom:5px;line-height:1.15;padding:4px 3px;text-align:center;font-size:13px;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+ .dock .tip{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:60;background:rgba(20,35,15,.96);border:1px solid var(--line);flex-wrap:nowrap;margin:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+ .dock .tip .ghostbtn{min-height:38px;padding:6px 12px;flex:none}
+ body.hasdock.selecting .wrap{padding-bottom:80px}
+ .cathead h1{flex-basis:100%;order:-1;margin:0}}
+@media(max-width:600px){.two{grid-template-columns:1fr}.tabs{width:100%}.tabs .chip{flex:1;justify-content:center;padding:8px 6px;font-size:14px;white-space:nowrap}.jeton{font-size:15px}}
+@media(prefers-reduced-motion:no-preference){.jeton.sel{animation:glow 2.4s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 3px 0 #9b6f10,0 0 22px rgba(255,214,90,1)}}}
+
+.title .tcol{display:flex;flex-direction:column;gap:6px;flex:1}
+.title .date{align-self:flex-start}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.stat{background:rgba(0,0,0,.22);border-radius:10px;padding:6px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;font:600 13px/1.2 system-ui,sans-serif}
+.stat b{color:var(--gold1);font-size:20px}
+.stat.warn{background:rgba(120,30,15,.55)}.stat.warn b{color:#ffd2c7}
+nav.tabs{margin:0 0 8px}
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.tools button{width:100%;min-height:44px;padding:8px 6px;font:600 15px system-ui,sans-serif;color:inherit}
+.tools .bigbtn{color:#3a2a00;font-weight:700}
+@media(max-width:699px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tools .bigbtn{grid-column:1/-1}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.blocks{grid-template-columns:repeat(auto-fill,minmax(min(calc(50% - 5px),250px),1fr))}
+@media(max-width:599px){.block{padding:8px 9px;min-height:118px}.block h2{font-size:16px}.block .bh{flex-direction:column;align-items:flex-start;gap:4px}.block .pill{font-size:12px}.block .meta{font-size:12px}.block.new{min-height:118px}}
+.jeton.tous{background:linear-gradient(var(--gold1),var(--gold2));color:#3a2a00;box-shadow:0 3px 0 #9b6f10,0 4px 8px rgba(0,0,0,.3)}
+.dlg span.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.wheel{position:relative;height:120px;border:1px solid #cfc6a6;border-radius:12px;background:#fffdf4;overflow:hidden}
+.wheel::before{content:"";position:absolute;left:6px;right:6px;top:40px;height:40px;border-radius:8px;background:rgba(226,168,38,.25);border:2px solid var(--gold2);pointer-events:none}
+.wheel::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;background:linear-gradient(#fffdf4,rgba(255,253,244,0) 35%,rgba(255,253,244,0) 65%,#fffdf4)}
+.wl{height:120px;overflow-y:scroll;scroll-snap-type:y mandatory;padding:40px 0;scrollbar-width:none;overscroll-behavior:contain}
+.wl::-webkit-scrollbar{display:none}
+.wi{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font:600 17px system-ui,sans-serif;color:#6d6650;cursor:pointer;user-select:none}
+.wi.on{color:var(--ink);font-weight:800;font-size:19px}
+.wheel.off{opacity:.35;pointer-events:none}
+.two.wheels{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.dlg textarea.txt{min-height:180px;font:inherit;font-size:16px;resize:vertical}
+.chap h2 #reset{font:600 14px system-ui,sans-serif;color:inherit}
+.dlg.wide{width:min(1000px,100%)}
+.apbox{max-height:60vh;overflow:auto;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #cfc6a6}
+.apmsg{min-height:1.2em;font-weight:600;margin:8px 0 0}
+.ptab{font:14px/1.35 system-ui,sans-serif;color:#222}
+.ptab h1{font:700 22px system-ui,sans-serif;margin:0 0 2px}.ptab .pdate{margin:0 0 8px;opacity:.75}
+.ptab h2{font:700 16px system-ui,sans-serif;margin:14px 0 4px}
+.ptab table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ptab th:nth-child(1){width:34%}.ptab th:nth-child(2){width:12%}.ptab th:nth-child(3){width:8%}.ptab th:nth-child(4){width:8%}
+.ptab th,.ptab td{border:1px solid #bbb;padding:4px 6px;text-align:left;vertical-align:top}
+.ptab th{background:#eee}.ptab td small{display:block;opacity:.7}.ptab em{color:#a3261a;font-style:normal;font-weight:600}
+#printzone{display:none}
+.block.new{grid-column:1/-1;min-height:56px!important}
+@media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
+
+.jeton.bureau{border:2px dashed var(--gold2);background:#efe3b8}
+.clr{margin-left:auto;align-self:center;min-height:28px;padding:2px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:600 13px system-ui,sans-serif;cursor:pointer}
+.clr:hover{background:rgba(120,30,15,.55)}
+.plaques{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.plaque{display:inline-flex;align-items:center;gap:2px;background:var(--card);color:var(--ink);border-radius:12px;padding:3px 4px 3px 10px;box-shadow:0 3px 0 rgba(0,0,0,.25);border:2px solid transparent}
+.plaque:focus-within{border-color:var(--gold2)}.plaque.bureau{border:2px dashed var(--gold2);background:#efe3b8}
+.plaque .pq{border:0;background:transparent;color:inherit;font:700 16px system-ui,sans-serif;padding:6px 2px;min-width:3ch;max-width:60vw;flex:none;outline:none;box-shadow:none}
+.pqdel{border:0;background:transparent;cursor:pointer;width:34px;height:34px;border-radius:8px;font-size:15px;opacity:.65;flex:none}.pqdel:hover{opacity:1;background:rgba(163,38,26,.15)}
+.block{position:relative}.block .bh{padding-right:34px}
+.grip{position:absolute;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:16px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.grip:hover{background:rgba(255,255,255,.18)}
+.task h3{margin-right:70px}
+.done{position:absolute;top:4px;right:38px;width:30px;height:30px;font:800 15px system-ui,sans-serif;border-radius:50%;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;opacity:.55;cursor:pointer;display:grid;place-items:center;padding:0}.done:hover{opacity:1;background:rgba(255,255,255,.18)}
+.task.fait{filter:grayscale(1);opacity:.6;border-style:dotted}.task.fait h3{text-decoration:line-through}.task.fait .done{opacity:1;background:#4a8a35;border-color:#9fd38a;color:#fff;filter:none}
+.task.hold,.block.hold{transform:scale(.97);transition:transform .3s}
+html.dragging,html.dragging body{overflow:hidden}
+.block,.task{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#mvbar{position:fixed;z-index:1001;background:var(--gold1);border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 10px var(--gold1);pointer-events:none}
+.wheel.wide .wi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 14px}
+.moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
+.mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
+.bdel{position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:14px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
+.dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
+.delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
+html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</style><script src="../repartition-postes/api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Répartition des postes", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
+{
+  let readHash2 = function() {
+    const h = location.hash.slice(1);
+    if (h.startsWith("cat-") && S.cats.some((c) => c.id === h.slice(4))) {
+      view = "planning";
+      cat = h.slice(4);
+    } else {
+      view = VIEWS.includes(h) ? h : "planning";
+      cat = null;
+    }
+  }, status2 = function(t, c) {
+    const e = $("#status");
+    if (e) {
+      e.textContent = t;
+      e.className = "status " + (c || "");
+    }
+    const m = $("#apmsg");
+    if (m) m.textContent = t;
+  }, commit2 = function(fn) {
+    if (!ready) {
+      status2("Chargement des données en cours, patiente quelques secondes…", "warn");
+      return;
+    }
+    hist.push(JSON.stringify(S));
+    if (hist.length > 40) hist.shift();
+    fn();
+    render2();
+    queueSave2();
+  }, undo2 = function() {
+    if (!hist.length) return;
+    S = JSON.parse(hist.pop());
+    render2();
+    queueSave2();
+  }, queueSave2 = function() {
+    pending = true;
+    clearTimeout(timer);
+    status2("Modifications en attente…");
+    timer = setTimeout(save, 800);
+  }, renderHead2 = function() {
+    const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
+    const holes = withNeed.reduce((a, t) => a + miss(t), 0);
+    return '<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement"></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
+  }, catStats2 = function(c) {
+    const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
+    return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
+  }, renderLanding2 = function() {
+    return '<div class="blocks">' + S.cats.map((c) => {
+      const k = catStats2(c), pc = k.n ? Math.round(k.ok / k.n * 100) : 0;
+      return '<a class="block '.concat(k.n && k.ok === k.n ? "ok" : "", '" href="#cat-').concat(c.id, '" data-cid="').concat(c.id, '" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="').concat(c.id, '" aria-label="Supprimer la catégorie ').concat(esc(c.name), '" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>').concat(esc(c.name), "</h2>").concat(k.holes ? '<span class="pill short">'.concat(k.holes, " à pourvoir</span>") : '<span class="pill ok">Complet ✓</span>', '</div><div class="pr"><div class="prog"><i style="width:').concat(pc, '%"></i></div><span>').concat(k.ok, "/").concat(k.n, '</span></div><div class="meta">').concat(k.ts.length, " poste").concat(k.ts.length > 1 ? "s" : "", "</div></a>");
+    }).join("") + '<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>';
+  }, renderCat2 = function() {
+    const c = S.cats.find((x) => x.id === cat), k = catStats2(c);
+    let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), '</h1>\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="').concat(c.id, '">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>');
+    h += '<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>\n  '.concat(sel ? '<div class="tip"><span>'.concat(sel === "__all" ? "<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider." : "<b>".concat(esc(mName(sel)), "</b> : touche un poste pour l’ajouter ou la retirer."), '</span><button class="ghostbtn" id="unsel">Terminé</button></div>') : "", '\n  <div class="jetons">').concat(S.members.length ? allJeton() : "").concat(sortM(S.members).map((m) => jeton(m.id, "", true)).join("") || '<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>', "</div></aside>");
+    h += k.ts.length ? '<div class="tasks">'.concat(k.ts.map((t) => {
+      const d = need(t), n = nb(t), ms = miss(t);
+      return '<div class="task '.concat(full(t) ? "ok" : "", " ").concat(t.done ? "fait" : "", " ").concat(sel && t.who.includes(sel) ? "mine" : "", '" data-task="').concat(t.id, '" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>').concat(esc(t.name), '</h3><button class="done" data-done="').concat(t.id, '" aria-pressed="').concat(!!t.done, '" aria-label="').concat(t.done ? "Poste fait, remettre à faire" : "Marquer le poste comme fait", '" title="').concat(t.done ? "Fait : touche pour remettre « à faire »" : "À faire : touche quand c’est fait", '">✓</button><button class="edit" data-edit="').concat(t.id, '" aria-label="Modifier ').concat(esc(t.name), '">✎</button>\n      <div class="meta">').concat(t.when ? "<span>".concat(esc(t.when), "</span>") : "").concat(t.hours ? "<span>".concat(fmtH(+t.hours), " h</span>") : "", '<span class="count ').concat(ms ? "short" : "", '">').concat(cnt(t), "</span></div>").concat(t.note ? '<div class="note">'.concat(esc(t.note), "</div>") : "", '\n      <div class="slots">').concat(sortIds(t.who).map((w) => jeton(w, t.id, false)).join("")).concat(t.need === 0 ? "" : Array.from({ length: Math.min(ms, 4) }, () => '<span class="slot">libre</span>').join("")).concat(ms > 4 && t.need !== 0 ? '<span class="slot">+'.concat(ms - 4, "</span>") : "").concat(t.who.length ? '<button class="clr" data-clear="'.concat(t.id, '" aria-label="Retirer tous les bénévoles de ').concat(esc(t.name), '">Vider</button>') : "", "</div></div>");
+    }).join(""), "</div>") : '<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
+    return h + "</div>";
+  }, catDialog2 = function() {
+    modal = '<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>';
+    render2();
+    setTimeout(() => {
+      var _a;
+      return (_a = $("#f-cname")) == null ? void 0 : _a.focus();
+    }, 0);
+  }, renderPeople2 = function() {
+    const holes = S.tasks.filter((t) => need(t) && miss(t));
+    let h = '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
+    return h + '<div class="people">' + sortM(S.members).map((m) => {
+      const ts = S.tasks.filter((t) => t.who.includes(m.id));
+      return '<section class="chap"><h2>'.concat(jeton(m.id, "", false), "</h2>").concat(ts.length ? "<ul>".concat(ts.map((t) => "<li><span>".concat(esc(t.name), "</span><em>").concat(esc(t.when)).concat(t.hours ? " · " + fmtH(+t.hours) + " h" : "", "</em></li>")).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant</p>', "</section>");
+    }).join("") + "</div>";
+  }, renderTeam2 = function() {
+    return '<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">'.concat(sortM(S.members).map((m) => '<span class="plaque'.concat(bm(m) ? " bureau" : "", '"><input class="txt pq" data-rename="').concat(m.id, '" value="').concat(esc(m.name), '" style="width:').concat(Math.max(3, m.name.length + 1), 'ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="').concat(m.id, '" aria-label="Retirer ').concat(esc(m.name), '" title="Retirer">🗑</button></span>')).join(""), '</div>\n  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>');
+  }, render2 = function() {
+    const e0 = $("#status"), st = (e0 == null ? void 0 : e0.textContent) || "", sc = (e0 == null ? void 0 : e0.className) || "status";
+    if (cat && !S.cats.some((c) => c.id === cat)) {
+      cat = null;
+      if (location.hash.startsWith("#cat-")) history.replaceState(null, "", "#planning");
+    }
+    const inCat = view === "planning" && cat;
+    document.body.classList.toggle("hasdock", !!inCat);
+    document.body.classList.toggle("selecting", !!sel);
+    root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
+    const e = $("#status");
+    e.textContent = st;
+    e.className = sc;
+  }, taskDialog2 = function(catId, t) {
+    var _a;
+    const isNew = !t;
+    t = t || { name: "", cat: catId || S.cats[0] && S.cats[0].id || "", when: "", hours: "", need: 1, note: "" };
+    modal = '<div class="modal"><form class="dlg" id="tform" data-id="'.concat(isNew ? "" : t.id, '"><h2>').concat(isNew ? "Nouveau poste" : "Modifier le poste", '</h2>\n  <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="').concat(esc(t.name), '">\n  <span class="f">Catégorie</span>').concat(wheel2("f-cat", [...S.cats.map((c) => c.id), "__new"], S.cats.some((c) => c.id === t.cat) ? t.cat : ((_a = S.cats[0]) == null ? void 0 : _a.id) || "__new", (v) => {
+      var _a2;
+      return v === "__new" ? "+ Nouvelle catégorie…" : ((_a2 = S.cats.find((c) => c.id === v)) == null ? void 0 : _a2.name) || "";
+    }, "Catégorie", false, "wide"), '\n  <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;').concat(S.cats.length ? "display:none" : "", '">\n  ').concat((() => {
+      const [d, c] = parseWhen2(t.when), days = DAYS.includes(d) ? DAYS : [...DAYS, d], slots = SLOTS.includes(c) ? SLOTS : ["—", c, ...SLOTS.slice(1)];
+      const nx = (v) => v === "—" ? "Non précisé" : v;
+      return '<div class="two wheels"><div><span class="f">Jour</span>'.concat(wheel2("f-day", days, d, (v) => v === "J" ? "J (jour même)" : nx(v), "Jour"), '</div><div><span class="f">Créneau</span>').concat(wheel2("f-slot", slots, c, nx, "Créneau"), "</div></div>");
+    })(), '\n  <div class="two wheels"><div><span class="f">Durée</span>').concat(wheel2("f-hours", HVALS, +t.hours || 0, (v) => fmtH(v) + " h", "Durée en heures"), '</div><div><span class="f">Nombre de personnes</span>').concat(wheel2("f-need", NVALS, t.need || 1, (v) => v + (v > 1 ? " personnes" : " personne"), "Nombre de personnes", t.need === 0), '</div></div>\n  <label class="chk"><input type="checkbox" id="f-all" ').concat(t.need === 0 ? "checked" : "", '>Tous les bénévoles (le jeton « Tous » remplit ce poste)</label>\n  <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="').concat(esc(t.note), '" placeholder="Matériel, lieu, responsable…">\n  <div class="acts">').concat(isNew ? "" : '<button type="button" class="ghostbtn del" data-del="'.concat(t.id, '">Supprimer</button>'), '<button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Enregistrer</button></div></form></div>');
+    render2();
+    initWheels2();
+    setTimeout(() => {
+      var _a2;
+      initWheels2();
+      (_a2 = $("#f-name")) == null ? void 0 : _a2.focus();
+    }, 0);
+  }, tableHTML2 = function() {
+    const dt = S.date ? (/* @__PURE__ */ new Date(S.date + "T12:00")).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+    return '<div class="ptab"><h1>'.concat(esc(S.title), "</h1>").concat(dt ? '<p class="pdate">'.concat(dt, "</p>") : "") + S.cats.map((c) => {
+      const ts = S.tasks.filter((t) => t.cat === c.id);
+      if (!ts.length) return "";
+      return "<h2>".concat(esc(c.name), "</h2><table><thead><tr><th>Poste</th><th>Quand</th><th>Durée</th><th>Effectif</th><th>Bénévoles</th></tr></thead><tbody>").concat(ts.map((t) => {
+        const ms = miss(t);
+        return "<tr><td>".concat(esc(t.name)).concat(t.note ? "<small>".concat(esc(t.note), "</small>") : "", "</td><td>").concat(esc(t.when), "</td><td>").concat(t.hours ? fmtH(+t.hours) + " h" : "", "</td><td>").concat(cnt(t), "</td><td>").concat(t.need === 0 && vol().length && nb(t) >= vol().length ? "Tous les bénévoles" : sortIds(t.who).map(mName).map(esc).join(", ")).concat(ms ? " <em>(".concat(ms, " à trouver)</em>") : "", "</td></tr>");
+      }).join(""), "</tbody></table>");
+    }).join("") + "</div>";
+  }, apercu2 = function() {
+    modal = '<div class="modal"><div class="dlg wide"><h2>Aperçu</h2><div class="apbox">'.concat(tableHTML2(), '</div><p class="apmsg" id="apmsg" role="status"></p><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button><button class="ghostbtn" id="csv">Copier pour Excel</button><button class="bigbtn" id="imprimer">🖨 Imprimer</button></div></div></div>');
+    render2();
+  }, imprimer2 = function() {
+    let z = document.getElementById("printzone");
+    if (!z) {
+      z = document.createElement("div");
+      z.id = "printzone";
+      document.body.appendChild(z);
+    }
+    z.innerHTML = tableHTML2();
+    window.print();
+  }, wheel2 = function(id, vals, cur, fmt, label, off, cls) {
+    let k = 0, best = 1e9;
+    vals.forEach((v, i) => {
+      const d = typeof v === "number" ? Math.abs(v - cur) : v === cur ? 0 : 1;
+      if (d < best) {
+        best = d;
+        k = i;
+      }
+    });
+    return '<div class="wheel '.concat(off ? "off" : "", " ").concat(cls || "", '" data-for="').concat(id, '"><div class="wl" tabindex="0" role="listbox" aria-label="').concat(label, '" data-k="').concat(k, '">').concat(vals.map((v, i) => '<div class="wi '.concat(i === k ? "on" : "", '" data-i="').concat(i, '" data-v="').concat(esc(v), '" role="option">').concat(esc(fmt(v)), "</div>")).join(""), '</div></div><input type="hidden" id="').concat(id, '" value="').concat(esc(vals[k]), '">');
+  }, initWheels2 = function() {
+    document.querySelectorAll(".wl").forEach((w) => {
+      w.scrollTop = +w.dataset.k * WH;
+    });
+  }, wheelSet2 = function(w, i, smooth) {
+    const it = w.querySelectorAll(".wi");
+    i = Math.max(0, Math.min(it.length - 1, i));
+    it.forEach((e, j) => e.classList.toggle("on", j === i));
+    const inp = document.getElementById(w.parentNode.dataset.for);
+    if (inp) inp.value = it[i].dataset.v;
+    if (inp && inp.id === "f-cat") {
+      const n = $("#f-newcat");
+      if (n) n.style.display = inp.value === "__new" ? "" : "none";
+    }
+    if (smooth) w.scrollTo({ top: i * WH, behavior: "smooth" });
+  }, parseWhen2 = function(w) {
+    w = (w || "").trim();
+    if (!w) return ["—", "—"];
+    let m = w.match(/^(J-\d+|J)(?: · (.+))?$/);
+    if (m) return [m[1], m[2] || "—"];
+    return ["J", w];
+  }, joinWhen2 = function(d, c) {
+    if (c === "—") return d === "—" ? "" : d;
+    if (d === "—" || d === "J") return c;
+    return d + " · " + c;
+  }, resetDlg2 = function() {
+    modal = '<div class="modal"><form class="dlg" id="rform"><h2>Remise à zéro de la liste</h2><p>Un prénom par ligne. Les prénoms déjà présents gardent leurs postes, les prénoms retirés sont enlevés des postes.</p>\n  <textarea class="txt" id="f-list" rows="10" aria-label="Liste des bénévoles">'.concat(esc(sortM(S.members).map((m) => m.name).join("\n")), '</textarea>\n  <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>\n  <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>');
+    render2();
+    setTimeout(() => {
+      var _a;
+      return (_a = $("#f-list")) == null ? void 0 : _a.focus();
+    }, 0);
+  }, confirmDlg2 = function(msg, fn) {
+    okFn = fn;
+    modal = '<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>'.concat(msg, '</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>');
+    render2();
+    $("#okc").focus();
+  }, closeDlg2 = function() {
+    modal = null;
+    okFn = null;
+    render2();
+  }, fillAll2 = function(tid) {
+    const t = S.tasks.find((x) => x.id === tid);
+    if (!t) return;
+    if (t.need !== 0) {
+      status2("Pour affecter tout le monde, coche « Tous les bénévoles » dans le poste (bouton ✎).", "warn");
+      return;
+    }
+    const ids = vol().map((m) => m.id), done = ids.every((i) => t.who.includes(i));
+    commit2(() => {
+      t.who = done ? [] : ids;
+    });
+    status2(done ? "Poste vidé." : "Tous les bénévoles sont affectés à «" + NB + t.name + NB + "».");
+  }, toggle2 = function(tid, mid) {
+    if (mid === "__all") return fillAll2(tid);
+    commit2(() => {
+      const t = S.tasks.find((x) => x.id === tid);
+      t.who = t.who.includes(mid) ? t.who.filter((w) => w !== mid) : [...t.who, mid];
+    });
+  }, moveItem2 = function(kind, id, tid, after) {
+    if (id === tid) return;
+    commit2(() => {
+      const A = kind === "c" ? S.cats : S.tasks, i = A.findIndex((x) => x.id === id);
+      if (i < 0) return;
+      const [it] = A.splice(i, 1);
+      let j = A.findIndex((x) => x.id === tid);
+      if (j < 0) {
+        A.splice(i, 0, it);
+        return;
+      }
+      A.splice(after ? j + 1 : j, 0, it);
+    });
+  }, stepItem2 = function(kind, id, dir) {
+    const A = kind === "c" ? S.cats : S.tasks.filter((t) => {
+      var _a;
+      return t.cat === ((_a = S.tasks.find((x) => x.id === id)) == null ? void 0 : _a.cat);
+    }), i = A.findIndex((x) => x.id === id), o = A[i + dir];
+    if (!o) return;
+    moveItem2(kind, id, o.id, dir > 0);
+    setTimeout(() => {
+      var _a;
+      return (_a = cardOf(kind, id)) == null ? void 0 : _a.focus();
+    }, 0);
+  }, sameOrder2 = function(kind, id, tid, after) {
+    const A = (kind === "c" ? S.cats : S.tasks).map((x) => x.id), B = A.filter((x) => x !== id), j = B.indexOf(tid);
+    B.splice(after ? j + 1 : j, 0, id);
+    return A.join() === B.join();
+  }, bar2 = function() {
+    let b = document.getElementById("mvbar");
+    if (!b) {
+      b = document.createElement("div");
+      b.id = "mvbar";
+      document.body.appendChild(b);
+    }
+    return b;
+  }, lpCancel2 = function() {
+    if (lp) {
+      clearTimeout(lp.timer);
+      lp.el.classList.remove("hold");
+      lp = null;
+    }
+  }, mvStart2 = function() {
+    const p = lp;
+    lp = null;
+    if (!p) return;
+    clearTimeout(p.timer);
+    p.el.classList.remove("hold");
+    const r = p.el.getBoundingClientRect(), g = p.el.cloneNode(true);
+    g.classList.add("mvghost");
+    g.removeAttribute("href");
+    g.style.width = r.width + "px";
+    g.style.height = r.height + "px";
+    mv = { kind: p.kind, id: p.id, el: p.el, dx: p.x - r.left, dy: p.y - r.top, tgt: null, after: false, ghost: g };
+    document.body.appendChild(g);
+    p.el.classList.add("moving");
+    document.documentElement.classList.add("dragging");
+    noClick = true;
+    try {
+      navigator.vibrate && navigator.vibrate(15);
+    } catch (_) {
+    }
+    mvMove2(p.cx, p.cy);
+  }, mvMove2 = function(x, y) {
+    mv.ghost.style.transform = "translate(".concat(x - mv.dx, "px,").concat(y - mv.dy, "px) rotate(-2deg) scale(1.03)");
+    const ed = 60;
+    if (y > innerHeight - ed) scrollBy(0, Math.ceil((y - innerHeight + ed) / 6));
+    else if (y < ed) scrollBy(0, -Math.ceil((ed - y) / 6));
+    let best = null, bd = 1e9, br = null;
+    document.querySelectorAll(mv.kind === "c" ? ".block[data-cid]" : ".task").forEach((c) => {
+      if (c === mv.el) return;
+      const r = c.getBoundingClientRect(), d = Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom));
+      if (d < bd) {
+        bd = d;
+        best = c;
+        br = r;
+      }
+    });
+    const b = bar2();
+    mv.tgt = null;
+    if (!best || bd > 90) {
+      b.style.display = "none";
+      return;
+    }
+    const dx = x - (br.left + br.width / 2), dy = y - (br.top + br.height / 2), vert = Math.abs(dy) > br.height / 4;
+    mv.after = vert ? dy > 0 : dx > 0;
+    const tid = mv.kind === "c" ? best.dataset.cid : best.dataset.task;
+    if (sameOrder2(mv.kind, mv.id, tid, mv.after)) {
+      b.style.display = "none";
+      return;
+    }
+    mv.tgt = tid;
+    const G = 5;
+    Object.assign(b.style, { display: "block" }, vert ? { left: br.left + "px", width: br.width + "px", top: (mv.after ? br.bottom + G : br.top - G) - 2 + "px", height: "4px" } : { top: br.top + "px", height: br.height + "px", left: (mv.after ? br.right + G : br.left - G) - 2 + "px", width: "4px" });
+  }, mvEnd2 = function(drop) {
+    lpCancel2();
+    const m = mv;
+    mv = null;
+    if (!m) return;
+    m.ghost.remove();
+    bar2().style.display = "none";
+    m.el.classList.remove("moving");
+    document.documentElement.classList.remove("dragging");
+    setTimeout(() => {
+      noClick = false;
+    }, 60);
+    if (drop && m.tgt) moveItem2(m.kind, m.id, m.tgt, m.after);
+  }, endDrag2 = function(cancel) {
+    var _a;
+    const d = drag;
+    drag = null;
+    if (!d) return;
+    d.el.classList.remove("grab");
+    document.documentElement.classList.remove("dragging");
+    if (!d.ghost) {
+      if (!cancel) {
+        sel = sel === d.id ? null : d.id;
+        render2();
+      }
+      return;
+    }
+    d.ghost.remove();
+    document.body.classList.remove("dragging");
+    (_a = d.hot) == null ? void 0 : _a.classList.remove("hot");
+    d.el.classList.remove("lift");
+    if (cancel) return;
+    const tgt = d.hot;
+    if (d.id === "__all") {
+      if (tgt && tgt.classList.contains("task")) fillAll2(tgt.dataset.task);
+      return;
+    }
+    if (tgt && tgt.classList.contains("task")) {
+      const tid = tgt.dataset.task;
+      if (tid === d.from) return;
+      commit2(() => {
+        const t = S.tasks.find((x) => x.id === tid);
+        if (!t.who.includes(d.id)) t.who.push(d.id);
+        if (d.from) {
+          const f = S.tasks.find((x) => x.id === d.from);
+          f.who = f.who.filter((w) => w !== d.id);
+        }
+      });
+    } else if (d.from) commit2(() => {
+      const f = S.tasks.find((x) => x.id === d.from);
+      f.who = f.who.filter((w) => w !== d.id);
+    });
+  };
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2;
+  const $ = (s) => document.querySelector(s), root = $("#root");
+  let S = JSON.parse(document.getElementById("state").textContent);
+  let mv = null;
+  const hist = [];
+  let etag = null, saving = false, pending = false, timer = null, modal = null, sel = null, drag = null;
+  const VIEWS = ["planning", "benevoles", "equipe"];
+  let view = "planning", cat = null;
+  readHash2();
+  const esc = (s) => String(s != null ? s : "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const fmtH = (h) => (Math.round(h * 10) / 10).toString().replace(".", ",");
+  const need = (t) => t.need === 0 ? vol().length : t.need;
+  const mName = (id) => {
+    var _a;
+    return ((_a = S.members.find((m) => m.id === id)) == null ? void 0 : _a.name) || "";
+  };
+  const isB = (id) => /bureau/i.test(mName(id));
+  const vol = () => S.members.filter((m) => !/bureau/i.test(m.name));
+  const nb = (t) => t.who.filter((w) => !isB(w)).length;
+  const cmp = (a, b) => a.localeCompare(b, "fr", { sensitivity: "base" });
+  const bm = (m) => /bureau/i.test(m.name) ? 1 : 0;
+  const sortM = (a) => [...a].sort((x, y) => bm(y) - bm(x) || cmp(x.name, y.name));
+  const sortIds = (ids) => [...ids].sort((a, b) => isB(b) - isB(a) || cmp(mName(a), mName(b)));
+  const hasB = (t) => t.who.some(isB);
+  const miss = (t) => hasB(t) ? 0 : Math.max(0, need(t) - nb(t));
+  const full = (t) => need(t) > 0 && (hasB(t) || nb(t) >= need(t));
+  const cnt = (t) => hasB(t) && !nb(t) ? "Bureau" : nb(t) + "/" + (t.need === 0 ? "tous" : need(t));
+  let ready = false;
+  document.documentElement.classList.add("loading");
+  async function save() {
+    if (saving) {
+      timer = setTimeout(save, 500);
+      return;
+    }
+    pending = false;
+    saving = true;
+    status2("Enregistrement…");
+    try {
+      const r = await fetch(window.API, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ state: S, etag }) });
+      const d = await r.json().catch(() => ({}));
+      if ((d.code || r.status) === 409 && d.state) {
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        modal = null;
+        render2();
+        status2("Quelqu’un a modifié la répartition en même temps : sa version est affichée, refais ta dernière modification.", "warn");
+      } else if (r.ok && !d.code) {
+        etag = d.etag || etag;
+        status2("Enregistré pour toute l’équipe.");
+      } else status2("L’enregistrement a échoué. Refais une modification pour réessayer.", "warn");
+    } catch (e) {
+      status2("Pas de connexion : la modification n’est pas enregistrée.", "warn");
+    }
+    saving = false;
+  }
+  async function refresh() {
+    var _a, _b;
+    if (pending || saving || modal || drag || mv || lp || ((_b = (_a = document.activeElement) == null ? void 0 : _a.matches) == null ? void 0 : _b.call(_a, "input.txt,.ttl"))) return;
+    try {
+      const r = await fetch(window.API, { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d.state && d.etag !== etag) {
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        render2();
+      }
+    } catch (e) {
+    }
+  }
+  const allJeton = () => '<span class="jeton tous '.concat(sel === "__all" ? "sel" : "", '" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>');
+  const jeton = (id, from, hours) => '<span class="jeton '.concat(sel === id ? "sel" : "").concat(isB(id) ? " bureau" : "", '" data-j="').concat(id, '" data-from="').concat(from || "", '" role="button" tabindex="0" aria-label="').concat(esc(mName(id)), '">').concat(esc(mName(id)), "</span>");
+  const WH = 40;
+  document.addEventListener("scroll", (e) => {
+    const w = e.target;
+    if (!w.classList || !w.classList.contains("wl")) return;
+    wheelSet2(w, Math.round(w.scrollTop / WH), false);
+  }, true);
+  document.addEventListener("click", (e) => {
+    const it = e.target.closest && e.target.closest(".wi");
+    if (it) wheelSet2(it.parentNode, +it.dataset.i, true);
+  });
+  document.addEventListener("keydown", (e) => {
+    const w = e.target.closest && e.target.closest(".wl");
+    if (!w) return;
+    const cur = w.querySelector(".wi.on");
+    const i = cur ? +cur.dataset.i : 0;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      wheelSet2(w, i + 1, true);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      wheelSet2(w, i - 1, true);
+    }
+  });
+  const h2 = (a, b) => a + " h – " + b + " h";
+  const DAYS = ["—", "J-7", "J-1", "J"], SLOTS = ["—", "Matin", "Après-midi", "Journée", h2(8, 10), h2(10, 12), h2(12, 14), h2(14, 16), h2(16, 18), h2(18, 20), h2(8, 18)];
+  const HVALS = Array.from({ length: 49 }, (_, i) => i / 2), NVALS = Array.from({ length: 40 }, (_, i) => i + 1);
+  let okFn = null;
+  const mvSel = ".block[data-cid],.task", cardOf = (k, id) => document.querySelector(k === "c" ? '.block[data-cid="'.concat(id, '"]') : '.task[data-task="'.concat(id, '"]'));
+  let lp = null, noClick = false;
+  root.addEventListener("pointerdown", (e) => {
+    if (e.button > 0 || modal || mv) return;
+    if (e.target.closest("button,input,select,textarea,.jeton")) return;
+    const el = e.target.closest(mvSel);
+    if (!el) return;
+    const kind = el.matches(".task") ? "t" : "c", mouse = e.pointerType === "mouse";
+    lp = { kind, id: kind === "c" ? el.dataset.cid : el.dataset.task, el, x: e.clientX, y: e.clientY, cx: e.clientX, cy: e.clientY, mouse };
+    el.classList.add("hold");
+    lp.timer = setTimeout(mvStart2, mouse ? 300 : 380);
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (lp) {
+      lp.cx = e.clientX;
+      lp.cy = e.clientY;
+      if (Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > (lp.mouse ? 8 : 12)) {
+        if (lp.mouse) mvStart2();
+        else lpCancel2();
+      }
+      return;
+    }
+    if (!mv) return;
+    e.preventDefault();
+    mvMove2(e.clientX, e.clientY);
+  }, { passive: false });
+  for (const o of [window, document]) o.addEventListener("touchmove", (e) => {
+    if (!mv) return;
+    e.preventDefault();
+    if (mv.pc) {
+      const t = e.touches[0];
+      if (t) mvMove2(t.clientX, t.clientY);
+    }
+  }, { passive: false });
+  window.addEventListener("touchend", () => {
+    if (mv && mv.pc) mvEnd2(true);
+  });
+  window.addEventListener("touchcancel", () => {
+    if (mv && mv.pc) mvEnd2(false);
+  });
+  window.addEventListener("pointerup", () => {
+    if (!mv || !mv.pc) mvEnd2(true);
+  });
+  window.addEventListener("pointercancel", (e) => {
+    if (mv && e.pointerType !== "mouse") {
+      mv.pc = true;
+      return;
+    }
+    mvEnd2(false);
+  });
+  window.addEventListener("click", (e) => {
+    if (noClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      noClick = false;
+    }
+  }, true);
+  root.addEventListener("contextmenu", (e) => {
+    if (e.target.closest(mvSel) && !e.target.closest("input,textarea")) e.preventDefault();
+  });
+  root.addEventListener("dragstart", (e) => {
+    var _a, _b;
+    if ((_b = (_a = e.target).closest) == null ? void 0 : _b.call(_a, mvSel)) e.preventDefault();
+  });
+  root.addEventListener("keydown", (e) => {
+    var _a;
+    if (!e.altKey) return;
+    const el = e.target;
+    if (!((_a = el.matches) == null ? void 0 : _a.call(el, mvSel))) return;
+    const d = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 }[e.key];
+    if (d) {
+      e.preventDefault();
+      stepItem2(el.matches(".task") ? "t" : "c", el.matches(".task") ? el.dataset.task : el.dataset.cid, d);
+    }
+  });
+  root.addEventListener("pointerdown", (e) => {
+    const j = e.target.closest(".jeton");
+    if (!j || e.button > 0 || !j.closest(".bench,.slots")) return;
+    drag = { id: j.dataset.j, from: j.dataset.from, x: e.clientX, y: e.clientY, el: j, ghost: null, hot: null, touch: e.pointerType !== "mouse" };
+    j.classList.add("grab");
+    try {
+      j.setPointerCapture(e.pointerId);
+    } catch (_) {
+    }
+  });
+  window.addEventListener("pointermove", (e) => {
+    var _a, _b;
+    if (!drag) return;
+    if (!drag.ghost) {
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.hypot(dx, dy) < 6) return;
+      const g = drag.el.cloneNode(true);
+      g.classList.add("ghost");
+      g.classList.remove("sel", "grab");
+      document.body.appendChild(g);
+      drag.ghost = g;
+      drag.el.classList.add("lift");
+      document.body.classList.add("dragging");
+      document.documentElement.classList.add("dragging");
+      try {
+        drag.touch && navigator.vibrate && navigator.vibrate(10);
+      } catch (_) {
+      }
+    }
+    e.preventDefault();
+    drag.ghost.style.transform = "translate(".concat(e.clientX, "px,").concat(e.clientY, "px) translate(-50%,").concat(drag.touch ? "-140%" : "-50%", ") scale(1.1)");
+    const ed = 60;
+    if (e.clientY > innerHeight - ed) scrollBy(0, Math.ceil((e.clientY - innerHeight + ed) / 6));
+    else if (e.clientY < ed) scrollBy(0, -Math.ceil((ed - e.clientY) / 6));
+    const t = ((_a = document.elementFromPoint(e.clientX, drag.touch ? e.clientY - 30 : e.clientY)) == null ? void 0 : _a.closest(".task,.bench")) || null;
+    if (t !== drag.hot) {
+      (_b = drag.hot) == null ? void 0 : _b.classList.remove("hot");
+      t == null ? void 0 : t.classList.add("hot");
+      drag.hot = t;
+    }
+  }, { passive: false });
+  window.addEventListener("pointerup", () => endDrag2(false));
+  window.addEventListener("pointercancel", () => endDrag2(true));
+  root.addEventListener("keydown", (e) => {
+    var _a, _b, _c, _d;
+    const j = (_b = (_a = e.target).closest) == null ? void 0 : _b.call(_a, ".jeton");
+    if (j && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      sel = sel === j.dataset.j ? null : j.dataset.j;
+      render2();
+    }
+    const t = (_d = (_c = e.target).closest) == null ? void 0 : _d.call(_c, ".task");
+    if (t && e.target === t && sel && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      toggle2(t.dataset.task, sel);
+    }
+  });
+  root.addEventListener("click", (e) => {
+    if (e.target.closest(".bdel")) e.preventDefault();
+    if (e.target.closest(".jeton")) return;
+    const b = e.target.closest("button,a");
+    if (!b) {
+      const t = e.target.closest(".task");
+      if (t && sel) toggle2(t.dataset.task, sel);
+      return;
+    }
+    if (b.id === "cancel") {
+      e.preventDefault();
+      return closeDlg2();
+    }
+    if (b.id === "okc") {
+      const f = okFn;
+      modal = null;
+      okFn = null;
+      return commit2(f);
+    }
+    if (b.id === "undo") return undo2();
+    if (b.id === "unsel") {
+      sel = null;
+      return render2();
+    }
+    if (b.id === "newcat") return catDialog2();
+    if (b.id === "reset") return resetDlg2();
+    if (b.id === "apercu") return apercu2();
+    if (b.id === "imprimer") return imprimer2();
+    if (b.id === "csv") {
+      const M = sortM(S.members), rows = [["Catégorie", "Poste", "Quand", "Durée (h)", "Effectif", ...M.map((m) => m.name)]];
+      for (const c of S.cats) for (const t of S.tasks.filter((t2) => t2.cat === c.id)) rows.push([c.name, t.name, t.when, t.hours, t.need === 0 ? "tous" : t.need, ...M.map((m) => t.who.includes(m.id) ? "X" : "")]);
+      navigator.clipboard.writeText(rows.map((r) => r.join("	")).join("\n")).then(() => status2("Tableau copié : colle-le dans Excel ou Sheets."), () => status2("La copie a été refusée par le navigateur.", "warn"));
+      return;
+    }
+    if (b.dataset.addtask !== void 0) return taskDialog2(b.dataset.addtask);
+    if (b.dataset.clear) {
+      const t = S.tasks.find((x) => x.id === b.dataset.clear);
+      commit2(() => {
+        t.who = [];
+      });
+      return status2("Poste « " + t.name + " » vidé. « Annuler » le remet comme avant.");
+    }
+    if (b.dataset.done) {
+      const t = S.tasks.find((x) => x.id === b.dataset.done);
+      commit2(() => {
+        t.done = !t.done;
+      });
+      return status2(t.done ? "« " + t.name + " » : fait ✓" : "« " + t.name + " » : à faire");
+    }
+    if (b.dataset.edit) return taskDialog2(null, S.tasks.find((t) => t.id === b.dataset.edit));
+    if (b.dataset.del) {
+      const t = S.tasks.find((t2) => t2.id === b.dataset.del);
+      return confirmDlg2("Supprimer le poste « ".concat(esc(t.name), " » ?"), () => {
+        S.tasks = S.tasks.filter((x) => x.id !== t.id);
+      });
+    }
+    if (b.dataset.delm) {
+      const m = S.members.find((m2) => m2.id === b.dataset.delm);
+      return confirmDlg2("Retirer ".concat(esc(m.name), " de l’équipe ? Ses ").concat(S.tasks.filter((t) => t.who.includes(m.id)).length, " affectation(s) seront effacées."), () => {
+        S.members = S.members.filter((x) => x.id !== m.id);
+        S.tasks.forEach((t) => t.who = t.who.filter((w) => w !== m.id));
+        if (sel === m.id) sel = null;
+      });
+    }
+    if (b.dataset.delc) {
+      const c = S.cats.find((c2) => c2.id === b.dataset.delc), n = S.tasks.filter((t) => t.cat === c.id).length;
+      return confirmDlg2("Supprimer la catégorie « ".concat(esc(c.name), " »").concat(n ? " et ses ".concat(n, " poste(s)") : "", " ?"), () => {
+        S.cats = S.cats.filter((x) => x.id !== c.id);
+        S.tasks = S.tasks.filter((t) => t.cat !== c.id);
+      });
+    }
+  });
+  root.addEventListener("input", (e) => {
+    if (e.target.classList.contains("pq")) e.target.style.width = Math.max(3, e.target.value.length + 1) + "ch";
+  });
+  root.addEventListener("keydown", (e) => {
+    var _a;
+    if (e.key === "Enter" && ((_a = e.target.classList) == null ? void 0 : _a.contains("pq"))) {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+  root.addEventListener("change", (e) => {
+    const i = e.target;
+    if (i.dataset.rename) {
+      const v = i.value.trim();
+      if (v) commit2(() => {
+        S.members.find((m) => m.id === i.dataset.rename).name = v;
+      });
+      return;
+    }
+    if (i.dataset.renc) {
+      const v = i.value.trim();
+      if (v) commit2(() => {
+        S.cats.find((c) => c.id === i.dataset.renc).name = v;
+      });
+      return;
+    }
+    if (i.id === "ttl") {
+      const v = i.value.trim() || "Répartition des postes";
+      return commit2(() => {
+        S.title = v;
+      });
+    }
+    if (i.id === "date") return commit2(() => {
+      S.date = i.value;
+    });
+    if (i.id === "f-cat") {
+      $("#f-newcat").style.display = i.value === "__new" ? "" : "none";
+      if (i.value === "__new") $("#f-newcat").focus();
+    }
+    if (i.id === "f-all") document.querySelector('.wheel[data-for="f-need"]').classList.toggle("off", i.checked);
+  });
+  root.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === "addm") {
+      const v = $("#newm").value.trim();
+      if (v) commit2(() => S.members.push({ id: uid("m"), name: v }));
+      setTimeout(() => {
+        var _a;
+        return (_a = $("#newm")) == null ? void 0 : _a.focus();
+      }, 0);
+      return;
+    }
+    if (f.id === "rform") {
+      const seen = /* @__PURE__ */ new Set(), names = $("#f-list").value.split(/[\n,;]+/).map((x) => x.trim()).filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase()));
+      const wipe = $("#f-wipe").checked;
+      modal = null;
+      sel = null;
+      return commit2(() => {
+        const old = S.members;
+        S.members = names.map((n) => old.find((m) => m.name.toLowerCase() === n.toLowerCase()) || { id: uid("m"), name: n });
+        const keep = new Set(S.members.map((m) => m.id));
+        S.tasks.forEach((t) => t.who = wipe ? [] : t.who.filter((w) => keep.has(w)));
+      });
+    }
+    if (f.id === "cform") {
+      const v = $("#f-cname").value.trim();
+      if (!v) return;
+      const id = uid("c");
+      modal = null;
+      commit2(() => S.cats.push({ id, name: v }));
+      location.hash = "cat-" + id;
+      return;
+    }
+    if (f.id === "addc") {
+      const v = $("#newc").value.trim();
+      if (v) commit2(() => S.cats.push({ id: uid("c"), name: v }));
+      return;
+    }
+    if (f.id === "tform") {
+      const name = $("#f-name").value.trim();
+      if (!name) return;
+      let cat2 = $("#f-cat").value;
+      const nc = $("#f-newcat").value.trim(), mk = cat2 === "__new" || !S.cats.length;
+      if (mk && !nc) {
+        $("#f-newcat").style.display = "";
+        return $("#f-newcat").focus();
+      }
+      const all = $("#f-all").checked, data = { name, when: joinWhen2($("#f-day").value, $("#f-slot").value), hours: parseFloat($("#f-hours").value) || 0, need: all ? 0 : Math.max(1, parseInt($("#f-need").value) || 1), note: $("#f-note").value.trim() };
+      const id = f.dataset.id;
+      modal = null;
+      commit2(() => {
+        if (mk) {
+          cat2 = uid("c");
+          S.cats.push({ id: cat2, name: nc });
+        }
+        if (id) Object.assign(S.tasks.find((t) => t.id === id), data, { cat: cat2 });
+        else S.tasks.push({ id: uid("t"), cat: cat2, who: [], ...data });
+      });
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (modal) closeDlg2();
+      else if (sel) {
+        sel = null;
+        render2();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !/INPUT|SELECT/.test(document.activeElement.tagName)) {
+      e.preventDefault();
+      undo2();
+    }
+  });
+  window.addEventListener("hashchange", () => {
+    readHash2();
+    scrollTo(0, 0);
+    render2();
+  });
+  render2();
+  status2("Chargement des données…");
+  fetch(window.API, { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((d) => {
+    ready = true;
+    document.documentElement.classList.remove("loading");
+    if (d.state) {
+      S = d.state;
+      etag = d.etag;
+      readHash2();
+      render2();
+      if (S.title === "Planning des bénévoles") commit2(() => {
+        S.title = "Répartition des postes";
+      });
+    }
+    status2("Répartition partagée : les modifications sont enregistrées pour toute l’équipe.");
+  }).catch(() => status2("Impossible de joindre le serveur : les modifications ne seront pas enregistrées.", "warn"));
+  setInterval(refresh, 15e3);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refresh();
+  });
+}
+</script><style>
+.ideebtn{margin-left:auto;flex:none}
+@media(max-width:599px){.title .ideelbl{display:none}.title .ideebtn{padding:9px 12px}}
+.ideebox textarea{width:100%;min-height:120px;margin:10px 0 4px;padding:10px 12px;border-radius:12px;border:2px solid #b8ad8a;background:#fffdf4;color:inherit;font:inherit;font-size:16px;resize:vertical}
+.ideebox .itypes{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ideebox .itype{border:2px solid #b8ad8a;background:transparent;color:inherit;border-radius:999px;padding:8px 14px;min-height:44px;font-weight:600;cursor:pointer}
+.ideebox .itype[aria-pressed="true"]{background:var(--gold1);border-color:var(--gold2)}
+.ideebox .icount{font-size:12px;opacity:.7;text-align:right}
+.ideebox .imsg{min-height:1.3em;margin:6px 0 0;font-weight:600}
+.ideebox .imsg.err{color:#a3271b}.ideebox .imsg.ok{color:#2c6b1f}
+.ideebox .isite{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.ideebox .ghostbtn{color:inherit;border-color:#b8ad8a}
+</style>
+<script>
+(function() {
+  const URL_F = "https://isole-x.netlify.app/.netlify/functions/idees";
+  const TYPES = [["Ergonomie", "Plus pratique"], ["Fonctionnalité", "Nouvelle idée"], ["Bug", "Bug"], ["Autre", "Autre"]];
+  let type = "Fonctionnalité", brouillon = "", box = null, last = null;
+  const ecran = () => {
+    const h = document.querySelector(".cathead h1");
+    return h ? "catégorie · " + h.textContent.trim() : location.hash.slice(1) || "planning";
+  };
+  function fermer() {
+    if (box) {
+      box.remove();
+      box = null;
+      last && last.focus && last.focus();
+    }
+  }
+  function ouvrir() {
+    last = document.activeElement;
+    const from = ecran().slice(0, 120);
+    box = document.createElement("div");
+    box.className = "modal ideebox";
+    box.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ideeH"><h2 id="ideeH">Boîte à idées</h2>\n      <p>Une idée pour améliorer l’appli, un bouton mal placé, un bug ? Écris-le ici. C’est anonyme&nbsp;: ton prénom n’est pas envoyé.</p>\n      <div class="itypes">'.concat(TYPES.map(([v, l]) => '<button type="button" class="itype" data-itype="'.concat(v, '" aria-pressed="').concat(v === type, '">').concat(l, "</button>")).join(""), '</div>\n      <textarea id="ideeTxt" maxlength="600" aria-label="Ta suggestion" placeholder="Mon idée&nbsp;: …"></textarea>\n      <input class="isite" id="ideeSite" tabindex="-1" autocomplete="off" aria-hidden="true">\n      <div class="icount" id="ideeCount">0/600</div>\n      <p class="imsg" id="ideeMsg" role="status"></p>\n      <div class="acts"><button type="button" class="ghostbtn" id="ideeClose">Fermer</button><button type="button" class="bigbtn" id="ideeSend">Envoyer</button></div></div>');
+    document.body.appendChild(box);
+    const t = box.querySelector("#ideeTxt"), m = box.querySelector("#ideeMsg"), b = box.querySelector("#ideeSend");
+    t.value = brouillon;
+    box.querySelector("#ideeCount").textContent = t.value.length + "/600";
+    t.oninput = () => {
+      brouillon = t.value;
+      box.querySelector("#ideeCount").textContent = t.value.length + "/600";
+    };
+    box.onclick = (e) => {
+      if (e.target === box || e.target.id === "ideeClose") return fermer();
+      const c = e.target.closest("[data-itype]");
+      if (c) {
+        type = c.dataset.itype;
+        box.querySelectorAll("[data-itype]").forEach((x) => x.setAttribute("aria-pressed", x === c));
+      }
+    };
+    b.onclick = async () => {
+      const texte = t.value.trim();
+      if (texte.length < 5) {
+        m.className = "imsg err";
+        m.textContent = "Écris au moins quelques mots.";
+        return t.focus();
+      }
+      b.disabled = true;
+      m.className = "imsg";
+      m.textContent = "Envoi…";
+      try {
+        const r = await fetch(URL_F, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texte, type, jeu: "Planning So Caval", ecran: from, site: box.querySelector("#ideeSite").value }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || "Envoi impossible pour le moment");
+        brouillon = "";
+        t.value = "";
+        box.querySelector("#ideeCount").textContent = "0/600";
+        m.className = "imsg ok";
+        m.textContent = "Merci, ton idée est bien arrivée.";
+      } catch (err) {
+        m.className = "imsg err";
+        m.textContent = err.message === "Failed to fetch" ? "Pas de connexion : réessaie plus tard." : err.message;
+      }
+      b.disabled = false;
+    };
+    setTimeout(() => t.focus(), 0);
+  }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#ideeOpen")) ouvrir();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (box && e.key === "Escape") fermer();
+  });
+})();
+</script>
+</body></html>
+
+
