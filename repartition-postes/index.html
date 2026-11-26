@@ -12,7 +12,7 @@
 --hand:"Segoe Print","Comic Neue","Comic Sans MS","Chalkboard SE",cursive}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--felt3)}
-body{margin:0;min-height:100vh;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fffbea;overflow-x:clip;
+body{margin:0;min-height:100vh;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fffbea;overflow-x:hidden;overflow-x:clip;
 background:radial-gradient(ellipse at 50% 20%,rgba(255,255,255,.10),transparent 60%),repeating-radial-gradient(circle at 20% 30%,rgba(0,0,0,.035) 0 2px,transparent 2px 5px),linear-gradient(160deg,var(--felt1),var(--felt2) 70%,var(--felt3));background-attachment:fixed}
 button,input,select{font:inherit;color:inherit}
 .wrap{width:min(1120px,100%);margin:auto;padding:18px 16px 60px}
@@ -34,7 +34,7 @@ button,input,select{font:inherit;color:inherit}
 .ghostbtn:disabled{opacity:.4;cursor:default}
 :focus-visible{outline:3px solid var(--gold1);outline-offset:2px}
 .status{font-size:14px;min-height:20px;margin:-4px 0 10px}.status.warn{color:var(--red);opacity:1}
-.bench{position:sticky;top:0;z-index:10;background:rgba(36,65,27,.94);backdrop-filter:blur(6px);border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.bench{position:sticky;top:0;z-index:10;background:rgba(36,65,27,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 .bench.hot{border-color:var(--gold1);box-shadow:0 0 0 3px rgba(255,226,122,.4)}
 .bench h2,.chap h2{font:700 18px var(--hand);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
 .bench h2 small,.chap h2 small{font:400 13px system-ui;opacity:.8}
@@ -75,7 +75,7 @@ html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
 .txt{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:rgba(0,0,0,.2);font-size:16px;width:100%;flex:1}
 .addrow{display:flex;gap:8px;margin-top:10px}
 .x{background:none;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;opacity:.8;flex:none}.x:hover{background:rgba(255,255,255,.12);opacity:1}
-.modal{position:fixed;inset:0;background:rgba(10,20,8,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:200}
+.modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(10,20,8,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:200}
 .dlg{background:var(--card);color:var(--ink);border-radius:18px;padding:22px;width:min(520px,100%);max-height:92vh;overflow:auto;box-shadow:0 6px 0 #b8ad8a,0 20px 50px rgba(0,0,0,.5)}
 .dlg h2{font:700 26px var(--hand);margin:0 0 12px}
 .dlg label.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
@@ -106,6 +106,7 @@ html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
  .dock{top:8px;max-height:calc(100vh - 80px);padding:6px;border-radius:12px;backdrop-filter:none;-webkit-backdrop-filter:none}
  .dock h2{font-size:14px;margin:0 0 6px;justify-content:center}.dock .hint{display:none}
  .dock .jetons{gap:5px}.dock .jeton{font-size:14px;min-height:42px;padding:2px 4px;justify-content:center;overflow:hidden;text-overflow:ellipsis}.dock .jeton small{display:none}
+ .dock,.board>*{min-width:0} .dock .jetons{display:block}.dock .jeton{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;min-width:0;margin-bottom:5px;line-height:1.15;padding:4px 3px;text-align:center;font-size:13px;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
  .dock .tip{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:60;background:rgba(20,35,15,.96);border:1px solid var(--line);flex-wrap:nowrap;margin:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
  .dock .tip .ghostbtn{min-height:38px;padding:6px 12px;flex:none}
  body.hasdock.selecting .wrap{padding-bottom:80px}
@@ -130,7 +131,7 @@ nav.tabs{margin:0 0 8px}
 .dlg span.f{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
 .wheel{position:relative;height:120px;border:1px solid #cfc6a6;border-radius:12px;background:#fffdf4;overflow:hidden}
 .wheel::before{content:"";position:absolute;left:6px;right:6px;top:40px;height:40px;border-radius:8px;background:rgba(226,168,38,.25);border:2px solid var(--gold2);pointer-events:none}
-.wheel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#fffdf4,rgba(255,253,244,0) 35%,rgba(255,253,244,0) 65%,#fffdf4)}
+.wheel::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;background:linear-gradient(#fffdf4,rgba(255,253,244,0) 35%,rgba(255,253,244,0) 65%,#fffdf4)}
 .wl{height:120px;overflow-y:scroll;scroll-snap-type:y mandatory;padding:40px 0;scrollbar-width:none;overscroll-behavior:contain}
 .wl::-webkit-scrollbar{display:none}
 .wi{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font:600 17px system-ui,sans-serif;color:#6d6650;cursor:pointer;user-select:none}
@@ -179,278 +180,795 @@ html.dragging,html.dragging body{overflow:hidden}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
 html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}</style><script src="api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Répartition des postes", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
 {
-const $=s=>document.querySelector(s),root=$('#root');
-let S=JSON.parse(document.getElementById('state').textContent);let mv=null;
-const hist=[];let etag=null,saving=false,pending=false,timer=null,modal=null,sel=null,drag=null;
-const VIEWS=['planning','benevoles','equipe'];
-let view='planning',cat=null;
-function readHash(){const h=location.hash.slice(1);if(h.startsWith('cat-')&&S.cats.some(c=>c.id===h.slice(4))){view='planning';cat=h.slice(4)}else{view=VIEWS.includes(h)?h:'planning';cat=null}}
-readHash();
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-const fmtH=h=>(Math.round(h*10)/10).toString().replace('.',',');
-const need=t=>t.need===0?vol().length:t.need;
-const mName=id=>S.members.find(m=>m.id===id)?.name||'';
-const isB=id=>/bureau/i.test(mName(id));
-const vol=()=>S.members.filter(m=>!/bureau/i.test(m.name));
-const nb=t=>t.who.filter(w=>!isB(w)).length;
-const cmp=(a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'});
-const bm=m=>/bureau/i.test(m.name)?1:0;
-const sortM=a=>[...a].sort((x,y)=>bm(y)-bm(x)||cmp(x.name,y.name));
-const sortIds=ids=>[...ids].sort((a,b)=>isB(b)-isB(a)||cmp(mName(a),mName(b)));
-const hasB=t=>t.who.some(isB);
-const miss=t=>hasB(t)?0:Math.max(0,need(t)-nb(t));
-const full=t=>need(t)>0&&(hasB(t)||nb(t)>=need(t));
-const cnt=t=>hasB(t)&&!nb(t)?'Bureau':nb(t)+'/'+(t.need===0?'tous':need(t));
-
-function status(t,c){const e=$('#status');if(e){e.textContent=t;e.className='status '+(c||'')}const m=$('#apmsg');if(m)m.textContent=t}
-let ready=false;document.documentElement.classList.add('loading');
-function commit(fn){if(!ready){status('Chargement des données en cours, patiente quelques secondes…','warn');return}hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
-function undo(){if(!hist.length)return;S=JSON.parse(hist.pop());render();queueSave()}
-function queueSave(){pending=true;clearTimeout(timer);status('Modifications en attente…');timer=setTimeout(save,800)}
-async function save(){
-  if(saving){timer=setTimeout(save,500);return}
-  pending=false;saving=true;status('Enregistrement…');
-  try{const r=await fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({state:S,etag})});
-    const d=await r.json().catch(()=>({}));
-    if((d.code||r.status)===409&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status('Quelqu’un a modifié la répartition en même temps : sa version est affichée, refais ta dernière modification.','warn')}
-    else if(r.ok&&!d.code){etag=d.etag||etag;status('Enregistré pour toute l’équipe.')}
-    else status('L’enregistrement a échoué. Refais une modification pour réessayer.','warn')}
-  catch(e){status('Pas de connexion : la modification n’est pas enregistrée.','warn')}
-  saving=false;
-}
-async function refresh(){
-  if(pending||saving||modal||drag||mv||lp||document.activeElement?.matches?.('input.txt,.ttl'))return;
-  try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
-    if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
-}
-
-const allJeton=()=>`<span class="jeton tous ${sel==='__all'?'sel':''}" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>`;
-const jeton=(id,from,hours)=>`<span class="jeton ${sel===id?'sel':''}${isB(id)?' bureau':''}" data-j="${id}" data-from="${from||''}" role="button" tabindex="0" aria-label="${esc(mName(id))}">${esc(mName(id))}</span>`;
-
-function renderHead(){
-  const T=S.tasks,withNeed=T.filter(t=>need(t)),ok=withNeed.filter(full).length;
-  const holes=withNeed.reduce((a,t)=>a+miss(t),0);
-  return `<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement"></div></div>
-  <div class="stats"><div class="stat"><b>${vol().length}</b><span>bénévoles</span></div><div class="stat"><b>${ok}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div></div>
-  <nav class="tabs">${[['planning','Catégories'],['benevoles','Fiche bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
-  <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>
-  <div class="status" id="status"></div>`;
-}
-function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>need(t));return{ts,ok:wn.filter(full).length,n:wn.length,holes:wn.reduce((a,t)=>a+miss(t),0)}}
-function renderLanding(){
-  return '<div class="blocks">'+S.cats.map(c=>{const k=catStats(c),pc=k.n?Math.round(k.ok/k.n*100):0;
-    return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}" data-cid="${c.id}" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="${c.id}" aria-label="Supprimer la catégorie ${esc(c.name)}" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} poste${k.ts.length>1?'s':''}</div></a>`}).join('')
-  +`<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>`;
-}
-function renderCat(){
-  const c=S.cats.find(x=>x.id===cat),k=catStats(c);
-  let h=`<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>${esc(c.name)}</h1>
-  <span class="badge"><b>${k.ok}/${k.n}</b> complètes</span><span class="badge ${k.holes?'warn':''}"><b>${k.holes}</b> à pourvoir</span>
-  <button class="bigbtn" data-addtask="${c.id}">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="${c.id}">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>`;
-  h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>
-  ${sel?`<div class="tip"><span>${sel==='__all'?'<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider.':`<b>${esc(mName(sel))}</b> : touche un poste pour l’ajouter ou la retirer.`}</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
-  <div class="jetons">${S.members.length?allJeton():''}${sortM(S.members).map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
-  h+=k.ts.length?`<div class="tasks">${k.ts.map(t=>{const d=need(t),n=nb(t),ms=miss(t);
-      return `<div class="task ${full(t)?'ok':''} ${t.done?'fait':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="done" data-done="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?'Poste fait, remettre à faire':'Marquer le poste comme fait'}" title="${t.done?'Fait : touche pour remettre « à faire »':'À faire : touche quand c’est fait'}">✓</button><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
-      <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}${t.hours?`<span>${fmtH(+t.hours)} h</span>`:''}<span class="count ${ms?'short':''}">${cnt(t)}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
-      <div class="slots">${sortIds(t.who).map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(ms,4)},()=>'<span class="slot">libre</span>').join('')}${ms>4&&t.need!==0?`<span class="slot">+${ms-4}</span>`:''}${t.who.length?`<button class="clr" data-clear="${t.id}" aria-label="Retirer tous les bénévoles de ${esc(t.name)}">Vider</button>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
-  return h+'</div>';
-}
-function catDialog(){modal=`<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>`;render();setTimeout(()=>$('#f-cname')?.focus(),0)}
-function renderPeople(){
-  const holes=S.tasks.filter(t=>need(t)&&miss(t));
-  let h=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${miss(t)} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
-  return h+'<div class="people">'+sortM(S.members).map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}</h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}${t.hours?' · '+fmtH(+t.hours)+' h':''}</em></li>`).join('')}</ul>`:'<p class="empty">Aucun poste pour l’instant</p>'}</section>`}).join('')+'</div>';
-}
-function renderTeam(){
-  return `<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">${sortM(S.members).map(m=>`<span class="plaque${bm(m)?' bureau':''}"><input class="txt pq" data-rename="${m.id}" value="${esc(m.name)}" style="width:${Math.max(3,m.name.length+1)}ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="${m.id}" aria-label="Retirer ${esc(m.name)}" title="Retirer">🗑</button></span>`).join('')}</div>
-  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>`;
-}
-function render(){
-  const e0=$('#status'),st=e0?.textContent||'',sc=e0?.className||'status';
-  if(cat&&!S.cats.some(c=>c.id===cat)){cat=null;if(location.hash.startsWith('#cat-'))history.replaceState(null,'','#planning')}
-  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);
-  root.innerHTML='<div class="wrap">'+(inCat?renderCat():renderHead()+(view==='planning'?renderLanding():view==='benevoles'?renderPeople():renderTeam()))+'</div>'+(modal||'');
-  const e=$('#status');e.textContent=st;e.className=sc;
-}
-
-function taskDialog(catId,t){
-  const isNew=!t;t=t||{name:'',cat:catId||(S.cats[0]&&S.cats[0].id)||'',when:'',hours:'',need:1,note:''};
-  modal=`<div class="modal"><form class="dlg" id="tform" data-id="${isNew?'':t.id}"><h2>${isNew?'Nouveau poste':'Modifier le poste'}</h2>
-  <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="${esc(t.name)}">
-  <span class="f">Catégorie</span>${wheel('f-cat',[...S.cats.map(c=>c.id),'__new'],S.cats.some(c=>c.id===t.cat)?t.cat:(S.cats[0]?.id||'__new'),v=>v==='__new'?'+ Nouvelle catégorie…':(S.cats.find(c=>c.id===v)?.name||''),'Catégorie',false,'wide')}
-  <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;${S.cats.length?'display:none':''}">
-  ${(()=>{const [d,c]=parseWhen(t.when),days=DAYS.includes(d)?DAYS:[...DAYS,d],slots=SLOTS.includes(c)?SLOTS:['—',c,...SLOTS.slice(1)];const nx=v=>v==='—'?'Non précisé':v;
-    return `<div class="two wheels"><div><span class="f">Jour</span>${wheel('f-day',days,d,v=>v==='J'?'J (jour même)':nx(v),'Jour')}</div><div><span class="f">Créneau</span>${wheel('f-slot',slots,c,nx,'Créneau')}</div></div>`})()}
-  <div class="two wheels"><div><span class="f">Durée</span>${wheel('f-hours',HVALS,+t.hours||0,v=>fmtH(v)+' h','Durée en heures')}</div><div><span class="f">Nombre de personnes</span>${wheel('f-need',NVALS,t.need||1,v=>v+(v>1?' personnes':' personne'),'Nombre de personnes',t.need===0)}</div></div>
-  <label class="chk"><input type="checkbox" id="f-all" ${t.need===0?'checked':''}>Tous les bénévoles (le jeton « Tous » remplit ce poste)</label>
-  <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="${esc(t.note)}" placeholder="Matériel, lieu, responsable…">
-  <div class="acts">${isNew?'':`<button type="button" class="ghostbtn del" data-del="${t.id}">Supprimer</button>`}<button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Enregistrer</button></div></form></div>`;
-  render();initWheels();setTimeout(()=>{initWheels();$('#f-name')?.focus()},0);
-}
-
-function tableHTML(){
-  const dt=S.date?new Date(S.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
-  return `<div class="ptab"><h1>${esc(S.title)}</h1>${dt?`<p class="pdate">${dt}</p>`:''}`+S.cats.map(c=>{const ts=S.tasks.filter(t=>t.cat===c.id);if(!ts.length)return'';
-    return `<h2>${esc(c.name)}</h2><table><thead><tr><th>Poste</th><th>Quand</th><th>Durée</th><th>Effectif</th><th>Bénévoles</th></tr></thead><tbody>${ts.map(t=>{const ms=miss(t);
-      return `<tr><td>${esc(t.name)}${t.note?`<small>${esc(t.note)}</small>`:''}</td><td>${esc(t.when)}</td><td>${t.hours?fmtH(+t.hours)+' h':''}</td><td>${cnt(t)}</td><td>${t.need===0&&vol().length&&nb(t)>=vol().length?'Tous les bénévoles':sortIds(t.who).map(mName).map(esc).join(', ')}${ms?` <em>(${ms} à trouver)</em>`:''}</td></tr>`}).join('')}</tbody></table>`}).join('')+'</div>';
-}
-function apercu(){modal=`<div class="modal"><div class="dlg wide"><h2>Aperçu</h2><div class="apbox">${tableHTML()}</div><p class="apmsg" id="apmsg" role="status"></p><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button><button class="ghostbtn" id="csv">Copier pour Excel</button><button class="bigbtn" id="imprimer">🖨 Imprimer</button></div></div></div>`;render()}
-function imprimer(){let z=document.getElementById('printzone');if(!z){z=document.createElement('div');z.id='printzone';document.body.appendChild(z)}z.innerHTML=tableHTML();window.print()}
-
-/* roue de sélection (heures, nombre de personnes) */
-const WH=40;
-function wheel(id,vals,cur,fmt,label,off,cls){let k=0,best=1e9;vals.forEach((v,i)=>{const d=typeof v==='number'?Math.abs(v-cur):(v===cur?0:1);if(d<best){best=d;k=i}});
-  return `<div class="wheel ${off?'off':''} ${cls||''}" data-for="${id}"><div class="wl" tabindex="0" role="listbox" aria-label="${label}" data-k="${k}">${vals.map((v,i)=>`<div class="wi ${i===k?'on':''}" data-i="${i}" data-v="${esc(v)}" role="option">${esc(fmt(v))}</div>`).join('')}</div></div><input type="hidden" id="${id}" value="${esc(vals[k])}">`}
-function initWheels(){document.querySelectorAll('.wl').forEach(w=>{w.scrollTop=(+w.dataset.k)*WH})}
-function wheelSet(w,i,smooth){const it=w.querySelectorAll('.wi');i=Math.max(0,Math.min(it.length-1,i));it.forEach((e,j)=>e.classList.toggle('on',j===i));
-  const inp=document.getElementById(w.parentNode.dataset.for);if(inp)inp.value=it[i].dataset.v;if(inp&&inp.id==='f-cat'){const n=$('#f-newcat');if(n)n.style.display=inp.value==='__new'?'':'none'}if(smooth)w.scrollTo({top:i*WH,behavior:'smooth'})}
-document.addEventListener('scroll',e=>{const w=e.target;if(!w.classList||!w.classList.contains('wl'))return;wheelSet(w,Math.round(w.scrollTop/WH),false)},true);
-document.addEventListener('click',e=>{const it=e.target.closest&&e.target.closest('.wi');if(it)wheelSet(it.parentNode,+it.dataset.i,true)});
-document.addEventListener('keydown',e=>{const w=e.target.closest&&e.target.closest('.wl');if(!w)return;const cur=w.querySelector('.wi.on');const i=cur?+cur.dataset.i:0;
-  if(e.key==='ArrowDown'){e.preventDefault();wheelSet(w,i+1,true)}else if(e.key==='ArrowUp'){e.preventDefault();wheelSet(w,i-1,true)}});
-const h2=(a,b)=>a+' h – '+b+' h';
-const DAYS=['—','J-7','J-1','J'],SLOTS=['—','Matin','Après-midi','Journée',h2(8,10),h2(10,12),h2(12,14),h2(14,16),h2(16,18),h2(18,20),h2(8,18)];
-function parseWhen(w){w=(w||'').trim();if(!w)return['—','—'];let m=w.match(/^(J-\d+|J)(?: · (.+))?$/);if(m)return[m[1],m[2]||'—'];return['J',w]}
-function joinWhen(d,c){if(c==='—')return d==='—'?'':d;if(d==='—'||d==='J')return c;return d+' · '+c}
-const HVALS=Array.from({length:49},(_,i)=>i/2),NVALS=Array.from({length:40},(_,i)=>i+1);
-
-/* remise à zéro de la liste des bénévoles */
-function resetDlg(){modal=`<div class="modal"><form class="dlg" id="rform"><h2>Remise à zéro de la liste</h2><p>Un prénom par ligne. Les prénoms déjà présents gardent leurs postes, les prénoms retirés sont enlevés des postes.</p>
-  <textarea class="txt" id="f-list" rows="10" aria-label="Liste des bénévoles">${esc(sortM(S.members).map(m=>m.name).join('\n'))}</textarea>
-  <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>
-  <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>`;render();setTimeout(()=>$('#f-list')?.focus(),0)}
-let okFn=null;
-function confirmDlg(msg,fn){okFn=fn;modal=`<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>${msg}</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>`;render();$('#okc').focus()}
-function closeDlg(){modal=null;okFn=null;render()}
-function fillAll(tid){const t=S.tasks.find(x=>x.id===tid);if(!t)return;if(t.need!==0){status('Pour affecter tout le monde, coche « Tous les bénévoles » dans le poste (bouton ✎).','warn');return}
-  const ids=vol().map(m=>m.id),done=ids.every(i=>t.who.includes(i));commit(()=>{t.who=done?[]:ids});status(done?'Poste vidé.':'Tous les bénévoles sont affectés à «'+NB+t.name+NB+'».')}
-function toggle(tid,mid){if(mid==='__all')return fillAll(tid);commit(()=>{const t=S.tasks.find(x=>x.id===tid);t.who=t.who.includes(mid)?t.who.filter(w=>w!==mid):[...t.who,mid]})}
-
-/* déplacer catégories et postes */
-function moveItem(kind,id,tid,after){if(id===tid)return;commit(()=>{const A=kind==='c'?S.cats:S.tasks,i=A.findIndex(x=>x.id===id);if(i<0)return;const [it]=A.splice(i,1);let j=A.findIndex(x=>x.id===tid);if(j<0){A.splice(i,0,it);return}A.splice(after?j+1:j,0,it)})}
-const mvSel='.block[data-cid],.task',cardOf=(k,id)=>document.querySelector(k==='c'?`.block[data-cid="${id}"]`:`.task[data-task="${id}"]`);
-function stepItem(kind,id,dir){const A=kind==='c'?S.cats:S.tasks.filter(t=>t.cat===S.tasks.find(x=>x.id===id)?.cat),i=A.findIndex(x=>x.id===id),o=A[i+dir];if(!o)return;moveItem(kind,id,o.id,dir>0);setTimeout(()=>cardOf(kind,id)?.focus(),0)}
-function sameOrder(kind,id,tid,after){const A=(kind==='c'?S.cats:S.tasks).map(x=>x.id),B=A.filter(x=>x!==id),j=B.indexOf(tid);B.splice(after?j+1:j,0,id);return A.join()===B.join()}
-/* appui maintenu sur une carte (catégorie ou poste) pour la déplacer, dépôt entre deux cartes */
-let lp=null,noClick=false;
-function bar(){let b=document.getElementById('mvbar');if(!b){b=document.createElement('div');b.id='mvbar';document.body.appendChild(b)}return b}
-function lpCancel(){if(lp){clearTimeout(lp.timer);lp.el.classList.remove('hold');lp=null}}
-function mvStart(){const p=lp;lp=null;if(!p)return;clearTimeout(p.timer);p.el.classList.remove('hold');const r=p.el.getBoundingClientRect(),g=p.el.cloneNode(true);
-  g.classList.add('mvghost');g.removeAttribute('href');g.style.width=r.width+'px';g.style.height=r.height+'px';
-  mv={kind:p.kind,id:p.id,el:p.el,dx:p.x-r.left,dy:p.y-r.top,tgt:null,after:false,ghost:g};document.body.appendChild(g);
-  p.el.classList.add('moving');document.documentElement.classList.add('dragging');noClick=true;try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}
-  mvMove(p.cx,p.cy)}
-function mvMove(x,y){
-  mv.ghost.style.transform=`translate(${x-mv.dx}px,${y-mv.dy}px) rotate(-2deg) scale(1.03)`;
-  const ed=60;if(y>innerHeight-ed)scrollBy(0,Math.ceil((y-innerHeight+ed)/6));else if(y<ed)scrollBy(0,-Math.ceil((ed-y)/6));
-  let best=null,bd=1e9,br=null;document.querySelectorAll(mv.kind==='c'?'.block[data-cid]':'.task').forEach(c=>{if(c===mv.el)return;const r=c.getBoundingClientRect(),d=Math.hypot(Math.max(r.left-x,0,x-r.right),Math.max(r.top-y,0,y-r.bottom));if(d<bd){bd=d;best=c;br=r}});
-  const b=bar();mv.tgt=null;if(!best||bd>90){b.style.display='none';return}
-  const dx=x-(br.left+br.width/2),dy=y-(br.top+br.height/2),vert=Math.abs(dy)>br.height/4;mv.after=vert?dy>0:dx>0;
-  const tid=mv.kind==='c'?best.dataset.cid:best.dataset.task;if(sameOrder(mv.kind,mv.id,tid,mv.after)){b.style.display='none';return}
-  mv.tgt=tid;const G=5;Object.assign(b.style,{display:'block'},vert?{left:br.left+'px',width:br.width+'px',top:(mv.after?br.bottom+G:br.top-G)-2+'px',height:'4px'}:{top:br.top+'px',height:br.height+'px',left:(mv.after?br.right+G:br.left-G)-2+'px',width:'4px'})}
-root.addEventListener('pointerdown',e=>{if(e.button>0||modal||mv)return;if(e.target.closest('button,input,select,textarea,.jeton'))return;const el=e.target.closest(mvSel);if(!el)return;
-  const kind=el.matches('.task')?'t':'c',mouse=e.pointerType==='mouse';lp={kind,id:kind==='c'?el.dataset.cid:el.dataset.task,el,x:e.clientX,y:e.clientY,cx:e.clientX,cy:e.clientY,mouse};
-  el.classList.add('hold');lp.timer=setTimeout(mvStart,mouse?300:380)});
-window.addEventListener('pointermove',e=>{
-  if(lp){lp.cx=e.clientX;lp.cy=e.clientY;if(Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>(lp.mouse?8:12)){if(lp.mouse)mvStart();else lpCancel()}return}
-  if(!mv)return;e.preventDefault();mvMove(e.clientX,e.clientY)},{passive:false});
-/* au toucher : une fois le déplacement lancé, on bloque le défilement et on suit le doigt même si le navigateur interrompt les événements pointeur */
-for(const o of[window,document])o.addEventListener('touchmove',e=>{if(!mv)return;e.preventDefault();if(mv.pc){const t=e.touches[0];if(t)mvMove(t.clientX,t.clientY)}},{passive:false});
-window.addEventListener('touchend',()=>{if(mv&&mv.pc)mvEnd(true)});window.addEventListener('touchcancel',()=>{if(mv&&mv.pc)mvEnd(false)});
-function mvEnd(drop){lpCancel();const m=mv;mv=null;if(!m)return;m.ghost.remove();bar().style.display='none';m.el.classList.remove('moving');document.documentElement.classList.remove('dragging');setTimeout(()=>{noClick=false},60);if(drop&&m.tgt)moveItem(m.kind,m.id,m.tgt,m.after)}
-window.addEventListener('pointerup',()=>{if(!mv||!mv.pc)mvEnd(true)});window.addEventListener('pointercancel',e=>{if(mv&&e.pointerType!=='mouse'){mv.pc=true;return}mvEnd(false)});
-window.addEventListener('click',e=>{if(noClick){e.preventDefault();e.stopPropagation();noClick=false}},true);
-root.addEventListener('contextmenu',e=>{if(e.target.closest(mvSel)&&!e.target.closest('input,textarea'))e.preventDefault()});
-root.addEventListener('dragstart',e=>{if(e.target.closest?.(mvSel))e.preventDefault()});
-root.addEventListener('keydown',e=>{if(!e.altKey)return;const el=e.target;if(!el.matches?.(mvSel))return;const d={ArrowUp:-1,ArrowLeft:-1,ArrowDown:1,ArrowRight:1}[e.key];if(d){e.preventDefault();stepItem(el.matches('.task')?'t':'c',el.matches('.task')?el.dataset.task:el.dataset.cid,d)}});
-
-/* glisser-déposer des jetons */
-root.addEventListener('pointerdown',e=>{const j=e.target.closest('.jeton');if(!j||e.button>0||!j.closest('.bench,.slots'))return;drag={id:j.dataset.j,from:j.dataset.from,x:e.clientX,y:e.clientY,el:j,ghost:null,hot:null,touch:e.pointerType!=='mouse'};j.classList.add('grab');try{j.setPointerCapture(e.pointerId)}catch(_){}});
-window.addEventListener('pointermove',e=>{
-  if(!drag)return;
-  if(!drag.ghost){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)<6)return;const g=drag.el.cloneNode(true);g.classList.add('ghost');g.classList.remove('sel','grab');document.body.appendChild(g);drag.ghost=g;drag.el.classList.add('lift');document.body.classList.add('dragging');document.documentElement.classList.add('dragging');try{drag.touch&&navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
-  e.preventDefault();drag.ghost.style.transform=`translate(${e.clientX}px,${e.clientY}px) translate(-50%,${drag.touch?'-140%':'-50%'}) scale(1.1)`;
-  const ed=60;if(e.clientY>innerHeight-ed)scrollBy(0,Math.ceil((e.clientY-innerHeight+ed)/6));else if(e.clientY<ed)scrollBy(0,-Math.ceil((ed-e.clientY)/6));
-  const t=document.elementFromPoint(e.clientX,drag.touch?e.clientY-30:e.clientY)?.closest('.task,.bench')||null;
-  if(t!==drag.hot){drag.hot?.classList.remove('hot');t?.classList.add('hot');drag.hot=t}
-},{passive:false});
-function endDrag(cancel){
-  const d=drag;drag=null;if(!d)return;d.el.classList.remove('grab');document.documentElement.classList.remove('dragging');
-  if(!d.ghost){if(!cancel){sel=sel===d.id?null:d.id;render()}return}
-  d.ghost.remove();document.body.classList.remove('dragging');d.hot?.classList.remove('hot');d.el.classList.remove('lift');
-  if(cancel)return;
-  const tgt=d.hot;
-  if(d.id==='__all'){if(tgt&&tgt.classList.contains('task'))fillAll(tgt.dataset.task);return}
-  if(tgt&&tgt.classList.contains('task')){const tid=tgt.dataset.task;if(tid===d.from)return;
-    commit(()=>{const t=S.tasks.find(x=>x.id===tid);if(!t.who.includes(d.id))t.who.push(d.id);if(d.from){const f=S.tasks.find(x=>x.id===d.from);f.who=f.who.filter(w=>w!==d.id)}})}
-  else if(d.from)commit(()=>{const f=S.tasks.find(x=>x.id===d.from);f.who=f.who.filter(w=>w!==d.id)});
-}
-window.addEventListener('pointerup',()=>endDrag(false));
-window.addEventListener('pointercancel',()=>endDrag(true));
-root.addEventListener('keydown',e=>{const j=e.target.closest?.('.jeton');if(j&&(e.key==='Enter'||e.key===' ')){e.preventDefault();sel=sel===j.dataset.j?null:j.dataset.j;render()}
-  const t=e.target.closest?.('.task');if(t&&e.target===t&&sel&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(t.dataset.task,sel)}});
-
-root.addEventListener('click',e=>{
-  if(e.target.closest('.bdel'))e.preventDefault();
-  if(e.target.closest('.jeton'))return;
-  const b=e.target.closest('button,a');
-  if(!b){const t=e.target.closest('.task');if(t&&sel)toggle(t.dataset.task,sel);return}
-  if(b.id==='cancel'){e.preventDefault();return closeDlg()}
-  if(b.id==='okc'){const f=okFn;modal=null;okFn=null;return commit(f)}
-  if(b.id==='undo')return undo();
-  if(b.id==='unsel'){sel=null;return render()}
-  if(b.id==='newcat')return catDialog();
-  if(b.id==='reset')return resetDlg();
-  if(b.id==='apercu')return apercu();
-  if(b.id==='imprimer')return imprimer();
-  if(b.id==='csv'){const M=sortM(S.members),rows=[['Catégorie','Poste','Quand','Durée (h)','Effectif',...M.map(m=>m.name)]];
-    for(const c of S.cats)for(const t of S.tasks.filter(t=>t.cat===c.id))rows.push([c.name,t.name,t.when,t.hours,t.need===0?'tous':t.need,...M.map(m=>t.who.includes(m.id)?'X':'')]);
-    navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n')).then(()=>status('Tableau copié : colle-le dans Excel ou Sheets.'),()=>status('La copie a été refusée par le navigateur.','warn'));return}
-  if(b.dataset.addtask!==undefined)return taskDialog(b.dataset.addtask);
-  if(b.dataset.clear){const t=S.tasks.find(x=>x.id===b.dataset.clear);commit(()=>{t.who=[]});return status('Poste « '+t.name+' » vidé. « Annuler » le remet comme avant.')}
-  if(b.dataset.done){const t=S.tasks.find(x=>x.id===b.dataset.done);commit(()=>{t.done=!t.done});return status(t.done?'« '+t.name+' » : fait ✓':'« '+t.name+' » : à faire')}
-  if(b.dataset.edit)return taskDialog(null,S.tasks.find(t=>t.id===b.dataset.edit));
-  if(b.dataset.del){const t=S.tasks.find(t=>t.id===b.dataset.del);return confirmDlg(`Supprimer le poste « ${esc(t.name)} » ?`,()=>{S.tasks=S.tasks.filter(x=>x.id!==t.id)})}
-  if(b.dataset.delm){const m=S.members.find(m=>m.id===b.dataset.delm);return confirmDlg(`Retirer ${esc(m.name)} de l’équipe ? Ses ${S.tasks.filter(t=>t.who.includes(m.id)).length} affectation(s) seront effacées.`,()=>{S.members=S.members.filter(x=>x.id!==m.id);S.tasks.forEach(t=>t.who=t.who.filter(w=>w!==m.id));if(sel===m.id)sel=null})}
-  if(b.dataset.delc){const c=S.cats.find(c=>c.id===b.dataset.delc),n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} poste(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
-});
-root.addEventListener('input',e=>{if(e.target.classList.contains('pq'))e.target.style.width=Math.max(3,e.target.value.length+1)+'ch'});
-root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList?.contains('pq')){e.preventDefault();e.target.blur()}});
-root.addEventListener('change',e=>{
-  const i=e.target;
-  if(i.dataset.rename){const v=i.value.trim();if(v)commit(()=>{S.members.find(m=>m.id===i.dataset.rename).name=v});return}
-  if(i.dataset.renc){const v=i.value.trim();if(v)commit(()=>{S.cats.find(c=>c.id===i.dataset.renc).name=v});return}
-  if(i.id==='ttl'){const v=i.value.trim()||'Répartition des postes';return commit(()=>{S.title=v})}
-  if(i.id==='date')return commit(()=>{S.date=i.value});
-  if(i.id==='f-cat'){$('#f-newcat').style.display=i.value==='__new'?'':'none';if(i.value==='__new')$('#f-newcat').focus()}
-  if(i.id==='f-all')document.querySelector('.wheel[data-for="f-need"]').classList.toggle('off',i.checked);
-});
-root.addEventListener('submit',e=>{
-  e.preventDefault();const f=e.target;
-  if(f.id==='addm'){const v=$('#newm').value.trim();if(v)commit(()=>S.members.push({id:uid('m'),name:v}));setTimeout(()=>$('#newm')?.focus(),0);return}
-  if(f.id==='rform'){const seen=new Set(),names=$('#f-list').value.split(/[\n,;]+/).map(x=>x.trim()).filter(x=>x&&!seen.has(x.toLowerCase())&&seen.add(x.toLowerCase()));
-    const wipe=$('#f-wipe').checked;modal=null;sel=null;
-    return commit(()=>{const old=S.members;S.members=names.map(n=>old.find(m=>m.name.toLowerCase()===n.toLowerCase())||{id:uid('m'),name:n});const keep=new Set(S.members.map(m=>m.id));S.tasks.forEach(t=>t.who=wipe?[]:t.who.filter(w=>keep.has(w)))})}
-  if(f.id==='cform'){const v=$('#f-cname').value.trim();if(!v)return;const id=uid('c');modal=null;commit(()=>S.cats.push({id,name:v}));location.hash='cat-'+id;return}
-  if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
-  if(f.id==='tform'){
-    const name=$('#f-name').value.trim();if(!name)return;
-    let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim(),mk=cat==='__new'||!S.cats.length;
-    if(mk&&!nc){$('#f-newcat').style.display='';return $('#f-newcat').focus()}
-    const all=$('#f-all').checked,data={name,when:joinWhen($('#f-day').value,$('#f-slot').value),hours:parseFloat($('#f-hours').value)||0,need:all?0:Math.max(1,parseInt($('#f-need').value)||1),note:$('#f-note').value.trim()};
-    const id=f.dataset.id;modal=null;
-    commit(()=>{if(mk){cat=uid('c');S.cats.push({id:cat,name:nc})}
-      if(id)Object.assign(S.tasks.find(t=>t.id===id),data,{cat});else S.tasks.push({id:uid('t'),cat,who:[],...data})});
+  let readHash2 = function() {
+    const h = location.hash.slice(1);
+    if (h.startsWith("cat-") && S.cats.some((c) => c.id === h.slice(4))) {
+      view = "planning";
+      cat = h.slice(4);
+    } else {
+      view = VIEWS.includes(h) ? h : "planning";
+      cat = null;
+    }
+  }, status2 = function(t, c) {
+    const e = $("#status");
+    if (e) {
+      e.textContent = t;
+      e.className = "status " + (c || "");
+    }
+    const m = $("#apmsg");
+    if (m) m.textContent = t;
+  }, commit2 = function(fn) {
+    if (!ready) {
+      status2("Chargement des données en cours, patiente quelques secondes…", "warn");
+      return;
+    }
+    hist.push(JSON.stringify(S));
+    if (hist.length > 40) hist.shift();
+    fn();
+    render2();
+    queueSave2();
+  }, undo2 = function() {
+    if (!hist.length) return;
+    S = JSON.parse(hist.pop());
+    render2();
+    queueSave2();
+  }, queueSave2 = function() {
+    pending = true;
+    clearTimeout(timer);
+    status2("Modifications en attente…");
+    timer = setTimeout(save, 800);
+  }, renderHead2 = function() {
+    const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
+    const holes = withNeed.reduce((a, t) => a + miss(t), 0);
+    return '<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement"></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
+  }, catStats2 = function(c) {
+    const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
+    return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
+  }, renderLanding2 = function() {
+    return '<div class="blocks">' + S.cats.map((c) => {
+      const k = catStats2(c), pc = k.n ? Math.round(k.ok / k.n * 100) : 0;
+      return '<a class="block '.concat(k.n && k.ok === k.n ? "ok" : "", '" href="#cat-').concat(c.id, '" data-cid="').concat(c.id, '" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="').concat(c.id, '" aria-label="Supprimer la catégorie ').concat(esc(c.name), '" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>').concat(esc(c.name), "</h2>").concat(k.holes ? '<span class="pill short">'.concat(k.holes, " à pourvoir</span>") : '<span class="pill ok">Complet ✓</span>', '</div><div class="pr"><div class="prog"><i style="width:').concat(pc, '%"></i></div><span>').concat(k.ok, "/").concat(k.n, '</span></div><div class="meta">').concat(k.ts.length, " poste").concat(k.ts.length > 1 ? "s" : "", "</div></a>");
+    }).join("") + '<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>';
+  }, renderCat2 = function() {
+    const c = S.cats.find((x) => x.id === cat), k = catStats2(c);
+    let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), '</h1>\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">+ Poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn delcat" data-delc="').concat(c.id, '">🗑 Supprimer la catégorie</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Pour déplacer un poste, garde le doigt appuyé dessus une demi-seconde.</p>');
+    h += '<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici.</p>\n  '.concat(sel ? '<div class="tip"><span>'.concat(sel === "__all" ? "<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider." : "<b>".concat(esc(mName(sel)), "</b> : touche un poste pour l’ajouter ou la retirer."), '</span><button class="ghostbtn" id="unsel">Terminé</button></div>') : "", '\n  <div class="jetons">').concat(S.members.length ? allJeton() : "").concat(sortM(S.members).map((m) => jeton(m.id, "", true)).join("") || '<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>', "</div></aside>");
+    h += k.ts.length ? '<div class="tasks">'.concat(k.ts.map((t) => {
+      const d = need(t), n = nb(t), ms = miss(t);
+      return '<div class="task '.concat(full(t) ? "ok" : "", " ").concat(t.done ? "fait" : "", " ").concat(sel && t.who.includes(sel) ? "mine" : "", '" data-task="').concat(t.id, '" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>').concat(esc(t.name), '</h3><button class="done" data-done="').concat(t.id, '" aria-pressed="').concat(!!t.done, '" aria-label="').concat(t.done ? "Poste fait, remettre à faire" : "Marquer le poste comme fait", '" title="').concat(t.done ? "Fait : touche pour remettre « à faire »" : "À faire : touche quand c’est fait", '">✓</button><button class="edit" data-edit="').concat(t.id, '" aria-label="Modifier ').concat(esc(t.name), '">✎</button>\n      <div class="meta">').concat(t.when ? "<span>".concat(esc(t.when), "</span>") : "").concat(t.hours ? "<span>".concat(fmtH(+t.hours), " h</span>") : "", '<span class="count ').concat(ms ? "short" : "", '">').concat(cnt(t), "</span></div>").concat(t.note ? '<div class="note">'.concat(esc(t.note), "</div>") : "", '\n      <div class="slots">').concat(sortIds(t.who).map((w) => jeton(w, t.id, false)).join("")).concat(t.need === 0 ? "" : Array.from({ length: Math.min(ms, 4) }, () => '<span class="slot">libre</span>').join("")).concat(ms > 4 && t.need !== 0 ? '<span class="slot">+'.concat(ms - 4, "</span>") : "").concat(t.who.length ? '<button class="clr" data-clear="'.concat(t.id, '" aria-label="Retirer tous les bénévoles de ').concat(esc(t.name), '">Vider</button>') : "", "</div></div>");
+    }).join(""), "</div>") : '<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
+    return h + "</div>";
+  }, catDialog2 = function() {
+    modal = '<div class="modal"><form class="dlg" id="cform"><h2>Nouvelle catégorie</h2><label class="f" for="f-cname">Nom</label><input class="txt" id="f-cname" required><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer</button></div></form></div>';
+    render2();
+    setTimeout(() => {
+      var _a;
+      return (_a = $("#f-cname")) == null ? void 0 : _a.focus();
+    }, 0);
+  }, renderPeople2 = function() {
+    const holes = S.tasks.filter((t) => need(t) && miss(t));
+    let h = '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
+    return h + '<div class="people">' + sortM(S.members).map((m) => {
+      const ts = S.tasks.filter((t) => t.who.includes(m.id));
+      return '<section class="chap"><h2>'.concat(jeton(m.id, "", false), "</h2>").concat(ts.length ? "<ul>".concat(ts.map((t) => "<li><span>".concat(esc(t.name), "</span><em>").concat(esc(t.when)).concat(t.hours ? " · " + fmtH(+t.hours) + " h" : "", "</em></li>")).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant</p>', "</section>");
+    }).join("") + "</div>";
+  }, renderTeam2 = function() {
+    return '<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">'.concat(sortM(S.members).map((m) => '<span class="plaque'.concat(bm(m) ? " bureau" : "", '"><input class="txt pq" data-rename="').concat(m.id, '" value="').concat(esc(m.name), '" style="width:').concat(Math.max(3, m.name.length + 1), 'ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="').concat(m.id, '" aria-label="Retirer ').concat(esc(m.name), '" title="Retirer">🗑</button></span>')).join(""), '</div>\n  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>');
+  }, render2 = function() {
+    const e0 = $("#status"), st = (e0 == null ? void 0 : e0.textContent) || "", sc = (e0 == null ? void 0 : e0.className) || "status";
+    if (cat && !S.cats.some((c) => c.id === cat)) {
+      cat = null;
+      if (location.hash.startsWith("#cat-")) history.replaceState(null, "", "#planning");
+    }
+    const inCat = view === "planning" && cat;
+    document.body.classList.toggle("hasdock", !!inCat);
+    document.body.classList.toggle("selecting", !!sel);
+    root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
+    const e = $("#status");
+    e.textContent = st;
+    e.className = sc;
+  }, taskDialog2 = function(catId, t) {
+    var _a;
+    const isNew = !t;
+    t = t || { name: "", cat: catId || S.cats[0] && S.cats[0].id || "", when: "", hours: "", need: 1, note: "" };
+    modal = '<div class="modal"><form class="dlg" id="tform" data-id="'.concat(isNew ? "" : t.id, '"><h2>').concat(isNew ? "Nouveau poste" : "Modifier le poste", '</h2>\n  <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="').concat(esc(t.name), '">\n  <span class="f">Catégorie</span>').concat(wheel2("f-cat", [...S.cats.map((c) => c.id), "__new"], S.cats.some((c) => c.id === t.cat) ? t.cat : ((_a = S.cats[0]) == null ? void 0 : _a.id) || "__new", (v) => {
+      var _a2;
+      return v === "__new" ? "+ Nouvelle catégorie…" : ((_a2 = S.cats.find((c) => c.id === v)) == null ? void 0 : _a2.name) || "";
+    }, "Catégorie", false, "wide"), '\n  <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;').concat(S.cats.length ? "display:none" : "", '">\n  ').concat((() => {
+      const [d, c] = parseWhen2(t.when), days = DAYS.includes(d) ? DAYS : [...DAYS, d], slots = SLOTS.includes(c) ? SLOTS : ["—", c, ...SLOTS.slice(1)];
+      const nx = (v) => v === "—" ? "Non précisé" : v;
+      return '<div class="two wheels"><div><span class="f">Jour</span>'.concat(wheel2("f-day", days, d, (v) => v === "J" ? "J (jour même)" : nx(v), "Jour"), '</div><div><span class="f">Créneau</span>').concat(wheel2("f-slot", slots, c, nx, "Créneau"), "</div></div>");
+    })(), '\n  <div class="two wheels"><div><span class="f">Durée</span>').concat(wheel2("f-hours", HVALS, +t.hours || 0, (v) => fmtH(v) + " h", "Durée en heures"), '</div><div><span class="f">Nombre de personnes</span>').concat(wheel2("f-need", NVALS, t.need || 1, (v) => v + (v > 1 ? " personnes" : " personne"), "Nombre de personnes", t.need === 0), '</div></div>\n  <label class="chk"><input type="checkbox" id="f-all" ').concat(t.need === 0 ? "checked" : "", '>Tous les bénévoles (le jeton « Tous » remplit ce poste)</label>\n  <label class="f" for="f-note">Remarque</label><input class="txt" id="f-note" value="').concat(esc(t.note), '" placeholder="Matériel, lieu, responsable…">\n  <div class="acts">').concat(isNew ? "" : '<button type="button" class="ghostbtn del" data-del="'.concat(t.id, '">Supprimer</button>'), '<button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Enregistrer</button></div></form></div>');
+    render2();
+    initWheels2();
+    setTimeout(() => {
+      var _a2;
+      initWheels2();
+      (_a2 = $("#f-name")) == null ? void 0 : _a2.focus();
+    }, 0);
+  }, tableHTML2 = function() {
+    const dt = S.date ? (/* @__PURE__ */ new Date(S.date + "T12:00")).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+    return '<div class="ptab"><h1>'.concat(esc(S.title), "</h1>").concat(dt ? '<p class="pdate">'.concat(dt, "</p>") : "") + S.cats.map((c) => {
+      const ts = S.tasks.filter((t) => t.cat === c.id);
+      if (!ts.length) return "";
+      return "<h2>".concat(esc(c.name), "</h2><table><thead><tr><th>Poste</th><th>Quand</th><th>Durée</th><th>Effectif</th><th>Bénévoles</th></tr></thead><tbody>").concat(ts.map((t) => {
+        const ms = miss(t);
+        return "<tr><td>".concat(esc(t.name)).concat(t.note ? "<small>".concat(esc(t.note), "</small>") : "", "</td><td>").concat(esc(t.when), "</td><td>").concat(t.hours ? fmtH(+t.hours) + " h" : "", "</td><td>").concat(cnt(t), "</td><td>").concat(t.need === 0 && vol().length && nb(t) >= vol().length ? "Tous les bénévoles" : sortIds(t.who).map(mName).map(esc).join(", ")).concat(ms ? " <em>(".concat(ms, " à trouver)</em>") : "", "</td></tr>");
+      }).join(""), "</tbody></table>");
+    }).join("") + "</div>";
+  }, apercu2 = function() {
+    modal = '<div class="modal"><div class="dlg wide"><h2>Aperçu</h2><div class="apbox">'.concat(tableHTML2(), '</div><p class="apmsg" id="apmsg" role="status"></p><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button><button class="ghostbtn" id="csv">Copier pour Excel</button><button class="bigbtn" id="imprimer">🖨 Imprimer</button></div></div></div>');
+    render2();
+  }, imprimer2 = function() {
+    let z = document.getElementById("printzone");
+    if (!z) {
+      z = document.createElement("div");
+      z.id = "printzone";
+      document.body.appendChild(z);
+    }
+    z.innerHTML = tableHTML2();
+    window.print();
+  }, wheel2 = function(id, vals, cur, fmt, label, off, cls) {
+    let k = 0, best = 1e9;
+    vals.forEach((v, i) => {
+      const d = typeof v === "number" ? Math.abs(v - cur) : v === cur ? 0 : 1;
+      if (d < best) {
+        best = d;
+        k = i;
+      }
+    });
+    return '<div class="wheel '.concat(off ? "off" : "", " ").concat(cls || "", '" data-for="').concat(id, '"><div class="wl" tabindex="0" role="listbox" aria-label="').concat(label, '" data-k="').concat(k, '">').concat(vals.map((v, i) => '<div class="wi '.concat(i === k ? "on" : "", '" data-i="').concat(i, '" data-v="').concat(esc(v), '" role="option">').concat(esc(fmt(v)), "</div>")).join(""), '</div></div><input type="hidden" id="').concat(id, '" value="').concat(esc(vals[k]), '">');
+  }, initWheels2 = function() {
+    document.querySelectorAll(".wl").forEach((w) => {
+      w.scrollTop = +w.dataset.k * WH;
+    });
+  }, wheelSet2 = function(w, i, smooth) {
+    const it = w.querySelectorAll(".wi");
+    i = Math.max(0, Math.min(it.length - 1, i));
+    it.forEach((e, j) => e.classList.toggle("on", j === i));
+    const inp = document.getElementById(w.parentNode.dataset.for);
+    if (inp) inp.value = it[i].dataset.v;
+    if (inp && inp.id === "f-cat") {
+      const n = $("#f-newcat");
+      if (n) n.style.display = inp.value === "__new" ? "" : "none";
+    }
+    if (smooth) w.scrollTo({ top: i * WH, behavior: "smooth" });
+  }, parseWhen2 = function(w) {
+    w = (w || "").trim();
+    if (!w) return ["—", "—"];
+    let m = w.match(/^(J-\d+|J)(?: · (.+))?$/);
+    if (m) return [m[1], m[2] || "—"];
+    return ["J", w];
+  }, joinWhen2 = function(d, c) {
+    if (c === "—") return d === "—" ? "" : d;
+    if (d === "—" || d === "J") return c;
+    return d + " · " + c;
+  }, resetDlg2 = function() {
+    modal = '<div class="modal"><form class="dlg" id="rform"><h2>Remise à zéro de la liste</h2><p>Un prénom par ligne. Les prénoms déjà présents gardent leurs postes, les prénoms retirés sont enlevés des postes.</p>\n  <textarea class="txt" id="f-list" rows="10" aria-label="Liste des bénévoles">'.concat(esc(sortM(S.members).map((m) => m.name).join("\n")), '</textarea>\n  <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>\n  <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>');
+    render2();
+    setTimeout(() => {
+      var _a;
+      return (_a = $("#f-list")) == null ? void 0 : _a.focus();
+    }, 0);
+  }, confirmDlg2 = function(msg, fn) {
+    okFn = fn;
+    modal = '<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>'.concat(msg, '</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>');
+    render2();
+    $("#okc").focus();
+  }, closeDlg2 = function() {
+    modal = null;
+    okFn = null;
+    render2();
+  }, fillAll2 = function(tid) {
+    const t = S.tasks.find((x) => x.id === tid);
+    if (!t) return;
+    if (t.need !== 0) {
+      status2("Pour affecter tout le monde, coche « Tous les bénévoles » dans le poste (bouton ✎).", "warn");
+      return;
+    }
+    const ids = vol().map((m) => m.id), done = ids.every((i) => t.who.includes(i));
+    commit2(() => {
+      t.who = done ? [] : ids;
+    });
+    status2(done ? "Poste vidé." : "Tous les bénévoles sont affectés à «" + NB + t.name + NB + "».");
+  }, toggle2 = function(tid, mid) {
+    if (mid === "__all") return fillAll2(tid);
+    commit2(() => {
+      const t = S.tasks.find((x) => x.id === tid);
+      t.who = t.who.includes(mid) ? t.who.filter((w) => w !== mid) : [...t.who, mid];
+    });
+  }, moveItem2 = function(kind, id, tid, after) {
+    if (id === tid) return;
+    commit2(() => {
+      const A = kind === "c" ? S.cats : S.tasks, i = A.findIndex((x) => x.id === id);
+      if (i < 0) return;
+      const [it] = A.splice(i, 1);
+      let j = A.findIndex((x) => x.id === tid);
+      if (j < 0) {
+        A.splice(i, 0, it);
+        return;
+      }
+      A.splice(after ? j + 1 : j, 0, it);
+    });
+  }, stepItem2 = function(kind, id, dir) {
+    const A = kind === "c" ? S.cats : S.tasks.filter((t) => {
+      var _a;
+      return t.cat === ((_a = S.tasks.find((x) => x.id === id)) == null ? void 0 : _a.cat);
+    }), i = A.findIndex((x) => x.id === id), o = A[i + dir];
+    if (!o) return;
+    moveItem2(kind, id, o.id, dir > 0);
+    setTimeout(() => {
+      var _a;
+      return (_a = cardOf(kind, id)) == null ? void 0 : _a.focus();
+    }, 0);
+  }, sameOrder2 = function(kind, id, tid, after) {
+    const A = (kind === "c" ? S.cats : S.tasks).map((x) => x.id), B = A.filter((x) => x !== id), j = B.indexOf(tid);
+    B.splice(after ? j + 1 : j, 0, id);
+    return A.join() === B.join();
+  }, bar2 = function() {
+    let b = document.getElementById("mvbar");
+    if (!b) {
+      b = document.createElement("div");
+      b.id = "mvbar";
+      document.body.appendChild(b);
+    }
+    return b;
+  }, lpCancel2 = function() {
+    if (lp) {
+      clearTimeout(lp.timer);
+      lp.el.classList.remove("hold");
+      lp = null;
+    }
+  }, mvStart2 = function() {
+    const p = lp;
+    lp = null;
+    if (!p) return;
+    clearTimeout(p.timer);
+    p.el.classList.remove("hold");
+    const r = p.el.getBoundingClientRect(), g = p.el.cloneNode(true);
+    g.classList.add("mvghost");
+    g.removeAttribute("href");
+    g.style.width = r.width + "px";
+    g.style.height = r.height + "px";
+    mv = { kind: p.kind, id: p.id, el: p.el, dx: p.x - r.left, dy: p.y - r.top, tgt: null, after: false, ghost: g };
+    document.body.appendChild(g);
+    p.el.classList.add("moving");
+    document.documentElement.classList.add("dragging");
+    noClick = true;
+    try {
+      navigator.vibrate && navigator.vibrate(15);
+    } catch (_) {
+    }
+    mvMove2(p.cx, p.cy);
+  }, mvMove2 = function(x, y) {
+    mv.ghost.style.transform = "translate(".concat(x - mv.dx, "px,").concat(y - mv.dy, "px) rotate(-2deg) scale(1.03)");
+    const ed = 60;
+    if (y > innerHeight - ed) scrollBy(0, Math.ceil((y - innerHeight + ed) / 6));
+    else if (y < ed) scrollBy(0, -Math.ceil((ed - y) / 6));
+    let best = null, bd = 1e9, br = null;
+    document.querySelectorAll(mv.kind === "c" ? ".block[data-cid]" : ".task").forEach((c) => {
+      if (c === mv.el) return;
+      const r = c.getBoundingClientRect(), d = Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom));
+      if (d < bd) {
+        bd = d;
+        best = c;
+        br = r;
+      }
+    });
+    const b = bar2();
+    mv.tgt = null;
+    if (!best || bd > 90) {
+      b.style.display = "none";
+      return;
+    }
+    const dx = x - (br.left + br.width / 2), dy = y - (br.top + br.height / 2), vert = Math.abs(dy) > br.height / 4;
+    mv.after = vert ? dy > 0 : dx > 0;
+    const tid = mv.kind === "c" ? best.dataset.cid : best.dataset.task;
+    if (sameOrder2(mv.kind, mv.id, tid, mv.after)) {
+      b.style.display = "none";
+      return;
+    }
+    mv.tgt = tid;
+    const G = 5;
+    Object.assign(b.style, { display: "block" }, vert ? { left: br.left + "px", width: br.width + "px", top: (mv.after ? br.bottom + G : br.top - G) - 2 + "px", height: "4px" } : { top: br.top + "px", height: br.height + "px", left: (mv.after ? br.right + G : br.left - G) - 2 + "px", width: "4px" });
+  }, mvEnd2 = function(drop) {
+    lpCancel2();
+    const m = mv;
+    mv = null;
+    if (!m) return;
+    m.ghost.remove();
+    bar2().style.display = "none";
+    m.el.classList.remove("moving");
+    document.documentElement.classList.remove("dragging");
+    setTimeout(() => {
+      noClick = false;
+    }, 60);
+    if (drop && m.tgt) moveItem2(m.kind, m.id, m.tgt, m.after);
+  }, endDrag2 = function(cancel) {
+    var _a;
+    const d = drag;
+    drag = null;
+    if (!d) return;
+    d.el.classList.remove("grab");
+    document.documentElement.classList.remove("dragging");
+    if (!d.ghost) {
+      if (!cancel) {
+        sel = sel === d.id ? null : d.id;
+        render2();
+      }
+      return;
+    }
+    d.ghost.remove();
+    document.body.classList.remove("dragging");
+    (_a = d.hot) == null ? void 0 : _a.classList.remove("hot");
+    d.el.classList.remove("lift");
+    if (cancel) return;
+    const tgt = d.hot;
+    if (d.id === "__all") {
+      if (tgt && tgt.classList.contains("task")) fillAll2(tgt.dataset.task);
+      return;
+    }
+    if (tgt && tgt.classList.contains("task")) {
+      const tid = tgt.dataset.task;
+      if (tid === d.from) return;
+      commit2(() => {
+        const t = S.tasks.find((x) => x.id === tid);
+        if (!t.who.includes(d.id)) t.who.push(d.id);
+        if (d.from) {
+          const f = S.tasks.find((x) => x.id === d.from);
+          f.who = f.who.filter((w) => w !== d.id);
+        }
+      });
+    } else if (d.from) commit2(() => {
+      const f = S.tasks.find((x) => x.id === d.from);
+      f.who = f.who.filter((w) => w !== d.id);
+    });
+  };
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2;
+  const $ = (s) => document.querySelector(s), root = $("#root");
+  let S = JSON.parse(document.getElementById("state").textContent);
+  let mv = null;
+  const hist = [];
+  let etag = null, saving = false, pending = false, timer = null, modal = null, sel = null, drag = null;
+  const VIEWS = ["planning", "benevoles", "equipe"];
+  let view = "planning", cat = null;
+  readHash2();
+  const esc = (s) => String(s != null ? s : "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const fmtH = (h) => (Math.round(h * 10) / 10).toString().replace(".", ",");
+  const need = (t) => t.need === 0 ? vol().length : t.need;
+  const mName = (id) => {
+    var _a;
+    return ((_a = S.members.find((m) => m.id === id)) == null ? void 0 : _a.name) || "";
+  };
+  const isB = (id) => /bureau/i.test(mName(id));
+  const vol = () => S.members.filter((m) => !/bureau/i.test(m.name));
+  const nb = (t) => t.who.filter((w) => !isB(w)).length;
+  const cmp = (a, b) => a.localeCompare(b, "fr", { sensitivity: "base" });
+  const bm = (m) => /bureau/i.test(m.name) ? 1 : 0;
+  const sortM = (a) => [...a].sort((x, y) => bm(y) - bm(x) || cmp(x.name, y.name));
+  const sortIds = (ids) => [...ids].sort((a, b) => isB(b) - isB(a) || cmp(mName(a), mName(b)));
+  const hasB = (t) => t.who.some(isB);
+  const miss = (t) => hasB(t) ? 0 : Math.max(0, need(t) - nb(t));
+  const full = (t) => need(t) > 0 && (hasB(t) || nb(t) >= need(t));
+  const cnt = (t) => hasB(t) && !nb(t) ? "Bureau" : nb(t) + "/" + (t.need === 0 ? "tous" : need(t));
+  let ready = false;
+  document.documentElement.classList.add("loading");
+  async function save() {
+    if (saving) {
+      timer = setTimeout(save, 500);
+      return;
+    }
+    pending = false;
+    saving = true;
+    status2("Enregistrement…");
+    try {
+      const r = await fetch(window.API, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ state: S, etag }) });
+      const d = await r.json().catch(() => ({}));
+      if ((d.code || r.status) === 409 && d.state) {
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        modal = null;
+        render2();
+        status2("Quelqu’un a modifié la répartition en même temps : sa version est affichée, refais ta dernière modification.", "warn");
+      } else if (r.ok && !d.code) {
+        etag = d.etag || etag;
+        status2("Enregistré pour toute l’équipe.");
+      } else status2("L’enregistrement a échoué. Refais une modification pour réessayer.", "warn");
+    } catch (e) {
+      status2("Pas de connexion : la modification n’est pas enregistrée.", "warn");
+    }
+    saving = false;
   }
-});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal)closeDlg();else if(sel){sel=null;render()}}
-  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo()}});
-window.addEventListener('hashchange',()=>{readHash();scrollTo(0,0);render()});
-render();
-status('Chargement des données…');fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{ready=true;document.documentElement.classList.remove('loading');if(d.state){S=d.state;etag=d.etag;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status('Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}).catch(()=>status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn'));
-setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+  async function refresh() {
+    var _a, _b;
+    if (pending || saving || modal || drag || mv || lp || ((_b = (_a = document.activeElement) == null ? void 0 : _a.matches) == null ? void 0 : _b.call(_a, "input.txt,.ttl"))) return;
+    try {
+      const r = await fetch(window.API, { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d.state && d.etag !== etag) {
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        render2();
+      }
+    } catch (e) {
+    }
+  }
+  const allJeton = () => '<span class="jeton tous '.concat(sel === "__all" ? "sel" : "", '" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>');
+  const jeton = (id, from, hours) => '<span class="jeton '.concat(sel === id ? "sel" : "").concat(isB(id) ? " bureau" : "", '" data-j="').concat(id, '" data-from="').concat(from || "", '" role="button" tabindex="0" aria-label="').concat(esc(mName(id)), '">').concat(esc(mName(id)), "</span>");
+  const WH = 40;
+  document.addEventListener("scroll", (e) => {
+    const w = e.target;
+    if (!w.classList || !w.classList.contains("wl")) return;
+    wheelSet2(w, Math.round(w.scrollTop / WH), false);
+  }, true);
+  document.addEventListener("click", (e) => {
+    const it = e.target.closest && e.target.closest(".wi");
+    if (it) wheelSet2(it.parentNode, +it.dataset.i, true);
+  });
+  document.addEventListener("keydown", (e) => {
+    const w = e.target.closest && e.target.closest(".wl");
+    if (!w) return;
+    const cur = w.querySelector(".wi.on");
+    const i = cur ? +cur.dataset.i : 0;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      wheelSet2(w, i + 1, true);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      wheelSet2(w, i - 1, true);
+    }
+  });
+  const h2 = (a, b) => a + " h – " + b + " h";
+  const DAYS = ["—", "J-7", "J-1", "J"], SLOTS = ["—", "Matin", "Après-midi", "Journée", h2(8, 10), h2(10, 12), h2(12, 14), h2(14, 16), h2(16, 18), h2(18, 20), h2(8, 18)];
+  const HVALS = Array.from({ length: 49 }, (_, i) => i / 2), NVALS = Array.from({ length: 40 }, (_, i) => i + 1);
+  let okFn = null;
+  const mvSel = ".block[data-cid],.task", cardOf = (k, id) => document.querySelector(k === "c" ? '.block[data-cid="'.concat(id, '"]') : '.task[data-task="'.concat(id, '"]'));
+  let lp = null, noClick = false;
+  root.addEventListener("pointerdown", (e) => {
+    if (e.button > 0 || modal || mv) return;
+    if (e.target.closest("button,input,select,textarea,.jeton")) return;
+    const el = e.target.closest(mvSel);
+    if (!el) return;
+    const kind = el.matches(".task") ? "t" : "c", mouse = e.pointerType === "mouse";
+    lp = { kind, id: kind === "c" ? el.dataset.cid : el.dataset.task, el, x: e.clientX, y: e.clientY, cx: e.clientX, cy: e.clientY, mouse };
+    el.classList.add("hold");
+    lp.timer = setTimeout(mvStart2, mouse ? 300 : 380);
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (lp) {
+      lp.cx = e.clientX;
+      lp.cy = e.clientY;
+      if (Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > (lp.mouse ? 8 : 12)) {
+        if (lp.mouse) mvStart2();
+        else lpCancel2();
+      }
+      return;
+    }
+    if (!mv) return;
+    e.preventDefault();
+    mvMove2(e.clientX, e.clientY);
+  }, { passive: false });
+  for (const o of [window, document]) o.addEventListener("touchmove", (e) => {
+    if (!mv) return;
+    e.preventDefault();
+    if (mv.pc) {
+      const t = e.touches[0];
+      if (t) mvMove2(t.clientX, t.clientY);
+    }
+  }, { passive: false });
+  window.addEventListener("touchend", () => {
+    if (mv && mv.pc) mvEnd2(true);
+  });
+  window.addEventListener("touchcancel", () => {
+    if (mv && mv.pc) mvEnd2(false);
+  });
+  window.addEventListener("pointerup", () => {
+    if (!mv || !mv.pc) mvEnd2(true);
+  });
+  window.addEventListener("pointercancel", (e) => {
+    if (mv && e.pointerType !== "mouse") {
+      mv.pc = true;
+      return;
+    }
+    mvEnd2(false);
+  });
+  window.addEventListener("click", (e) => {
+    if (noClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      noClick = false;
+    }
+  }, true);
+  root.addEventListener("contextmenu", (e) => {
+    if (e.target.closest(mvSel) && !e.target.closest("input,textarea")) e.preventDefault();
+  });
+  root.addEventListener("dragstart", (e) => {
+    var _a, _b;
+    if ((_b = (_a = e.target).closest) == null ? void 0 : _b.call(_a, mvSel)) e.preventDefault();
+  });
+  root.addEventListener("keydown", (e) => {
+    var _a;
+    if (!e.altKey) return;
+    const el = e.target;
+    if (!((_a = el.matches) == null ? void 0 : _a.call(el, mvSel))) return;
+    const d = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 }[e.key];
+    if (d) {
+      e.preventDefault();
+      stepItem2(el.matches(".task") ? "t" : "c", el.matches(".task") ? el.dataset.task : el.dataset.cid, d);
+    }
+  });
+  root.addEventListener("pointerdown", (e) => {
+    const j = e.target.closest(".jeton");
+    if (!j || e.button > 0 || !j.closest(".bench,.slots")) return;
+    drag = { id: j.dataset.j, from: j.dataset.from, x: e.clientX, y: e.clientY, el: j, ghost: null, hot: null, touch: e.pointerType !== "mouse" };
+    j.classList.add("grab");
+    try {
+      j.setPointerCapture(e.pointerId);
+    } catch (_) {
+    }
+  });
+  window.addEventListener("pointermove", (e) => {
+    var _a, _b;
+    if (!drag) return;
+    if (!drag.ghost) {
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.hypot(dx, dy) < 6) return;
+      const g = drag.el.cloneNode(true);
+      g.classList.add("ghost");
+      g.classList.remove("sel", "grab");
+      document.body.appendChild(g);
+      drag.ghost = g;
+      drag.el.classList.add("lift");
+      document.body.classList.add("dragging");
+      document.documentElement.classList.add("dragging");
+      try {
+        drag.touch && navigator.vibrate && navigator.vibrate(10);
+      } catch (_) {
+      }
+    }
+    e.preventDefault();
+    drag.ghost.style.transform = "translate(".concat(e.clientX, "px,").concat(e.clientY, "px) translate(-50%,").concat(drag.touch ? "-140%" : "-50%", ") scale(1.1)");
+    const ed = 60;
+    if (e.clientY > innerHeight - ed) scrollBy(0, Math.ceil((e.clientY - innerHeight + ed) / 6));
+    else if (e.clientY < ed) scrollBy(0, -Math.ceil((ed - e.clientY) / 6));
+    const t = ((_a = document.elementFromPoint(e.clientX, drag.touch ? e.clientY - 30 : e.clientY)) == null ? void 0 : _a.closest(".task,.bench")) || null;
+    if (t !== drag.hot) {
+      (_b = drag.hot) == null ? void 0 : _b.classList.remove("hot");
+      t == null ? void 0 : t.classList.add("hot");
+      drag.hot = t;
+    }
+  }, { passive: false });
+  window.addEventListener("pointerup", () => endDrag2(false));
+  window.addEventListener("pointercancel", () => endDrag2(true));
+  root.addEventListener("keydown", (e) => {
+    var _a, _b, _c, _d;
+    const j = (_b = (_a = e.target).closest) == null ? void 0 : _b.call(_a, ".jeton");
+    if (j && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      sel = sel === j.dataset.j ? null : j.dataset.j;
+      render2();
+    }
+    const t = (_d = (_c = e.target).closest) == null ? void 0 : _d.call(_c, ".task");
+    if (t && e.target === t && sel && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      toggle2(t.dataset.task, sel);
+    }
+  });
+  root.addEventListener("click", (e) => {
+    if (e.target.closest(".bdel")) e.preventDefault();
+    if (e.target.closest(".jeton")) return;
+    const b = e.target.closest("button,a");
+    if (!b) {
+      const t = e.target.closest(".task");
+      if (t && sel) toggle2(t.dataset.task, sel);
+      return;
+    }
+    if (b.id === "cancel") {
+      e.preventDefault();
+      return closeDlg2();
+    }
+    if (b.id === "okc") {
+      const f = okFn;
+      modal = null;
+      okFn = null;
+      return commit2(f);
+    }
+    if (b.id === "undo") return undo2();
+    if (b.id === "unsel") {
+      sel = null;
+      return render2();
+    }
+    if (b.id === "newcat") return catDialog2();
+    if (b.id === "reset") return resetDlg2();
+    if (b.id === "apercu") return apercu2();
+    if (b.id === "imprimer") return imprimer2();
+    if (b.id === "csv") {
+      const M = sortM(S.members), rows = [["Catégorie", "Poste", "Quand", "Durée (h)", "Effectif", ...M.map((m) => m.name)]];
+      for (const c of S.cats) for (const t of S.tasks.filter((t2) => t2.cat === c.id)) rows.push([c.name, t.name, t.when, t.hours, t.need === 0 ? "tous" : t.need, ...M.map((m) => t.who.includes(m.id) ? "X" : "")]);
+      navigator.clipboard.writeText(rows.map((r) => r.join("	")).join("\n")).then(() => status2("Tableau copié : colle-le dans Excel ou Sheets."), () => status2("La copie a été refusée par le navigateur.", "warn"));
+      return;
+    }
+    if (b.dataset.addtask !== void 0) return taskDialog2(b.dataset.addtask);
+    if (b.dataset.clear) {
+      const t = S.tasks.find((x) => x.id === b.dataset.clear);
+      commit2(() => {
+        t.who = [];
+      });
+      return status2("Poste « " + t.name + " » vidé. « Annuler » le remet comme avant.");
+    }
+    if (b.dataset.done) {
+      const t = S.tasks.find((x) => x.id === b.dataset.done);
+      commit2(() => {
+        t.done = !t.done;
+      });
+      return status2(t.done ? "« " + t.name + " » : fait ✓" : "« " + t.name + " » : à faire");
+    }
+    if (b.dataset.edit) return taskDialog2(null, S.tasks.find((t) => t.id === b.dataset.edit));
+    if (b.dataset.del) {
+      const t = S.tasks.find((t2) => t2.id === b.dataset.del);
+      return confirmDlg2("Supprimer le poste « ".concat(esc(t.name), " » ?"), () => {
+        S.tasks = S.tasks.filter((x) => x.id !== t.id);
+      });
+    }
+    if (b.dataset.delm) {
+      const m = S.members.find((m2) => m2.id === b.dataset.delm);
+      return confirmDlg2("Retirer ".concat(esc(m.name), " de l’équipe ? Ses ").concat(S.tasks.filter((t) => t.who.includes(m.id)).length, " affectation(s) seront effacées."), () => {
+        S.members = S.members.filter((x) => x.id !== m.id);
+        S.tasks.forEach((t) => t.who = t.who.filter((w) => w !== m.id));
+        if (sel === m.id) sel = null;
+      });
+    }
+    if (b.dataset.delc) {
+      const c = S.cats.find((c2) => c2.id === b.dataset.delc), n = S.tasks.filter((t) => t.cat === c.id).length;
+      return confirmDlg2("Supprimer la catégorie « ".concat(esc(c.name), " »").concat(n ? " et ses ".concat(n, " poste(s)") : "", " ?"), () => {
+        S.cats = S.cats.filter((x) => x.id !== c.id);
+        S.tasks = S.tasks.filter((t) => t.cat !== c.id);
+      });
+    }
+  });
+  root.addEventListener("input", (e) => {
+    if (e.target.classList.contains("pq")) e.target.style.width = Math.max(3, e.target.value.length + 1) + "ch";
+  });
+  root.addEventListener("keydown", (e) => {
+    var _a;
+    if (e.key === "Enter" && ((_a = e.target.classList) == null ? void 0 : _a.contains("pq"))) {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+  root.addEventListener("change", (e) => {
+    const i = e.target;
+    if (i.dataset.rename) {
+      const v = i.value.trim();
+      if (v) commit2(() => {
+        S.members.find((m) => m.id === i.dataset.rename).name = v;
+      });
+      return;
+    }
+    if (i.dataset.renc) {
+      const v = i.value.trim();
+      if (v) commit2(() => {
+        S.cats.find((c) => c.id === i.dataset.renc).name = v;
+      });
+      return;
+    }
+    if (i.id === "ttl") {
+      const v = i.value.trim() || "Répartition des postes";
+      return commit2(() => {
+        S.title = v;
+      });
+    }
+    if (i.id === "date") return commit2(() => {
+      S.date = i.value;
+    });
+    if (i.id === "f-cat") {
+      $("#f-newcat").style.display = i.value === "__new" ? "" : "none";
+      if (i.value === "__new") $("#f-newcat").focus();
+    }
+    if (i.id === "f-all") document.querySelector('.wheel[data-for="f-need"]').classList.toggle("off", i.checked);
+  });
+  root.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === "addm") {
+      const v = $("#newm").value.trim();
+      if (v) commit2(() => S.members.push({ id: uid("m"), name: v }));
+      setTimeout(() => {
+        var _a;
+        return (_a = $("#newm")) == null ? void 0 : _a.focus();
+      }, 0);
+      return;
+    }
+    if (f.id === "rform") {
+      const seen = /* @__PURE__ */ new Set(), names = $("#f-list").value.split(/[\n,;]+/).map((x) => x.trim()).filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase()));
+      const wipe = $("#f-wipe").checked;
+      modal = null;
+      sel = null;
+      return commit2(() => {
+        const old = S.members;
+        S.members = names.map((n) => old.find((m) => m.name.toLowerCase() === n.toLowerCase()) || { id: uid("m"), name: n });
+        const keep = new Set(S.members.map((m) => m.id));
+        S.tasks.forEach((t) => t.who = wipe ? [] : t.who.filter((w) => keep.has(w)));
+      });
+    }
+    if (f.id === "cform") {
+      const v = $("#f-cname").value.trim();
+      if (!v) return;
+      const id = uid("c");
+      modal = null;
+      commit2(() => S.cats.push({ id, name: v }));
+      location.hash = "cat-" + id;
+      return;
+    }
+    if (f.id === "addc") {
+      const v = $("#newc").value.trim();
+      if (v) commit2(() => S.cats.push({ id: uid("c"), name: v }));
+      return;
+    }
+    if (f.id === "tform") {
+      const name = $("#f-name").value.trim();
+      if (!name) return;
+      let cat2 = $("#f-cat").value;
+      const nc = $("#f-newcat").value.trim(), mk = cat2 === "__new" || !S.cats.length;
+      if (mk && !nc) {
+        $("#f-newcat").style.display = "";
+        return $("#f-newcat").focus();
+      }
+      const all = $("#f-all").checked, data = { name, when: joinWhen2($("#f-day").value, $("#f-slot").value), hours: parseFloat($("#f-hours").value) || 0, need: all ? 0 : Math.max(1, parseInt($("#f-need").value) || 1), note: $("#f-note").value.trim() };
+      const id = f.dataset.id;
+      modal = null;
+      commit2(() => {
+        if (mk) {
+          cat2 = uid("c");
+          S.cats.push({ id: cat2, name: nc });
+        }
+        if (id) Object.assign(S.tasks.find((t) => t.id === id), data, { cat: cat2 });
+        else S.tasks.push({ id: uid("t"), cat: cat2, who: [], ...data });
+      });
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (modal) closeDlg2();
+      else if (sel) {
+        sel = null;
+        render2();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !/INPUT|SELECT/.test(document.activeElement.tagName)) {
+      e.preventDefault();
+      undo2();
+    }
+  });
+  window.addEventListener("hashchange", () => {
+    readHash2();
+    scrollTo(0, 0);
+    render2();
+  });
+  render2();
+  status2("Chargement des données…");
+  fetch(window.API, { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((d) => {
+    ready = true;
+    document.documentElement.classList.remove("loading");
+    if (d.state) {
+      S = d.state;
+      etag = d.etag;
+      readHash2();
+      render2();
+      if (S.title === "Planning des bénévoles") commit2(() => {
+        S.title = "Répartition des postes";
+      });
+    }
+    status2("Répartition partagée : les modifications sont enregistrées pour toute l’équipe.");
+  }).catch(() => status2("Impossible de joindre le serveur : les modifications ne seront pas enregistrées.", "warn"));
+  setInterval(refresh, 15e3);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refresh();
+  });
 }
 </script><style>
 .ideebtn{margin-left:auto;flex:none}
@@ -466,51 +984,76 @@ setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(
 .ideebox .ghostbtn{color:inherit;border-color:#b8ad8a}
 </style>
 <script>
-/* Boîte à idées : suggestions anonymes rangées dans la base Notion « Boîte à idées – Isole x ! » (Jeu = Planning So Caval) */
-(function(){
-  const URL_F='https://isole-x.netlify.app/.netlify/functions/idees';
-  const TYPES=[['Ergonomie','Plus pratique'],['Fonctionnalité','Nouvelle idée'],['Bug','Bug'],['Autre','Autre']];
-  let type='Fonctionnalité',brouillon='',box=null,last=null;
-  const ecran=()=>{const h=document.querySelector('.cathead h1');return h?'catégorie · '+h.textContent.trim():(location.hash.slice(1)||'planning')};
-  function fermer(){if(box){box.remove();box=null;last&&last.focus&&last.focus()}}
-  function ouvrir(){
-    last=document.activeElement;const from=ecran().slice(0,120);
-    box=document.createElement('div');box.className='modal ideebox';
-    box.innerHTML=`<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ideeH"><h2 id="ideeH">Boîte à idées</h2>
-      <p>Une idée pour améliorer l’appli, un bouton mal placé, un bug ? Écris-le ici. C’est anonyme&nbsp;: ton prénom n’est pas envoyé.</p>
-      <div class="itypes">${TYPES.map(([v,l])=>`<button type="button" class="itype" data-itype="${v}" aria-pressed="${v===type}">${l}</button>`).join('')}</div>
-      <textarea id="ideeTxt" maxlength="600" aria-label="Ta suggestion" placeholder="Mon idée&nbsp;: …"></textarea>
-      <input class="isite" id="ideeSite" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <div class="icount" id="ideeCount">0/600</div>
-      <p class="imsg" id="ideeMsg" role="status"></p>
-      <div class="acts"><button type="button" class="ghostbtn" id="ideeClose">Fermer</button><button type="button" class="bigbtn" id="ideeSend">Envoyer</button></div></div>`;
-    document.body.appendChild(box);
-    const t=box.querySelector('#ideeTxt'),m=box.querySelector('#ideeMsg'),b=box.querySelector('#ideeSend');
-    t.value=brouillon;box.querySelector('#ideeCount').textContent=t.value.length+'/600';
-    t.oninput=()=>{brouillon=t.value;box.querySelector('#ideeCount').textContent=t.value.length+'/600'};
-    box.onclick=e=>{
-      if(e.target===box||e.target.id==='ideeClose')return fermer();
-      const c=e.target.closest('[data-itype]');
-      if(c){type=c.dataset.itype;box.querySelectorAll('[data-itype]').forEach(x=>x.setAttribute('aria-pressed',x===c))}
-    };
-    
-    b.onclick=async()=>{
-      const texte=t.value.trim();
-      if(texte.length<5){m.className='imsg err';m.textContent='Écris au moins quelques mots.';return t.focus()}
-      b.disabled=true;m.className='imsg';m.textContent='Envoi…';
-      try{
-        const r=await fetch(URL_F,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte,type,jeu:'Planning So Caval',ecran:from,site:box.querySelector('#ideeSite').value})});
-        const j=await r.json().catch(()=>({}));
-        if(!r.ok||!j.ok)throw new Error(j.error||'Envoi impossible pour le moment');
-        brouillon='';t.value='';box.querySelector('#ideeCount').textContent='0/600';
-        m.className='imsg ok';m.textContent='Merci, ton idée est bien arrivée.';
-      }catch(err){m.className='imsg err';m.textContent=(err.message==='Failed to fetch'?'Pas de connexion : réessaie plus tard.':err.message)}
-      b.disabled=false;
-    };
-    setTimeout(()=>t.focus(),0);
+(function() {
+  const URL_F = "https://isole-x.netlify.app/.netlify/functions/idees";
+  const TYPES = [["Ergonomie", "Plus pratique"], ["Fonctionnalité", "Nouvelle idée"], ["Bug", "Bug"], ["Autre", "Autre"]];
+  let type = "Fonctionnalité", brouillon = "", box = null, last = null;
+  const ecran = () => {
+    const h = document.querySelector(".cathead h1");
+    return h ? "catégorie · " + h.textContent.trim() : location.hash.slice(1) || "planning";
+  };
+  function fermer() {
+    if (box) {
+      box.remove();
+      box = null;
+      last && last.focus && last.focus();
+    }
   }
-  document.addEventListener('click',e=>{if(e.target.closest('#ideeOpen'))ouvrir()});
-  document.addEventListener('keydown',e=>{if(box&&e.key==='Escape')fermer()});
+  function ouvrir() {
+    last = document.activeElement;
+    const from = ecran().slice(0, 120);
+    box = document.createElement("div");
+    box.className = "modal ideebox";
+    box.innerHTML = '<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ideeH"><h2 id="ideeH">Boîte à idées</h2>\n      <p>Une idée pour améliorer l’appli, un bouton mal placé, un bug ? Écris-le ici. C’est anonyme&nbsp;: ton prénom n’est pas envoyé.</p>\n      <div class="itypes">'.concat(TYPES.map(([v, l]) => '<button type="button" class="itype" data-itype="'.concat(v, '" aria-pressed="').concat(v === type, '">').concat(l, "</button>")).join(""), '</div>\n      <textarea id="ideeTxt" maxlength="600" aria-label="Ta suggestion" placeholder="Mon idée&nbsp;: …"></textarea>\n      <input class="isite" id="ideeSite" tabindex="-1" autocomplete="off" aria-hidden="true">\n      <div class="icount" id="ideeCount">0/600</div>\n      <p class="imsg" id="ideeMsg" role="status"></p>\n      <div class="acts"><button type="button" class="ghostbtn" id="ideeClose">Fermer</button><button type="button" class="bigbtn" id="ideeSend">Envoyer</button></div></div>');
+    document.body.appendChild(box);
+    const t = box.querySelector("#ideeTxt"), m = box.querySelector("#ideeMsg"), b = box.querySelector("#ideeSend");
+    t.value = brouillon;
+    box.querySelector("#ideeCount").textContent = t.value.length + "/600";
+    t.oninput = () => {
+      brouillon = t.value;
+      box.querySelector("#ideeCount").textContent = t.value.length + "/600";
+    };
+    box.onclick = (e) => {
+      if (e.target === box || e.target.id === "ideeClose") return fermer();
+      const c = e.target.closest("[data-itype]");
+      if (c) {
+        type = c.dataset.itype;
+        box.querySelectorAll("[data-itype]").forEach((x) => x.setAttribute("aria-pressed", x === c));
+      }
+    };
+    b.onclick = async () => {
+      const texte = t.value.trim();
+      if (texte.length < 5) {
+        m.className = "imsg err";
+        m.textContent = "Écris au moins quelques mots.";
+        return t.focus();
+      }
+      b.disabled = true;
+      m.className = "imsg";
+      m.textContent = "Envoi…";
+      try {
+        const r = await fetch(URL_F, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texte, type, jeu: "Planning So Caval", ecran: from, site: box.querySelector("#ideeSite").value }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || "Envoi impossible pour le moment");
+        brouillon = "";
+        t.value = "";
+        box.querySelector("#ideeCount").textContent = "0/600";
+        m.className = "imsg ok";
+        m.textContent = "Merci, ton idée est bien arrivée.";
+      } catch (err) {
+        m.className = "imsg err";
+        m.textContent = err.message === "Failed to fetch" ? "Pas de connexion : réessaie plus tard." : err.message;
+      }
+      b.disabled = false;
+    };
+    setTimeout(() => t.focus(), 0);
+  }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#ideeOpen")) ouvrir();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (box && e.key === "Escape") fermer();
+  });
 })();
 </script>
 </body></html>
