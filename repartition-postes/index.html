@@ -164,7 +164,10 @@ nav.tabs{margin:0 0 8px}
 .block{position:relative}.block .bh{padding-right:34px}
 .grip{position:absolute;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:16px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .grip:hover{background:rgba(255,255,255,.18)}
-.block .grip{top:8px;right:8px}.task .grip{top:4px;right:38px}.task h3{margin-right:66px}
+.task h3{margin-right:34px}
+.block,.task{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#mvbar{position:fixed;z-index:1001;background:var(--gold1);border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 10px var(--gold1);pointer-events:none}
+.wheel.wide .wi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 14px}
 .moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
 .bdel{position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:14px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
@@ -213,7 +216,7 @@ async function save(){
   saving=false;
 }
 async function refresh(){
-  if(pending||saving||modal||drag||mv||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  if(pending||saving||modal||drag||mv||lp||document.activeElement?.matches?.('input.txt,.ttl'))return;
   try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
     if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
 }
@@ -226,14 +229,14 @@ function renderHead(){
   const holes=withNeed.reduce((a,t)=>a+miss(t),0);
   return `<div class="title"><span class="logo" aria-hidden="true">★</span><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement"></div></div>
   <div class="stats"><div class="stat"><b>${vol().length}</b><span>bénévoles</span></div><div class="stat"><b>${ok}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div></div>
-  <nav class="tabs">${[['planning','Catégories'],['benevoles','Par bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
+  <nav class="tabs">${[['planning','Catégories'],['benevoles','Fiche bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
   <div class="tools"><button class="bigbtn" data-addtask="">+ Poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Aperçu et Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>
   <div class="status" id="status"></div>`;
 }
 function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>need(t));return{ts,ok:wn.filter(full).length,n:wn.length,holes:wn.reduce((a,t)=>a+miss(t),0)}}
 function renderLanding(){
   return '<div class="blocks">'+S.cats.map(c=>{const k=catStats(c),pc=k.n?Math.round(k.ok/k.n*100):0;
-    return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}" data-cid="${c.id}"><span class="grip" data-mv="${c.id}" data-kind="c" tabindex="0" role="button" aria-label="Déplacer la catégorie ${esc(c.name)}" title="Glisser pour déplacer">⠿</span><button type="button" class="bdel" data-delc="${c.id}" aria-label="Supprimer la catégorie ${esc(c.name)}" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} poste${k.ts.length>1?'s':''}</div></a>`}).join('')
+    return `<a class="block ${k.n&&k.ok===k.n?'ok':''}" href="#cat-${c.id}" data-cid="${c.id}" draggable="false" title="Maintenir appuyé pour déplacer"><button type="button" class="bdel" data-delc="${c.id}" aria-label="Supprimer la catégorie ${esc(c.name)}" title="Supprimer la catégorie">🗑</button><div class="bh"><h2>${esc(c.name)}</h2>${k.holes?`<span class="pill short">${k.holes} à pourvoir</span>`:`<span class="pill ok">Complet ✓</span>`}</div><div class="pr"><div class="prog"><i style="width:${pc}%"></i></div><span>${k.ok}/${k.n}</span></div><div class="meta">${k.ts.length} poste${k.ts.length>1?'s':''}</div></a>`}).join('')
   +`<button class="block new" id="newcat"><h2>+ Nouvelle catégorie</h2></button></div>`;
 }
 function renderCat(){
@@ -245,7 +248,7 @@ function renderCat(){
   ${sel?`<div class="tip"><span>${sel==='__all'?'<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider.':`<b>${esc(mName(sel))}</b> : touche un poste pour l’ajouter ou la retirer.`}</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
   <div class="jetons">${S.members.length?allJeton():''}${sortM(S.members).map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
   h+=k.ts.length?`<div class="tasks">${k.ts.map(t=>{const d=need(t),n=nb(t),ms=miss(t);
-      return `<div class="task ${full(t)?'ok':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0"><h3>${esc(t.name)}</h3><span class="grip" data-mv="${t.id}" data-kind="t" tabindex="0" role="button" aria-label="Déplacer le poste ${esc(t.name)}" title="Glisser pour déplacer">⠿</span><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
+      return `<div class="task ${full(t)?'ok':''} ${sel&&t.who.includes(sel)?'mine':''}" data-task="${t.id}" tabindex="0" title="Maintenir appuyé pour déplacer"><h3>${esc(t.name)}</h3><button class="edit" data-edit="${t.id}" aria-label="Modifier ${esc(t.name)}">✎</button>
       <div class="meta">${t.when?`<span>${esc(t.when)}</span>`:''}${t.hours?`<span>${fmtH(+t.hours)} h</span>`:''}<span class="count ${ms?'short':''}">${cnt(t)}</span></div>${t.note?`<div class="note">${esc(t.note)}</div>`:''}
       <div class="slots">${sortIds(t.who).map(w=>jeton(w,t.id,false)).join('')}${t.need===0?'':Array.from({length:Math.min(ms,4)},()=>'<span class="slot">libre</span>').join('')}${ms>4&&t.need!==0?`<span class="slot">+${ms-4}</span>`:''}${t.who.length?`<button class="clr" data-clear="${t.id}" aria-label="Retirer tous les bénévoles de ${esc(t.name)}">Vider</button>`:''}</div></div>`}).join('')}</div>`:'<div class="chap"><p class="empty">Aucun poste dans cette catégorie. Ajoute-en un avec « + Poste ».</p></div>';
   return h+'</div>';
@@ -272,7 +275,7 @@ function taskDialog(catId,t){
   const isNew=!t;t=t||{name:'',cat:catId||(S.cats[0]&&S.cats[0].id)||'',when:'',hours:'',need:1,note:''};
   modal=`<div class="modal"><form class="dlg" id="tform" data-id="${isNew?'':t.id}"><h2>${isNew?'Nouveau poste':'Modifier le poste'}</h2>
   <label class="f" for="f-name">Nom du poste</label><input class="txt" id="f-name" required value="${esc(t.name)}">
-  <label class="f" for="f-cat">Catégorie</label><select class="txt" id="f-cat">${S.cats.map(c=>`<option value="${c.id}" ${c.id===t.cat?'selected':''}>${esc(c.name)}</option>`).join('')}<option value="__new">Nouvelle catégorie…</option></select>
+  <span class="f">Catégorie</span>${wheel('f-cat',[...S.cats.map(c=>c.id),'__new'],S.cats.some(c=>c.id===t.cat)?t.cat:(S.cats[0]?.id||'__new'),v=>v==='__new'?'+ Nouvelle catégorie…':(S.cats.find(c=>c.id===v)?.name||''),'Catégorie',false,'wide')}
   <input class="txt" id="f-newcat" placeholder="Nom de la nouvelle catégorie" style="margin-top:8px;${S.cats.length?'display:none':''}">
   ${(()=>{const [d,c]=parseWhen(t.when),days=DAYS.includes(d)?DAYS:[...DAYS,d],slots=SLOTS.includes(c)?SLOTS:['—',c,...SLOTS.slice(1)];const nx=v=>v==='—'?'Non précisé':v;
     return `<div class="two wheels"><div><span class="f">Jour</span>${wheel('f-day',days,d,v=>v==='J'?'J (jour même)':nx(v),'Jour')}</div><div><span class="f">Créneau</span>${wheel('f-slot',slots,c,nx,'Créneau')}</div></div>`})()}
@@ -294,11 +297,11 @@ function imprimer(){let z=document.getElementById('printzone');if(!z){z=document
 
 /* roue de sélection (heures, nombre de personnes) */
 const WH=40;
-function wheel(id,vals,cur,fmt,label,off){let k=0,best=1e9;vals.forEach((v,i)=>{const d=typeof v==='number'?Math.abs(v-cur):(v===cur?0:1);if(d<best){best=d;k=i}});
-  return `<div class="wheel ${off?'off':''}" data-for="${id}"><div class="wl" tabindex="0" role="listbox" aria-label="${label}" data-k="${k}">${vals.map((v,i)=>`<div class="wi ${i===k?'on':''}" data-i="${i}" data-v="${esc(v)}" role="option">${esc(fmt(v))}</div>`).join('')}</div></div><input type="hidden" id="${id}" value="${esc(vals[k])}">`}
+function wheel(id,vals,cur,fmt,label,off,cls){let k=0,best=1e9;vals.forEach((v,i)=>{const d=typeof v==='number'?Math.abs(v-cur):(v===cur?0:1);if(d<best){best=d;k=i}});
+  return `<div class="wheel ${off?'off':''} ${cls||''}" data-for="${id}"><div class="wl" tabindex="0" role="listbox" aria-label="${label}" data-k="${k}">${vals.map((v,i)=>`<div class="wi ${i===k?'on':''}" data-i="${i}" data-v="${esc(v)}" role="option">${esc(fmt(v))}</div>`).join('')}</div></div><input type="hidden" id="${id}" value="${esc(vals[k])}">`}
 function initWheels(){document.querySelectorAll('.wl').forEach(w=>{w.scrollTop=(+w.dataset.k)*WH})}
 function wheelSet(w,i,smooth){const it=w.querySelectorAll('.wi');i=Math.max(0,Math.min(it.length-1,i));it.forEach((e,j)=>e.classList.toggle('on',j===i));
-  const inp=document.getElementById(w.parentNode.dataset.for);if(inp)inp.value=it[i].dataset.v;if(smooth)w.scrollTo({top:i*WH,behavior:'smooth'})}
+  const inp=document.getElementById(w.parentNode.dataset.for);if(inp)inp.value=it[i].dataset.v;if(inp&&inp.id==='f-cat'){const n=$('#f-newcat');if(n)n.style.display=inp.value==='__new'?'':'none'}if(smooth)w.scrollTo({top:i*WH,behavior:'smooth'})}
 document.addEventListener('scroll',e=>{const w=e.target;if(!w.classList||!w.classList.contains('wl'))return;wheelSet(w,Math.round(w.scrollTop/WH),false)},true);
 document.addEventListener('click',e=>{const it=e.target.closest&&e.target.closest('.wi');if(it)wheelSet(it.parentNode,+it.dataset.i,true)});
 document.addEventListener('keydown',e=>{const w=e.target.closest&&e.target.closest('.wl');if(!w)return;const cur=w.querySelector('.wi.on');const i=cur?+cur.dataset.i:0;
@@ -323,19 +326,38 @@ function toggle(tid,mid){if(mid==='__all')return fillAll(tid);commit(()=>{const 
 
 /* déplacer catégories et postes */
 function moveItem(kind,id,tid,after){if(id===tid)return;commit(()=>{const A=kind==='c'?S.cats:S.tasks,i=A.findIndex(x=>x.id===id);if(i<0)return;const [it]=A.splice(i,1);let j=A.findIndex(x=>x.id===tid);if(j<0){A.splice(i,0,it);return}A.splice(after?j+1:j,0,it)})}
-function stepItem(kind,id,dir){const A=kind==='c'?S.cats:S.tasks.filter(t=>t.cat===S.tasks.find(x=>x.id===id)?.cat),i=A.findIndex(x=>x.id===id),o=A[i+dir];if(!o)return;moveItem(kind,id,o.id,dir>0);setTimeout(()=>document.querySelector(`.grip[data-mv="${id}"]`)?.focus(),0)}
-function mvClear(){document.querySelectorAll('.dropA,.dropB').forEach(x=>x.classList.remove('dropA','dropB'))}
-root.addEventListener('pointerdown',e=>{const g=e.target.closest('.grip');if(!g||e.button>0)return;e.preventDefault();e.stopPropagation();mv={kind:g.dataset.kind,id:g.dataset.mv,el:g.closest('.block,.task'),x:e.clientX,y:e.clientY,on:false,tgt:null,after:false};try{g.setPointerCapture(e.pointerId)}catch(_){}});
-window.addEventListener('pointermove',e=>{if(!mv)return;
-  if(!mv.on){if(Math.hypot(e.clientX-mv.x,e.clientY-mv.y)<6)return;mv.on=true;const r=mv.el.getBoundingClientRect(),g=mv.el.cloneNode(true);g.classList.add('mvghost');g.removeAttribute('href');g.style.width=r.width+'px';g.style.height=r.height+'px';mv.dx=mv.x-r.left;mv.dy=mv.y-r.top;document.body.appendChild(g);mv.ghost=g;mv.el.classList.add('moving');document.documentElement.classList.add('dragging');try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
-  mv.ghost.style.transform=`translate(${e.clientX-mv.dx}px,${e.clientY-mv.dy}px) rotate(-2deg) scale(1.03)`;
-  e.preventDefault();const ed=60;if(e.clientY>innerHeight-ed)scrollBy(0,Math.ceil((e.clientY-innerHeight+ed)/6));else if(e.clientY<ed)scrollBy(0,-Math.ceil((ed-e.clientY)/6));
-  const t=document.elementFromPoint(e.clientX,e.clientY)?.closest(mv.kind==='c'?'.block[data-cid]':'.task');mvClear();mv.tgt=null;
-  if(t&&t!==mv.el){const r=t.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);mv.after=Math.abs(dy)>r.height/4?dy>0:dx>0;mv.tgt=mv.kind==='c'?t.dataset.cid:t.dataset.task;t.classList.add(mv.after?'dropA':'dropB')}
-},{passive:false});
-function mvEnd(){const m=mv;mv=null;if(!m)return;m.ghost?.remove();mvClear();m.el?.classList.remove('moving');document.documentElement.classList.remove('dragging');if(m.on&&m.tgt)moveItem(m.kind,m.id,m.tgt,m.after)}
-window.addEventListener('pointerup',mvEnd);window.addEventListener('pointercancel',()=>{if(mv){mv.tgt=null;mvEnd()}});
-root.addEventListener('keydown',e=>{const g=e.target.closest?.('.grip');if(!g)return;const d={ArrowUp:-1,ArrowLeft:-1,ArrowDown:1,ArrowRight:1}[e.key];if(d){e.preventDefault();e.stopPropagation();stepItem(g.dataset.kind,g.dataset.mv,d)}else if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation()}},true);
+const mvSel='.block[data-cid],.task',cardOf=(k,id)=>document.querySelector(k==='c'?`.block[data-cid="${id}"]`:`.task[data-task="${id}"]`);
+function stepItem(kind,id,dir){const A=kind==='c'?S.cats:S.tasks.filter(t=>t.cat===S.tasks.find(x=>x.id===id)?.cat),i=A.findIndex(x=>x.id===id),o=A[i+dir];if(!o)return;moveItem(kind,id,o.id,dir>0);setTimeout(()=>cardOf(kind,id)?.focus(),0)}
+function sameOrder(kind,id,tid,after){const A=(kind==='c'?S.cats:S.tasks).map(x=>x.id),B=A.filter(x=>x!==id),j=B.indexOf(tid);B.splice(after?j+1:j,0,id);return A.join()===B.join()}
+/* appui maintenu sur une carte (catégorie ou poste) pour la déplacer, dépôt entre deux cartes */
+let lp=null,noClick=false;
+function bar(){let b=document.getElementById('mvbar');if(!b){b=document.createElement('div');b.id='mvbar';document.body.appendChild(b)}return b}
+function mvStart(){const p=lp;lp=null;if(!p)return;clearTimeout(p.timer);const r=p.el.getBoundingClientRect(),g=p.el.cloneNode(true);
+  g.classList.add('mvghost');g.removeAttribute('href');g.style.width=r.width+'px';g.style.height=r.height+'px';
+  mv={kind:p.kind,id:p.id,el:p.el,dx:p.x-r.left,dy:p.y-r.top,tgt:null,after:false,ghost:g};document.body.appendChild(g);
+  p.el.classList.add('moving');document.documentElement.classList.add('dragging');noClick=true;try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}
+  mvMove(p.cx,p.cy)}
+function mvMove(x,y){
+  mv.ghost.style.transform=`translate(${x-mv.dx}px,${y-mv.dy}px) rotate(-2deg) scale(1.03)`;
+  const ed=60;if(y>innerHeight-ed)scrollBy(0,Math.ceil((y-innerHeight+ed)/6));else if(y<ed)scrollBy(0,-Math.ceil((ed-y)/6));
+  let best=null,bd=1e9,br=null;document.querySelectorAll(mv.kind==='c'?'.block[data-cid]':'.task').forEach(c=>{if(c===mv.el)return;const r=c.getBoundingClientRect(),d=Math.hypot(Math.max(r.left-x,0,x-r.right),Math.max(r.top-y,0,y-r.bottom));if(d<bd){bd=d;best=c;br=r}});
+  const b=bar();mv.tgt=null;if(!best||bd>90){b.style.display='none';return}
+  const dx=x-(br.left+br.width/2),dy=y-(br.top+br.height/2),vert=Math.abs(dy)>br.height/4;mv.after=vert?dy>0:dx>0;
+  const tid=mv.kind==='c'?best.dataset.cid:best.dataset.task;if(sameOrder(mv.kind,mv.id,tid,mv.after)){b.style.display='none';return}
+  mv.tgt=tid;const G=5;Object.assign(b.style,{display:'block'},vert?{left:br.left+'px',width:br.width+'px',top:(mv.after?br.bottom+G:br.top-G)-2+'px',height:'4px'}:{top:br.top+'px',height:br.height+'px',left:(mv.after?br.right+G:br.left-G)-2+'px',width:'4px'})}
+root.addEventListener('pointerdown',e=>{if(e.button>0||modal||mv)return;if(e.target.closest('button,input,select,textarea,.jeton'))return;const el=e.target.closest(mvSel);if(!el)return;
+  const kind=el.matches('.task')?'t':'c',mouse=e.pointerType==='mouse';lp={kind,id:kind==='c'?el.dataset.cid:el.dataset.task,el,x:e.clientX,y:e.clientY,cx:e.clientX,cy:e.clientY,mouse};
+  lp.timer=setTimeout(mvStart,mouse?300:450)});
+window.addEventListener('pointermove',e=>{
+  if(lp){lp.cx=e.clientX;lp.cy=e.clientY;if(Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>8){if(lp.mouse)mvStart();else{clearTimeout(lp.timer);lp=null}}return}
+  if(!mv)return;e.preventDefault();mvMove(e.clientX,e.clientY)},{passive:false});
+window.addEventListener('touchmove',e=>{if(mv)e.preventDefault()},{passive:false});
+function mvEnd(drop){if(lp){clearTimeout(lp.timer);lp=null}const m=mv;mv=null;if(!m)return;m.ghost.remove();bar().style.display='none';m.el.classList.remove('moving');document.documentElement.classList.remove('dragging');setTimeout(()=>{noClick=false},60);if(drop&&m.tgt)moveItem(m.kind,m.id,m.tgt,m.after)}
+window.addEventListener('pointerup',()=>mvEnd(true));window.addEventListener('pointercancel',()=>mvEnd(false));
+window.addEventListener('click',e=>{if(noClick){e.preventDefault();e.stopPropagation();noClick=false}},true);
+root.addEventListener('contextmenu',e=>{if(e.target.closest(mvSel)&&!e.target.closest('input,textarea'))e.preventDefault()});
+root.addEventListener('dragstart',e=>{if(e.target.closest?.(mvSel))e.preventDefault()});
+root.addEventListener('keydown',e=>{if(!e.altKey)return;const el=e.target;if(!el.matches?.(mvSel))return;const d={ArrowUp:-1,ArrowLeft:-1,ArrowDown:1,ArrowRight:1}[e.key];if(d){e.preventDefault();stepItem(el.matches('.task')?'t':'c',el.matches('.task')?el.dataset.task:el.dataset.cid,d)}});
 
 /* glisser-déposer des jetons */
 root.addEventListener('pointerdown',e=>{const j=e.target.closest('.jeton');if(!j||e.button>0||!j.closest('.bench,.slots'))return;drag={id:j.dataset.j,from:j.dataset.from,x:e.clientX,y:e.clientY,el:j,ghost:null,hot:null,touch:e.pointerType!=='mouse'};j.classList.add('grab');try{j.setPointerCapture(e.pointerId)}catch(_){}});
@@ -364,7 +386,6 @@ root.addEventListener('keydown',e=>{const j=e.target.closest?.('.jeton');if(j&&(
   const t=e.target.closest?.('.task');if(t&&e.target===t&&sel&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(t.dataset.task,sel)}});
 
 root.addEventListener('click',e=>{
-  if(e.target.closest('.grip')){e.preventDefault();return}
   if(e.target.closest('.bdel'))e.preventDefault();
   if(e.target.closest('.jeton'))return;
   const b=e.target.closest('button,a');
