@@ -657,7 +657,14 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     try {
       const r = await fetch(window.API, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ state: S, etag }) });
       const d = await r.json().catch(() => ({}));
-      if ((d.code || r.status) === 409 && d.state) {
+      if (d.code === 423 && d.state) {
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        modal = null;
+        render2();
+        status2(LOCKMSG, "warn");
+      } else if ((d.code || r.status) === 409 && d.state) {
         S = d.state;
         etag = d.etag;
         hist.length = 0;
@@ -718,7 +725,6 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   const DAYS = ["—", "J-7", "J-1", "J"], SLOTS = ["—", "Matin", "Après-midi", "Journée", h2(8, 10), h2(10, 12), h2(12, 14), h2(14, 16), h2(16, 18), h2(18, 20), h2(8, 18)];
   const HVALS = Array.from({ length: 49 }, (_, i) => i / 2), NVALS = Array.from({ length: 40 }, (_, i) => i + 1);
   let okFn = null;
-  const CODE = "8579";
   const mvSel = ".block[data-cid],.task", cardOf = (k, id) => document.querySelector(k === "c" ? '.block[data-cid="'.concat(id, '"]') : '.task[data-task="'.concat(id, '"]'));
   let lp = null, noClick = false, lastTap = { id: null, t: 0 };
   root.addEventListener("pointerdown", (e) => {
@@ -1035,23 +1041,42 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       return;
     }
     if (f.id === "lform") {
-      if ($("#f-code").value.trim() !== CODE) {
-        $("#lmsg").textContent = "Code incorrect.";
-        $("#f-code").value = "";
-        return $("#f-code").focus();
-      }
+      const lm = $("#lmsg"), code = $("#f-code").value.trim();
       if (!ready) {
-        $("#lmsg").textContent = "Chargement des données en cours, réessaie dans quelques secondes.";
+        lm.textContent = "Chargement des données en cours, réessaie dans quelques secondes.";
         return;
       }
-      const v = !S.locked;
-      S.locked = v;
-      if (v) tourStop2();
-      modal = null;
-      sel = null;
-      render2();
-      queueSave2();
-      return status2(v ? "Répartition verrouillée : consultation seule." : "Répartition déverrouillée : les modifications sont possibles.");
+      if (pending || saving) {
+        lm.textContent = "Enregistrement en cours, réessaie dans 2 secondes.";
+        return;
+      }
+      const v = !S.locked, bt = f.querySelector(".bigbtn");
+      bt.disabled = true;
+      lm.textContent = "Vérification du code…";
+      fetch(window.API, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "lock", code, locked: v }) }).then((r) => r.json()).then((d) => {
+        if (d.code || !d.state) {
+          bt.disabled = false;
+          const c = $("#f-code");
+          lm.textContent = d.error || (d.code === 400 ? "Le serveur n’est pas à jour : redéploie le script Apps Script." : "Le serveur a refusé.");
+          if (c) {
+            c.value = "";
+            c.focus();
+          }
+          return;
+        }
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        if (S.locked) tourStop2();
+        modal = null;
+        sel = null;
+        render2();
+        status2(S.locked ? "Répartition verrouillée : consultation seule." : "Répartition déverrouillée : les modifications sont possibles.");
+      }).catch(() => {
+        bt.disabled = false;
+        lm.textContent = "Pas de connexion : réessaie.";
+      });
+      return;
     }
     if (f.id === "tform") {
       const name = $("#f-name").value.trim();

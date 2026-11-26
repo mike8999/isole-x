@@ -231,7 +231,8 @@ async function save(){
   pending=false;saving=true;status('Enregistrement…');
   try{const r=await fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({state:S,etag})});
     const d=await r.json().catch(()=>({}));
-    if((d.code||r.status)===409&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status('Quelqu’un a modifié la répartition en même temps : sa version est affichée, refais ta dernière modification.','warn')}
+    if(d.code===423&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status(LOCKMSG,'warn')}
+    else if((d.code||r.status)===409&&d.state){S=d.state;etag=d.etag;hist.length=0;modal=null;render();status('Quelqu’un a modifié la répartition en même temps : sa version est affichée, refais ta dernière modification.','warn')}
     else if(r.ok&&!d.code){etag=d.etag||etag;status('Enregistré pour toute l’équipe.')}
     else status('L’enregistrement a échoué. Refais une modification pour réessayer.','warn')}
   catch(e){status('Pas de connexion : la modification n’est pas enregistrée.','warn')}
@@ -342,7 +343,6 @@ function resetDlg(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class=
   <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>
   <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>`;render();setTimeout(()=>$('#f-list')?.focus(),0)}
 let okFn=null;
-const CODE='8579';
 function lockDlg(){const on=!!S.locked;modal=`<div class="modal"><form class="dlg" id="lform"><h2>${on?'Déverrouiller':'Verrouiller'} la répartition</h2><p>${on?'Entre le code pour pouvoir de nouveau modifier.':'Une fois verrouillée, tout le monde peut consulter, imprimer et utiliser la boîte à idées, mais personne ne peut rien modifier.'}</p><label class="f" for="f-code">Code</label><input class="txt" id="f-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="lmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">${on?'🔓 Déverrouiller':'🔒 Verrouiller'}</button></div></form></div>`;render();setTimeout(()=>$('#f-code')&&$('#f-code').focus(),0)}
 function confirmDlg(msg,fn){okFn=fn;modal=`<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>${msg}</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>`;render();$('#okc').focus()}
 function closeDlg(){modal=null;okFn=null;render()}
@@ -464,9 +464,14 @@ root.addEventListener('submit',e=>{
     const c=S.cats.find(x=>x.id===$('#f-delc').value);if(!c)return;const n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} poste(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
   if(f.id==='cform'){const v=$('#f-cname').value.trim();if(!v)return;const id=uid('c');modal=null;commit(()=>S.cats.push({id,name:v}));location.hash='cat-'+id;return}
   if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
-  if(f.id==='lform'){if($('#f-code').value.trim()!==CODE){$('#lmsg').textContent='Code incorrect.';$('#f-code').value='';return $('#f-code').focus()}
-    if(!ready){$('#lmsg').textContent='Chargement des données en cours, réessaie dans quelques secondes.';return}
-    const v=!S.locked;S.locked=v;if(v)tourStop();modal=null;sel=null;render();queueSave();return status(v?'Répartition verrouillée : consultation seule.':'Répartition déverrouillée : les modifications sont possibles.')}
+  if(f.id==='lform'){const lm=$('#lmsg'),code=$('#f-code').value.trim();
+    if(!ready){lm.textContent='Chargement des données en cours, réessaie dans quelques secondes.';return}
+    if(pending||saving){lm.textContent='Enregistrement en cours, réessaie dans 2 secondes.';return}
+    const v=!S.locked,bt=f.querySelector('.bigbtn');bt.disabled=true;lm.textContent='Vérification du code…';
+    fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'lock',code,locked:v})}).then(r=>r.json()).then(d=>{
+      if(d.code||!d.state){bt.disabled=false;const c=$('#f-code');lm.textContent=d.error||(d.code===400?'Le serveur n’est pas à jour : redéploie le script Apps Script.':'Le serveur a refusé.');if(c){c.value='';c.focus()}return}
+      S=d.state;etag=d.etag;hist.length=0;if(S.locked)tourStop();modal=null;sel=null;render();status(S.locked?'Répartition verrouillée : consultation seule.':'Répartition déverrouillée : les modifications sont possibles.')
+    }).catch(()=>{bt.disabled=false;lm.textContent='Pas de connexion : réessaie.'});return}
   if(f.id==='tform'){
     const name=$('#f-name').value.trim();if(!name)return;
     let cat=$('#f-cat').value;const nc=$('#f-newcat').value.trim(),mk=cat==='__new'||!S.cats.length;
