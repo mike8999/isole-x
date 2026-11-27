@@ -42,11 +42,13 @@ Jeux pour s’entraîner en STI2D.
   - USB (Chrome ou Edge sur ordinateur) : `moniteur_capteurs.ino` ; Bluetooth (Android avec Chrome 148 ou plus, ou ordinateur) : `moniteur_bluetooth.ino` (Uno + HC-05/HC-06 sur D10/D11)
   - Wi-Fi (tous les téléphones, iPhone compris) : `moniteur_esp32_wifi.ino`, l'ESP32 crée le réseau « Moniteur-ESP32 » et sert la page sur http://192.168.4.1 ; ce programme est fabriqué par `fabriquer_esp32.py` à partir de `index.html` (à relancer après chaque modification de la page)
   - Boîte à idées vers la base Notion (Jeu = Moniteur Arduino)
-- **Retour de séance (avis anonyme des élèves en 10 secondes, vers Notion)** : https://mike8999.github.io/isole-x/retour-seance/
+- **Retour de séance (avis anonyme des élèves en 10 secondes, vers Notion) — dernière version** : https://mike8999.github.io/isole-x/retour-seance/
+  - ancienne version 2 conservée : https://mike8999.github.io/isole-x/retour-seance-v2/
   - ancienne version 1 conservée (sans serveur) : https://mike8999.github.io/isole-x/retour-seance-v1/
-  - Sans paramètre : page professeur qui crée le lien et le QR code d'une séance (cours + classe) ; élèves : `?c=Cours&k=Classe`
-  - Paires qui s'excluent (Utile/Inutile, Intéressant/Ennuyeux, Clair/Confus, Trop rapide/Trop lent, Inutile/Enrichissant, Ennuyeux/Agréable) + Agréable, Enrichissant, Trop difficile
-  - Serveur : `retour-seance/serveur-apps-script.gs` (Google Apps Script, clé `NOTION_TOKEN`) → base Notion « Retours de séance » ; une réponse par téléphone, par séance et par jour
+  - Page professeur (sans paramètre) : cours, type de séance (Cours, TP, TD, Projet, Évaluation), classe, effectif, date → lien et QR code valables seulement ce jour-là
+  - Élèves (`?c=…&k=…&t=…&n=…&d=…`) : paires qui s'excluent (Utile/Inutile, Intéressant/Ennuyeux, Clair/Confus, rythme Trop rapide/Adapté/Trop lent, Inutile/Enrichissant, Ennuyeux/Agréable) + Agréable, Enrichissant, Trop difficile ; sans réseau, la réponse attend sur le téléphone et part au retour de la connexion
+  - Page Résultats (`?r`, code `PROF_CODE`) : séances, réponses, participation, score moyen, score par type de séance, évolution, barres par critère ; filtres classe et type
+  - Serveur : `retour-seance/serveur-apps-script.gs` (Google Apps Script, propriétés `NOTION_TOKEN` et `PROF_CODE`) → base Notion « Retours de séance » ; boîte à idées vers la base Notion (Jeu = Retour de séance)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/
