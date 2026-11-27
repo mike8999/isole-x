@@ -167,7 +167,8 @@ function hFn(f,m){
   const simple=f.arg.length===1&&f.arg[0].num.length===1&&!f.arg[0].den.length&&!f.arg[0].neg&&f.arg[0].num[0].t!=='f'&&f.arg[0].num[0].t!=='g';
   const par=x=>`<span class="par">(</span>${x}<span class="par">)</span>`;
   switch(f.fn){
-    case'root':return`<span class="fpl"${da}><span class="fname"${da}>${fnLab(f)}</span><span class="froot">${inner}</span></span>`;
+    case'root':return f.n===2?`<span class="fpl frad"${da}><span class="fname rsign"${da}><svg viewBox="0 0 12 40" preserveAspectRatio="none" aria-hidden="true"><path d="M1 24 4.5 21 8 38 11.5 1.5" fill="none" stroke="currentColor" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span class="froot">${inner}</span></span>`
+      :`<span class="fpl"${da}><span class="fname"${da}>${fnLab(f)}</span><span class="froot">${inner}</span></span>`;
     case'pow':return`<span class="fpl"${da}>${simple?inner:par(inner)}<sup class="fsup"${da}>${f.n}</sup></span>`;
     case'exp':return`<span class="fpl"${da}><span class="fname"${da}>e</span><sup class="fsup">${inner}</sup></span>`;
     case'p10':return`<span class="fpl"${da}><span class="fname"${da}>10</span><sup class="fsup">${inner}</sup></span>`;
@@ -287,6 +288,9 @@ function boardDrop(src,tgt){
   if(a.term===b.term&&a.kind==='factor'&&b.kind==='factor'){
     if(a.row!==b.row){
       if(keyF(a.f)===keyF(b.f)){pushUndo();const tx=textF(a.f);removeF(a);removeF(b);return finishMove(`Simplification : ${tx}/${tx} = 1`,'cancel')}
+      {const pa=powBase(a.f),pb=powBase(b.f);if(pa&&pb&&pa.k===pb.k){pushUndo();const tx=textF(a.f)+' / '+textF(b.f),d=pa.n-pb.n,m=Math.abs(d);
+        if(!m){removeF(a);removeF(b)}else{const keep=d>0?a:b,base=d>0?pa.base:pb.base,row=keep.term[keep.row];row.splice(row.indexOf(keep.f),1,m===1?reid(base):F('pow',m,[T([reid(base)])]));removeF(d>0?b:a)}
+        return finishMove(`Simplification : ${tx}`,'cancel')}}
       if(a.f.t==='n'&&b.f.t==='n'){const g=gcd(a.f.v,b.f.v);
         if(g>1){pushUndo();a.f.v/=g;b.f.v/=g;return finishMove(`Simplification par ${g}`,'gcd')}
         return fail(`${a.f.v} et ${b.f.v} n’ont pas de diviseur commun.`)}
@@ -431,7 +435,10 @@ function isolated(sd){const sm=state.eq[sd];if(sm.length!==1)return false;const 
 function isoSide(){for(const sd of[0,1])if(isolated(sd)&&!hasT(state.eq[1-sd]))return sd;return -1}
 function goalMatch(){const s=isoSide();return s>=0&&canS(state.eq[1-s])===state.goalKey&&(s===0?state.rel:MIRROR[state.rel])===state.goalRel}
 function fullySimplified(){return !findSimp(state.eq[0])&&!findSimp(state.eq[1])}
+/* un outil devient nécessaire en cours de route (x·x devenu x²) : on l'ajoute */
+function syncTools(){if(!state.tools)return;autoTools().forEach(t=>{if(!state.tools.some(u=>u.fn===t.fn&&u.n===t.n))state.tools.push(t)})}
 function afterMove(){
+  syncTools();
   if(state.pending)return;
   const iso=isoSide();
   if(iso<0){state.isoAt=null;return}
@@ -476,6 +483,7 @@ function deckNote(t){return deckHas(t)<0?" Ce jeton n’est pas dans la pioche 
 function findSimp(sum){
   for(const t of sum){const kg=t.num[0];if(kg&&kg.t==='g'&&kg.keep&&t.num.length===1&&!t.den.length&&!t.neg)return{msg:'Ces parenthèses ne servent plus : touche-les pour les retirer.',ids:[kg.id],act:'dev'};
     for(const a of t.num)for(const b of t.den)if(keyF(a)===keyF(b))return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]};
+    for(const a of t.num)for(const b of t.den){const x=powBase(a),y=powBase(b);if(x&&y&&x.k===y.k)return{msg:`Simplifie : glisse ${esc(textF(a))} (en haut) sur ${esc(textF(b))} (en bas).`,ids:[a.id,b.id]}}
     for(const a of t.num)for(const b of t.den)if(a.t==='n'&&b.t==='n'&&gcd(a.v,b.v)>1)return{msg:`${a.v} et ${b.v} sont divisibles par ${gcd(a.v,b.v)} : glisse l’un sur l’autre.`,ids:[a.id,b.id]};
     for(const r of['num','den']){const im=t[r].filter(f=>f.t==='s'&&isImagV(f.v));if(im.length>1)return{msg:'i·i = −1 : glisse un i sur l’autre.',ids:[im[0].id,im[1].id]}}
     for(const r of['num','den']){const fs=t[r].filter(f=>f.t!=='n'&&!(f.t==='s'&&isImagV(f.v)));for(let i=0;i<fs.length;i++)for(let j=i+1;j<fs.length;j++){const x=powBase(fs[i]),y=powBase(fs[j]);

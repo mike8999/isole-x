@@ -385,3 +385,10 @@ body.dragtool .tzones{display:grid}
 .mbox .math .card.im,#isobar .math .card.im{color:#7a1fa2}
 @media (prefers-reduced-motion:reduce){#board{transition:none}}
 @media (max-width:600px){#goalBig{font-size:26px;padding:4px 14px}#board{height:min(40vh,360px)}}
+
+/* racine carrée : le signe √ s'étire sur toute la hauteur et rejoint la barre */
+.fpl.frad{align-items:stretch}
+.fpl.frad .rsign{display:flex;align-self:stretch;width:.62em;padding:0;color:var(--birch1);filter:drop-shadow(0 2px 0 rgba(0,0,0,.5))}
+.fpl.frad .rsign svg{width:100%;height:100%;overflow:visible}
+.fpl.frad .rsign path{stroke-width:.12em}
+.fpl.frad .froot{margin-left:0}

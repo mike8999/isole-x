@@ -204,6 +204,22 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
 #coachCap{position:fixed;left:50%;transform:translateX(-50%);width:min(92vw,520px);pointer-events:auto;background:var(--card);color:var(--ink);border-radius:16px;padding:14px 16px;box-shadow:0 5px 0 #b8ad8a,0 16px 40px rgba(0,0,0,.5);font:600 17px/1.4 system-ui,sans-serif}
 #coachCap .cnum{display:inline-block;font:700 14px var(--hand);background:var(--gold2);color:#3a2a00;border-radius:8px;padding:1px 8px;margin-right:6px}
 #coachCap .acts{margin-top:12px}#coachCap .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink)}
+
+/* fiche d’un poste sur téléphone : tout tient à l’écran (boîte à idées) */
+@media (max-width:600px),(max-height:760px){
+ .modal{padding:6px}
+ .dlg{padding:12px 14px;max-height:calc(100dvh - 12px)}
+ .dlg h2{font-size:20px;margin:0 0 4px}
+ .dlg label.f,.dlg span.f{margin:6px 0 2px;font-size:13px}
+ .dlg .txt{min-height:36px;padding:5px 10px}
+ .dlg .chk{margin-top:6px;font-size:14px}
+ .dlg .acts{margin-top:10px;gap:6px}
+ .dlg .bigbtn,.dlg .ghostbtn{min-height:36px;padding:5px 12px}
+ .dlg .two{gap:8px}
+ .wheel{height:84px}.wheel::before{top:28px;height:28px}
+ .wl{height:84px;padding:28px 0}
+ .wi{height:28px;line-height:28px;font-size:15px}.wi.on{font-size:16px}
+}
 </style><script src="api.js"></script></head><body><div id="root"></div><script type="application/json" id="state">{"title": "Répartition des postes", "date": "", "members": [{"id": "m1", "name": "Alexia"}, {"id": "m2", "name": "Michael"}, {"id": "m3", "name": "Hanène"}, {"id": "m4", "name": "Romaric"}, {"id": "m5", "name": "Hélène"}, {"id": "m6", "name": "Isabelle"}, {"id": "m7", "name": "Arnaud"}, {"id": "m8", "name": "Charlotte"}, {"id": "m9", "name": "Célia"}, {"id": "m10", "name": "Eva"}, {"id": "m11", "name": "Laura"}, {"id": "m12", "name": "Quentin"}], "cats": [{"id": "c1", "name": "Sécurité & Accueil"}, {"id": "c2", "name": "Buvette et restauration"}, {"id": "c3", "name": "Logistique générale"}], "tasks": [{"id": "t1", "cat": "c1", "name": "Vérifier les barrières et le parking (capacité 160)", "when": "J-7", "hours": 1, "need": 1, "note": "", "who": ["m12"]}, {"id": "t2", "cat": "c1", "name": "Signaler les zones de sécurité et les parkings", "when": "J-1", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t3", "cat": "c1", "name": "Guider au parking et accueillir les visiteurs", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m12"]}, {"id": "t4", "cat": "c1", "name": "Surveiller les abords de la carrière et la sécurité des enfants", "when": "8 h – 18 h", "hours": 10, "need": 2, "note": "", "who": ["m11", "m12"]}, {"id": "t5", "cat": "c1", "name": "Contrôler le dernier départ et fermer les accès", "when": "18 h – 20 h", "hours": 2, "need": 1, "note": "", "who": ["m12"]}, {"id": "t6", "cat": "c2", "name": "Acheter les boissons et l’approvisionnement", "when": "J-7", "hours": 1, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t7", "cat": "c2", "name": "Aller chercher l’approvisionnement (2 voyages ?)", "when": "J-1", "hours": 4, "need": 2, "note": "", "who": ["m1", "m3"]}, {"id": "t8", "cat": "c2", "name": "Préparer et installer la buvette (tables propres, réchauds, friteuse)", "when": "8 h – 10 h", "hours": 2, "need": 2, "note": "", "who": ["m5", "m6", "m7", "m8", "m9"]}, {"id": "t9", "cat": "c2", "name": "Tenir la buvette et encaisser", "when": "10 h – 17 h", "hours": 7, "need": 3, "note": "", "who": ["m3", "m6"]}, {"id": "t10", "cat": "c2", "name": "Faire l’inventaire de la caisse, ranger et congeler les restes", "when": "17 h – 20 h", "hours": 3, "need": 2, "note": "", "who": ["m1", "m4", "m6"]}, {"id": "t11", "cat": "c2", "name": "Préparer la carte et les prix de vente", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1", "m6"]}, {"id": "t12", "cat": "c2", "name": "Préparer les crêpes", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m2"]}, {"id": "t13", "cat": "c2", "name": "Préparer le fond de caisse", "when": "", "hours": 0, "need": 1, "note": "", "who": ["m1"]}, {"id": "t14", "cat": "c2", "name": "Préparer le vin chaud", "when": "10 h – 14 h", "hours": 4, "need": 2, "note": "", "who": ["m4"]}, {"id": "t15", "cat": "c2", "name": "Préparer le chocolat chaud", "when": "14 h – 17 h", "hours": 3, "need": 2, "note": "", "who": ["m5"]}, {"id": "t16", "cat": "c3", "name": "Nettoyer le site et les sanitaires", "when": "J-7", "hours": 2, "need": 0, "note": "", "who": ["m7", "m8", "m9", "m10", "m11", "m12"]}, {"id": "t17", "cat": "c3", "name": "Coordination globale (remplacements, problèmes)", "when": "8 h – 18 h", "hours": 10, "need": 1, "note": "Responsable : Président / Alexia", "who": ["m1", "m6"]}, {"id": "t18", "cat": "c3", "name": "Grand ménage du site (déchets, balayage, vérification des boxes)", "when": "18 h – 20 h", "hours": 2, "need": 0, "note": "", "who": ["m1", "m2", "m3", "m4", "m5"]}]}</script><script>
 {
 const $=s=>document.querySelector(s),root=$('#root');
@@ -317,10 +333,17 @@ function sauvDlg(){if(arch)return;if(S.locked)return status(LOCKMSG,'warn');moda
     sauvs=d.sauvegardes;el.innerHTML=sauvs.length?'<ul class="slist">'+sauvs.map(o=>`<li><div><b>${fdate(o.d)}</b> <em>${esc(o.w||'')}</em><br><small>${pl(o.c,'catégorie')} · ${pl(o.t,'poste')} · ${pl(o.m,'bénévole')} · ${pl(o.a,'affectation')}</small></div><button class="ghostbtn" data-rest="${o.k}">Restaurer</button></li>`).join('')+'</ul>':'<p>Aucune sauvegarde pour l’instant : la première sera faite à la prochaine modification.</p>'
   }).catch(()=>{const el=$('#slist');if(el)el.innerHTML='<p>Pas de connexion : réessaie.</p>'})}
 function restDlg(k){const o=sauvs.find(x=>x.k===k);if(!o)return;if(pending||saving)return status('Enregistrement en cours, réessaie dans 2 secondes.','warn');
-  const go=()=>{status('Restauration…');fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'restaurer',k})}).then(r=>r.json()).then(d=>{
-    if(!d.state||(d.code&&d.code!==423)){render();return status(d.error||'Restauration refusée.','warn')}
-    S=d.state;etag=d.etag;hist.length=0;render();status(d.code===423?LOCKMSG:`Version du ${fdate(o.d)} restaurée. L’état d’avant a été sauvegardé, tu peux y revenir.`,d.code===423?'warn':'')}).catch(()=>status('Pas de connexion : réessaie.','warn'))};
-  go.direct=true;confirmDlg(`Revenir à la version du <b>${fdate(o.d)}</b> (${pl(o.c,'catégorie')}, ${pl(o.t,'poste')}, ${pl(o.a,'affectation')}) ? L’état actuel sera sauvegardé avant.`,go,'Restaurer')}
+  /* restauration réservée à l’administrateur : même code que le cadenas, vérifié par le serveur */
+  modal=`<div class="modal"><form class="dlg" id="restform" data-k="${esc(k)}"><h2>Restaurer une sauvegarde</h2><p>Revenir à la version du <b>${fdate(o.d)}</b> (${pl(o.c,'catégorie')}, ${pl(o.t,'poste')}, ${pl(o.a,'affectation')}) ? L’état actuel sera sauvegardé avant.</p><label class="f" for="r-code">Code administrateur (celui du cadenas)</label><input class="txt" id="r-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="rmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Restaurer</button></div></form></div>`;
+  render();$('#r-code').focus()}
+function restSubmit(f){const k=f.dataset.k,o=sauvs.find(x=>x.k===k),rm=$('#rmsg'),code=$('#r-code').value.trim(),bt=f.querySelector('.bigbtn');if(!o)return;
+  if(pending||saving){rm.textContent='Enregistrement en cours, réessaie dans 2 secondes.';return}
+  bt.disabled=true;rm.textContent='Vérification du code…';
+  fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'restaurer',k,code})}).then(r=>r.json()).then(d=>{
+    if(d.code===423){S=d.state||S;etag=d.etag||etag;modal=null;render();return status(LOCKMSG,'warn')}
+    if(!d.state||d.code){bt.disabled=false;const c=$('#r-code');rm.textContent=d.error||'Restauration refusée.';if(c){c.value='';c.focus()}return}
+    S=d.state;etag=d.etag;hist.length=0;modal=null;render();status(`Version du ${fdate(o.d)} restaurée. L’état d’avant a été sauvegardé, tu peux y revenir.`)
+  }).catch(()=>{bt.disabled=false;rm.textContent='Pas de connexion : réessaie.'})}
 /* plusieurs événements (serveur v4) : l'événement en cours + les anciens, rangés à part */
 let evts=[],nsrc=null;
 const fjour=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
@@ -427,7 +450,7 @@ function apercu(){modal=`<div class="modal"><div class="dlg wide"><h2>Export Exc
 function imprimer(){let z=document.getElementById('printzone');if(!z){z=document.createElement('div');z.id='printzone';document.body.appendChild(z)}z.innerHTML=tableHTML();window.print()}
 
 /* roue de sélection (heures, nombre de personnes) */
-const WH=40;
+const WH=matchMedia('(max-width:600px),(max-height:760px)').matches?28:40; // hauteur d’une ligne de roulette (plus petite sur téléphone)
 function wheel(id,vals,cur,fmt,label,off,cls){let k=0,best=1e9;vals.forEach((v,i)=>{const d=typeof v==='number'?Math.abs(v-cur):(v===cur?0:1);if(d<best){best=d;k=i}});
   return `<div class="wheel ${off?'off':''} ${cls||''}" data-for="${id}"><div class="wl" tabindex="0" role="listbox" aria-label="${label}" data-k="${k}">${vals.map((v,i)=>`<div class="wi ${i===k?'on':''}" data-i="${i}" data-v="${esc(v)}" role="option">${esc(fmt(v))}</div>`).join('')}</div></div><input type="hidden" id="${id}" value="${esc(vals[k])}">`}
 function initWheels(){document.querySelectorAll('.wl').forEach(w=>{w.scrollTop=(+w.dataset.k)*WH})}
@@ -586,6 +609,7 @@ root.addEventListener('submit',e=>{
   if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
   if(f.id==='nform')return nouvSubmit(f);
   if(f.id==='xform')return delEvtSubmit(f);
+  if(f.id==='restform')return restSubmit(f);
   if(f.id==='lform'){const lm=$('#lmsg'),code=$('#f-code').value.trim();
     if(!ready){lm.textContent='Chargement des données en cours, réessaie dans quelques secondes.';return}
     if(pending||saving){lm.textContent='Enregistrement en cours, réessaie dans 2 secondes.';return}
@@ -614,14 +638,18 @@ const TOURS={
     ['.bdel','La poubelle supprime la catégorie et ses postes, après confirmation.'],
     ['#newcat','« Ajouter une catégorie » crée un nouveau groupe de postes.'],
     ['#delcats','« Supprimer une catégorie » : choisis-la avec la roulette, ou coche « toutes » pour tout effacer.'],
-    ['nav.tabs','« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms.'],
-    ['#apercu','« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer.'],
+    ['nav.tabs','« Mes postes » : chaque bénévole choisit son prénom et voit ou prend ses postes. « Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms.'],
+    ['#apercu','« Export Excel » affiche le tableau complet, à copier dans Excel.'],
+    ['#imprimer','« Imprimer » prépare une version papier de la répartition.'],
     ['#lock','Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie.'],
     ['#evts','« Événements » crée l’événement suivant à partir de celui-ci (avec le code) et garde les anciens, à consulter ou dupliquer.'],
-    ['#sauv','« Sauvegardes » permet de revenir à une version précédente, enregistrée automatiquement par le serveur.'],
+    ['#sauv','« Sauvegardes » permet de revenir à une version précédente, enregistrée automatiquement par le serveur. Restaurer demande le code administrateur (celui du cadenas).'],
     ['#ideeOpen','Une idée, un bug ? La boîte à idées est anonyme.']],
   cat:[['#bench','Voici les jetons des bénévoles. Glisse un jeton sur un poste, ou touche un jeton puis les postes où l’affecter.'],
     ['.jeton.tous','Le jeton « Tous » remplit d’un coup les postes cochés « Tous les bénévoles ».'],
+    ['.jeton.bureau','Le jeton du bureau est toujours en tête : un poste où le bureau est inscrit compte comme couvert.'],
+    ['.jeton.clash','Un ⚠ sur un jeton : ce bénévole a deux postes en même temps.'],
+    ['.clashbox','L’encadré « Doublons d’horaires » liste ces chevauchements pour les corriger.'],
     ['.task','Double-clic (ou deux touchers) sur un poste pour le modifier. Maintiens appuyé pour le déplacer.'],
     ['.task .done','La coche verte indique que le poste est fait. Touche-la de nouveau pour le remettre « à faire ».'],
     ['.task .clr','« Vider » retire tous les bénévoles du poste.'],

@@ -1,6 +1,6 @@
 // Garde l'appli « Répartition des postes » disponible sans réseau (page, script, logo).
 // Réseau d'abord, sinon la dernière copie enregistrée. Les données (serveur Google) ne passent pas par ici.
-const C = 'rp-v1';
+const C = 'rp-v2';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'api.js', 'logo-socaval.png', 'manifest.webmanifest']).catch(() => {}))); });
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {

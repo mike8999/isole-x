@@ -1,10 +1,10 @@
-// Serveur de données de « Répartition des postes » (So Caval) — version 4 : verrou contrôlé par le serveur, sauvegardes automatiques, plusieurs événements
+// Serveur de données de « Répartition des postes » (So Caval) — version 5 : restauration avec code, verrou contrôlé par le serveur, sauvegardes automatiques, plusieurs événements
 // Mise à jour : coller ce fichier dans l'éditeur Apps Script, Enregistrer, puis
 // Déployer > Gérer les déploiements > ✎ Modifier > Version : Nouvelle version > Déployer (l'adresse reste la même).
 const ANCIEN = 'https://planning-benevoles-tbho.netlify.app/api/state';
 const P = PropertiesService.getScriptProperties();
 const TAILLE = 8000;
-const VERSION = 4;
+const VERSION = 5;
 const EVT_MAX = 60;              // anciens événements gardés
 const SAUV_MAX = 40, SAUV_MIN = 15; // 40 sauvegardes gardées ; au plus une toutes les 15 min, sauf suppression
 const CODE_DEFAUT = '8579';        // code utilisé tant que changerCode() n'a pas été lancé
@@ -152,6 +152,7 @@ function doPost(e) {
 
     if (b && b.action === 'restaurer') {
       if (locked) return sortie_(Object.assign({ code: 423 }, cur));
+      const errR = verifCode_(b.code); if (errR) return sortie_(errR); // restauration réservée à l'administrateur (code du cadenas)
       const old = relire_(b.k);
       if (!old) return sortie_({ code: 404, error: 'Sauvegarde introuvable.' });
       sauver_(cur.state, 'avant restauration');
