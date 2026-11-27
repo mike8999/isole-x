@@ -111,7 +111,7 @@ html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
  .dock .tip .ghostbtn{min-height:38px;padding:6px 12px;flex:none}
  body.hasdock.selecting .wrap{padding-bottom:80px}
  .cathead h1{flex-basis:100%;order:-1;margin:0}}
-@media(max-width:600px){.two{grid-template-columns:1fr}.tabs{width:100%}.tabs .chip{flex:1;justify-content:center;padding:8px 6px;font-size:14px;white-space:nowrap}.jeton{font-size:15px}}
+@media(max-width:600px){.two{grid-template-columns:1fr}.tabs{width:100%}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tabs .chip{justify-content:center;padding:8px 6px;font-size:14px;white-space:nowrap}.jeton{font-size:15px}}
 @media(prefers-reduced-motion:no-preference){.jeton.sel{animation:glow 2.4s ease-in-out infinite}@keyframes glow{50%{box-shadow:0 3px 0 #9b6f10,0 0 22px rgba(255,214,90,1)}}}
 
 .title .tcol{display:flex;flex-direction:column;gap:6px;flex:1}
@@ -183,6 +183,8 @@ html.dragging,html.dragging body{overflow:hidden}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
 .slist{list-style:none;padding:0;margin:0;max-height:55vh;overflow:auto}.slist li{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 2px;border-bottom:1px solid rgba(0,0,0,.12)}.slist em{opacity:.7}.slist small{opacity:.8}.slist .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink);flex:none}
 .jeton.clash{border-color:#e8742a;background:#ffe2c7}.clashbox{border:2px solid #e8742a;background:rgba(232,116,42,.18);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:15px}.clashbox ul{margin:6px 0 0;padding-left:20px}.clashbox li{margin:3px 0}
+.plist{display:flex;flex-wrap:wrap;gap:8px}.mebtn{cursor:pointer;font:600 17px system-ui,sans-serif;min-height:44px;padding:6px 14px;border:0;border-radius:9px;background:var(--card);color:var(--ink);box-shadow:0 3px 0 #b8ad8a,0 4px 8px rgba(0,0,0,.3)}.meacts{justify-content:flex-start;margin-top:4px}.melst li{gap:10px;padding:9px 0}.melst .bigbtn,.melst .ghostbtn{flex:none;padding:8px 12px;font-size:15px}.melst small{opacity:.85}
+body.locked .take,body.locked .quit,body.offline .take,body.offline .quit{display:none}
 .bdel{position:absolute;bottom:8px;right:8px;width:33px;height:33px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:15.4px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
 .dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
@@ -200,6 +202,12 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
 {
   let readHash2 = function() {
     const h = location.hash.slice(1);
+    if (h.startsWith("moi-")) {
+      setMe(h.slice(4));
+      view = "moi";
+      cat = null;
+      return;
+    }
     if (h.startsWith("cat-") && S.cats.some((c) => c.id === h.slice(4))) {
       view = "planning";
       cat = h.slice(4);
@@ -288,7 +296,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }, renderHead2 = function() {
     const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
     const holes = withNeed.reduce((a, t) => a + miss(t), 0);
-    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button><button type="button" class="ghostbtn" id="sauv">🕘 Sauvegardes</button></div>\n  <div class="status" id="status"></div>');
+    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["moi", "Mes postes"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button><button type="button" class="ghostbtn" id="sauv">🕘 Sauvegardes</button></div>\n  <div class="status" id="status"></div>');
   }, catStats2 = function(c) {
     const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
     return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
@@ -365,6 +373,32 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     };
     go.direct = true;
     confirmDlg2("Revenir à la version du <b>".concat(fdate(o.d), "</b> (").concat(pl(o.c, "catégorie"), ", ").concat(pl(o.t, "poste"), ", ").concat(pl(o.a, "affectation"), ") ? L’état actuel sera sauvegardé avant."), go, "Restaurer");
+  }, takeTask2 = function(tid) {
+    const t = S.tasks.find((x) => x.id === tid);
+    if (!t || !me) return;
+    const go = () => {
+      if (!t.who.includes(me)) t.who.push(me);
+    };
+    const c = S.tasks.filter((o) => o.id !== tid && o.who.includes(me) && over(span2(t), span2(o)));
+    if (c.length) return confirmDlg2("⚠ « ".concat(esc(t.name), " » (").concat(esc(t.when), ") tombe en même temps que ").concat(c.map((o) => "« " + esc(o.name) + " » (" + esc(o.when) + ")").join(", "), ". T’inscrire quand même ?"), go, "Je prends quand même");
+    commit2(go);
+    status2("C’est noté : tu es sur « ".concat(t.name, " »."));
+  }, renderMoi2 = function() {
+    const m = me && S.members.find((x) => x.id === me);
+    if (!m || isB(me)) {
+      const L = sortM(vol());
+      return '<section class="chap"><h2>Qui es-tu ?</h2><p class="hint">Touche ton prénom pour voir tes postes et t’inscrire.</p><div class="plist">'.concat(L.map((x) => '<button class="mebtn" data-me="'.concat(x.id, '">').concat(esc(x.name), "</button>")).join("") || '<p class="empty">Aucun bénévole dans l’équipe.</p>', "</div></section>");
+    }
+    const mine = S.tasks.filter((t) => t.who.includes(me)), cl = clashes2().filter((x) => x.m.id === me);
+    const libres = S.tasks.filter((t) => t.need > 0 && miss(t) > 0 && !t.who.includes(me));
+    let h = '<section class="chap"><h2>Bonjour '.concat(esc(m.name), '</h2><div class="acts meacts"><button class="ghostbtn" id="notme">Ce n’est pas moi</button><button class="ghostbtn" id="melink">📋 Copier mon lien</button></div></section>');
+    if (cl.length) h += '<section class="chap clashbox"><h2>⚠ Tu es sur deux postes en même temps</h2><ul>'.concat(cl.map((x) => "<li>« ".concat(esc(x.a.name), " » (").concat(esc(x.a.when), ") et « ").concat(esc(x.b.name), " » (").concat(esc(x.b.when), ")</li>")).join(""), "</ul></section>");
+    h += '<section class="chap"><h2>Mes postes ('.concat(mine.length, ")</h2>").concat(mine.length ? '<ul class="lst melst">'.concat(mine.map((t) => '<li><span style="flex:1">'.concat(clashWith2(me, t.id).length ? "⚠ " : "", "<b>").concat(esc(t.name), "</b><br><small>").concat(esc(catN(t.cat))).concat(t.when ? " · " + esc(t.when) : "").concat(t.done ? " · fait ✓" : "", '</small></span><button class="ghostbtn quit" data-quit="').concat(t.id, '">Me retirer</button></li>')).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant : choisis-en un juste en dessous.</p>', "</section>");
+    h += '<section class="chap"><h2>Postes à pourvoir ('.concat(libres.length, ")</h2>").concat(libres.length ? '<ul class="lst melst">'.concat(libres.map((t) => {
+      const c = mine.filter((o) => over(span2(t), span2(o)));
+      return '<li><span style="flex:1"><b>'.concat(esc(t.name), "</b><br><small>").concat(esc(catN(t.cat))).concat(t.when ? " · " + esc(t.when) : "", ' · <b class="count short">').concat(miss(t), " à trouver</b>").concat(c.length ? " · ⚠ en même temps que « ".concat(esc(c[0].name), " »") : "", '</small></span><button class="bigbtn take" data-take="').concat(t.id, '">Je prends</button></li>');
+    }).join(""), "</ul>") : '<p class="empty">Tous les postes sont pourvus. Merci !</p>', "</section>");
+    return h;
   }, renderPeople2 = function() {
     const holes = S.tasks.filter((t) => need(t) && miss(t));
     const cl = clashes2();
@@ -388,7 +422,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     document.body.classList.toggle("locked", !!S.locked);
     document.body.classList.toggle("offline", offline);
     keep2();
-    root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
+    root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "moi" ? renderMoi2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
     const e = $("#status");
     e.textContent = st;
     e.className = sc;
@@ -732,13 +766,25 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       status2("Hors ligne : version du ".concat(fdate(c.t), ", en consultation seule. Elle se mettra à jour dès le retour du réseau."), "warn");
     } else status2("Impossible de joindre le serveur : les modifications ne seront pas enregistrées.", "warn");
   };
-  var readHash = readHash2, status = status2, keep = keep2, cached = cached2, commit = commit2, undo = undo2, queueSave = queueSave2, span = span2, clashWith = clashWith2, clashes = clashes2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2, connecte = connecte2, horsLigne = horsLigne2;
+  var readHash = readHash2, status = status2, keep = keep2, cached = cached2, commit = commit2, undo = undo2, queueSave = queueSave2, span = span2, clashWith = clashWith2, clashes = clashes2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, takeTask = takeTask2, renderMoi = renderMoi2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2, connecte = connecte2, horsLigne = horsLigne2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
   const hist = [];
   let etag = null, saving = false, pending = false, timer = null, modal = null, sel = null, drag = null;
-  const VIEWS = ["planning", "benevoles", "equipe"];
+  const VIEWS = ["planning", "moi", "benevoles", "equipe"];
+  let me = null;
+  try {
+    me = localStorage.getItem("rp-moi");
+  } catch (e) {
+  }
+  const setMe = (id) => {
+    me = id;
+    try {
+      id ? localStorage.setItem("rp-moi", id) : localStorage.removeItem("rp-moi");
+    } catch (e) {
+    }
+  };
   let view = "planning", cat = null;
   readHash2();
   const esc = (s) => String(s != null ? s : "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -825,6 +871,10 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   let sauvs = [];
   const fdate = (d) => new Date(d).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const pl = (n, m) => n + " " + m + (n > 1 ? "s" : "");
+  const catN = (id) => {
+    var _a;
+    return ((_a = S.cats.find((c) => c.id === id)) == null ? void 0 : _a.name) || "";
+  };
   const WH = 40;
   document.addEventListener("scroll", (e) => {
     const w = e.target;
@@ -1027,6 +1077,28 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     if (b.id === "newcat") return catDialog2();
     if (b.id === "delcats") return delCatsDlg2();
     if (b.id === "sauv") return sauvDlg2();
+    if (b.dataset.me) {
+      setMe(b.dataset.me);
+      history.replaceState(null, "", "#moi");
+      return render2();
+    }
+    if (b.id === "notme") {
+      setMe(null);
+      return render2();
+    }
+    if (b.id === "melink") {
+      const u = location.href.split("#")[0] + "#moi-" + me;
+      (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => status2("Lien copié : envoie-le à " + mName(me) + ".")).catch(() => prompt("Copie ce lien :", u));
+      return;
+    }
+    if (b.dataset.take) return takeTask2(b.dataset.take);
+    if (b.dataset.quit) {
+      const t = S.tasks.find((x) => x.id === b.dataset.quit);
+      if (t) confirmDlg2("Te retirer du poste « ".concat(esc(t.name), " » ?"), () => {
+        t.who = t.who.filter((w) => w !== me);
+      }, "Me retirer");
+      return;
+    }
     if (b.id === "reset") return resetDlg2();
     if (b.id === "apercu") return apercu2();
     if (b.id === "imprimer") return imprimer2();
@@ -1267,6 +1339,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       ["[data-addtask]", "« Ajouter un poste » crée un poste : jour, créneau et nombre de personnes se choisissent avec les roulettes."],
       ["#undo", "« Annuler » défait la dernière modification."]
     ],
+    moi: [[".mebtn", "Touche ton prénom : l’appli s’en souviendra sur ce téléphone."], [".melst", "Tes postes, avec « Me retirer » si tu ne peux plus venir."], [".take", "« Je prends » t’inscrit tout de suite sur un poste où il manque du monde."], ["#melink", "« Copier mon lien » donne une adresse qui ouvre directement ta page."]],
     benevoles: [[".chap", "En haut, les postes où il manque encore du monde."], [".people", "Puis la fiche de chaque bénévole avec ses postes."]],
     equipe: [
       [".plaque", "Touche un prénom pour le corriger directement dans sa plaque. La poubelle retire la personne."],
