@@ -182,6 +182,7 @@ html.dragging,html.dragging body{overflow:hidden}
 .moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
 .slist{list-style:none;padding:0;margin:0;max-height:55vh;overflow:auto}.slist li{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 2px;border-bottom:1px solid rgba(0,0,0,.12)}.slist em{opacity:.7}.slist small{opacity:.8}.slist .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink);flex:none}
+.jeton.clash{border-color:#e8742a;background:#ffe2c7}.clashbox{border:2px solid #e8742a;background:rgba(232,116,42,.18);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:15px}.clashbox ul{margin:6px 0 0;padding-left:20px}.clashbox li{margin:3px 0}
 .bdel{position:absolute;bottom:8px;right:8px;width:33px;height:33px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:15.4px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
 .dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
@@ -246,7 +247,17 @@ async function refresh(){
 }
 
 const allJeton=()=>`<span class="jeton tous ${sel==='__all'?'sel':''}" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>`;
-const jeton=(id,from,hours)=>`<span class="jeton ${sel===id?'sel':''}${isB(id)?' bureau':''}" data-j="${id}" data-from="${from||''}" role="button" tabindex="0" aria-label="${esc(mName(id))}">${esc(mName(id))}</span>`;
+const jeton=(id,from,hours)=>{const c=from?clashWith(id,from):[],tt=c.length?`Aussi sur ${c.map(x=>'« '+x.name+' » ('+x.when+')').join(', ')} au même moment`:'';
+  return `<span class="jeton ${sel===id?'sel':''}${isB(id)?' bureau':''}${c.length?' clash':''}" data-j="${id}" data-from="${from||''}" role="button" tabindex="0" aria-label="${esc(mName(id))}${c.length?' : '+esc(tt):''}"${c.length?` title="${esc(tt)}"`:''}>${c.length?'⚠ ':''}${esc(mName(id))}</span>`};
+/* doublons d'horaires : même jour et créneaux qui se chevauchent */
+function span(t){const [d,c]=parseWhen(t.when);if(c==='—')return null;const day=d==='—'?'J':d,x=c.replace(/ /g,' ');
+  if(x==='Matin')return{day,s:8,e:12};if(x==='Après-midi')return{day,s:13,e:18};if(x==='Journée')return{day,s:8,e:18};
+  const m=x.match(/(\d+)(?:\s*h\s*(\d+))?\s*h?\s*[–-]\s*(\d+)(?:\s*h\s*(\d+))?/);if(!m)return null;const s=+m[1]+(+m[2]||0)/60,e=+m[3]+(+m[4]||0)/60;return e>s?{day,s,e}:null}
+const over=(a,b)=>a&&b&&a.day===b.day&&a.s<b.e&&b.s<a.e;
+function clashWith(mid,tid){if(isB(mid))return[];const t=S.tasks.find(x=>x.id===tid),a=t&&span(t);if(!a)return[];return S.tasks.filter(o=>o.id!==tid&&o.who.includes(mid)&&over(a,span(o)))}
+function clashes(){const out=[];for(const m of sortM(S.members)){if(isB(m.id))continue;const ts=S.tasks.filter(t=>t.who.includes(m.id)&&span(t));
+  for(let i=0;i<ts.length;i++)for(let j=i+1;j<ts.length;j++)if(over(span(ts[i]),span(ts[j])))out.push({m,a:ts[i],b:ts[j]})}return out}
+const clashLi=x=>`<li><b>${esc(x.m.name)}</b> : « ${esc(x.a.name)} » (${esc(x.a.when)}) et « ${esc(x.b.name)} » (${esc(x.b.when)})</li>`;
 
 function renderHead(){
   const T=S.tasks,withNeed=T.filter(t=>need(t)),ok=withNeed.filter(full).length;
@@ -268,6 +279,7 @@ function renderCat(){
   let h=`<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>${esc(c.name)}</h1>${S.locked?'<span class="badge lockbadge">🔒 Verrouillée</span>':''}
   <span class="badge"><b>${k.ok}/${k.n}</b> complètes</span><span class="badge ${k.holes?'warn':''}"><b>${k.holes}</b> à pourvoir</span>
   <button class="bigbtn" data-addtask="${c.id}">Ajouter un poste</button><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>Annuler</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Touche deux fois un poste pour le modifier. Pour le déplacer, garde le doigt appuyé dessus une demi-seconde.</p>`;
+  {const ids=new Set(k.ts.map(t=>t.id)),cl=clashes().filter(x=>ids.has(x.a.id)||ids.has(x.b.id));if(cl.length)h+=`<div class="clashbox" role="status"><b>⚠ ${cl.length>1?cl.length+' doublons':'Un doublon'} d’horaires</b><ul>${cl.map(clashLi).join('')}</ul></div>`}
   h+=`<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici. Double-clic sur un poste pour le modifier.</p>
   ${sel?`<div class="tip"><span>${sel==='__all'?'<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider.':`<b>${esc(mName(sel))}</b> : touche un poste pour l’ajouter ou la retirer.`}</span><button class="ghostbtn" id="unsel">Terminé</button></div>`:''}
   <div class="jetons">${S.members.length?allJeton():''}${sortM(S.members).map(m=>jeton(m.id,'',true)).join('')||'<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>'}</div></aside>`;
@@ -296,8 +308,9 @@ function restDlg(k){const o=sauvs.find(x=>x.k===k);if(!o)return;if(pending||savi
   go.direct=true;confirmDlg(`Revenir à la version du <b>${fdate(o.d)}</b> (${pl(o.c,'catégorie')}, ${pl(o.t,'poste')}, ${pl(o.a,'affectation')}) ? L’état actuel sera sauvegardé avant.`,go,'Restaurer')}
 function renderPeople(){
   const holes=S.tasks.filter(t=>need(t)&&miss(t));
-  let h=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${miss(t)} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
-  return h+'<div class="people">'+sortM(S.members).map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}</h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${esc(t.name)}</span><em>${esc(t.when)}</em></li>`).join('')}</ul>`:'<p class="empty">Aucun poste pour l’instant</p>'}</section>`}).join('')+'</div>';
+  const cl=clashes();let h=cl.length?`<section class="chap clashbox"><h2>⚠ Doublons d’horaires</h2><ul>${cl.map(clashLi).join('')}</ul></section>`:'';
+  h+=`<section class="chap"><h2>${holes.length?'Il manque du monde':'Tous les postes sont pourvus'}</h2>${holes.length?`<ul class="lst">${holes.map(t=>`<li><span style="flex:1">${esc(t.name)}${t.when?' · '+esc(t.when):''}</span><b class="count short">${miss(t)} à trouver</b></li>`).join('')}</ul>`:''}</section>`;
+  return h+'<div class="people">'+sortM(S.members).map(m=>{const ts=S.tasks.filter(t=>t.who.includes(m.id));return `<section class="chap"><h2>${jeton(m.id,'',false)}</h2>${ts.length?`<ul>${ts.map(t=>`<li><span>${clashWith(m.id,t.id).length?'⚠ ':''}${esc(t.name)}</span><em>${esc(t.when)}</em></li>`).join('')}</ul>`:'<p class="empty">Aucun poste pour l’instant</p>'}</section>`}).join('')+'</div>';
 }
 function renderTeam(){
   return `<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">${sortM(S.members).map(m=>`<span class="plaque${bm(m)?' bureau':''}"><input class="txt pq" ${S.locked?'disabled':''} data-rename="${m.id}" value="${esc(m.name)}" style="width:${Math.max(3,m.name.length+1)}ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="${m.id}" aria-label="Retirer ${esc(m.name)}" title="Retirer">🗑</button></span>`).join('')}</div>

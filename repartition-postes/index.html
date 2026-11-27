@@ -182,6 +182,7 @@ html.dragging,html.dragging body{overflow:hidden}
 .moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
 .slist{list-style:none;padding:0;margin:0;max-height:55vh;overflow:auto}.slist li{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 2px;border-bottom:1px solid rgba(0,0,0,.12)}.slist em{opacity:.7}.slist small{opacity:.8}.slist .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink);flex:none}
+.jeton.clash{border-color:#e8742a;background:#ffe2c7}.clashbox{border:2px solid #e8742a;background:rgba(232,116,42,.18);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:15px}.clashbox ul{margin:6px 0 0;padding-left:20px}.clashbox li{margin:3px 0}
 .bdel{position:absolute;bottom:8px;right:8px;width:33px;height:33px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:15.4px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
 .dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
@@ -242,6 +243,30 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     clearTimeout(timer);
     status2("Modifications en attente…");
     timer = setTimeout(save, 800);
+  }, span2 = function(t) {
+    const [d, c] = parseWhen2(t.when);
+    if (c === "—") return null;
+    const day = d === "—" ? "J" : d, x = c.replace(/ /g, " ");
+    if (x === "Matin") return { day, s: 8, e: 12 };
+    if (x === "Après-midi") return { day, s: 13, e: 18 };
+    if (x === "Journée") return { day, s: 8, e: 18 };
+    const m = x.match(/(\d+)(?:\s*h\s*(\d+))?\s*h?\s*[–-]\s*(\d+)(?:\s*h\s*(\d+))?/);
+    if (!m) return null;
+    const s = +m[1] + (+m[2] || 0) / 60, e = +m[3] + (+m[4] || 0) / 60;
+    return e > s ? { day, s, e } : null;
+  }, clashWith2 = function(mid, tid) {
+    if (isB(mid)) return [];
+    const t = S.tasks.find((x) => x.id === tid), a = t && span2(t);
+    if (!a) return [];
+    return S.tasks.filter((o) => o.id !== tid && o.who.includes(mid) && over(a, span2(o)));
+  }, clashes2 = function() {
+    const out = [];
+    for (const m of sortM(S.members)) {
+      if (isB(m.id)) continue;
+      const ts = S.tasks.filter((t) => t.who.includes(m.id) && span2(t));
+      for (let i = 0; i < ts.length; i++) for (let j = i + 1; j < ts.length; j++) if (over(span2(ts[i]), span2(ts[j]))) out.push({ m, a: ts[i], b: ts[j] });
+    }
+    return out;
   }, renderHead2 = function() {
     const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
     const holes = withNeed.reduce((a, t) => a + miss(t), 0);
@@ -257,6 +282,10 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }, renderCat2 = function() {
     const c = S.cats.find((x) => x.id === cat), k = catStats2(c);
     let h = '<div class="cathead"><a class="ghostbtn" href="#planning" style="text-decoration:none;display:inline-flex;align-items:center;color:inherit">◀ Catégories</a><h1>'.concat(esc(c.name), "</h1>").concat(S.locked ? '<span class="badge lockbadge">🔒 Verrouillée</span>' : "", '\n  <span class="badge"><b>').concat(k.ok, "/").concat(k.n, '</b> complètes</span><span class="badge ').concat(k.holes ? "warn" : "", '"><b>').concat(k.holes, '</b> à pourvoir</span>\n  <button class="bigbtn" data-addtask="').concat(c.id, '">Ajouter un poste</button><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>Annuler</button><button type="button" class="ghostbtn ideebtn" id="ideeOpen" aria-label="Boîte à idées" title="Boîte à idées">💡<span class="ideelbl"> Boîte à idées</span></button><button type="button" class="hbtn" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div><div class="status" id="status"></div><p class="mhint">Touche un prénom dans la colonne de droite, puis les postes où l’affecter. Touche deux fois un poste pour le modifier. Pour le déplacer, garde le doigt appuyé dessus une demi-seconde.</p>');
+    {
+      const ids = new Set(k.ts.map((t) => t.id)), cl = clashes2().filter((x) => ids.has(x.a.id) || ids.has(x.b.id));
+      if (cl.length) h += '<div class="clashbox" role="status"><b>⚠ '.concat(cl.length > 1 ? cl.length + " doublons" : "Un doublon", " d’horaires</b><ul>").concat(cl.map(clashLi).join(""), "</ul></div>");
+    }
     h += '<div class="board"><aside class="bench dock" id="bench"><h2>Bénévoles</h2><p class="hint">Glisse un jeton vers un poste à gauche, ou touche un jeton puis les postes. Le jeton « Tous » remplit les postes cochés « Tous les bénévoles ». Pour retirer quelqu’un, ramène son jeton ici. Double-clic sur un poste pour le modifier.</p>\n  '.concat(sel ? '<div class="tip"><span>'.concat(sel === "__all" ? "<b>Tous</b> : touche un poste coché « Tous les bénévoles » pour le remplir ou le vider." : "<b>".concat(esc(mName(sel)), "</b> : touche un poste pour l’ajouter ou la retirer."), '</span><button class="ghostbtn" id="unsel">Terminé</button></div>') : "", '\n  <div class="jetons">').concat(S.members.length ? allJeton() : "").concat(sortM(S.members).map((m) => jeton(m.id, "", true)).join("") || '<p class="empty">Ajoute des bénévoles dans l’onglet Équipe.</p>', "</div></aside>");
     h += k.ts.length ? '<div class="tasks">'.concat(k.ts.map((t) => {
       const d = need(t), n = nb(t), ms = miss(t);
@@ -320,10 +349,12 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     confirmDlg2("Revenir à la version du <b>".concat(fdate(o.d), "</b> (").concat(pl(o.c, "catégorie"), ", ").concat(pl(o.t, "poste"), ", ").concat(pl(o.a, "affectation"), ") ? L’état actuel sera sauvegardé avant."), go, "Restaurer");
   }, renderPeople2 = function() {
     const holes = S.tasks.filter((t) => need(t) && miss(t));
-    let h = '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
+    const cl = clashes2();
+    let h = cl.length ? '<section class="chap clashbox"><h2>⚠ Doublons d’horaires</h2><ul>'.concat(cl.map(clashLi).join(""), "</ul></section>") : "";
+    h += '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
     return h + '<div class="people">' + sortM(S.members).map((m) => {
       const ts = S.tasks.filter((t) => t.who.includes(m.id));
-      return '<section class="chap"><h2>'.concat(jeton(m.id, "", false), "</h2>").concat(ts.length ? "<ul>".concat(ts.map((t) => "<li><span>".concat(esc(t.name), "</span><em>").concat(esc(t.when), "</em></li>")).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant</p>', "</section>");
+      return '<section class="chap"><h2>'.concat(jeton(m.id, "", false), "</h2>").concat(ts.length ? "<ul>".concat(ts.map((t) => "<li><span>".concat(clashWith2(m.id, t.id).length ? "⚠ " : "").concat(esc(t.name), "</span><em>").concat(esc(t.when), "</em></li>")).join(""), "</ul>") : '<p class="empty">Aucun poste pour l’instant</p>', "</section>");
     }).join("") + "</div>";
   }, renderTeam2 = function() {
     return '<section class="chap"><h2>Bénévoles <button class="ghostbtn" id="reset">Remise à zéro de la liste</button></h2><p class="hint">Touche un nom pour le corriger, 🗑 pour retirer la personne.</p><div class="plaques">'.concat(sortM(S.members).map((m) => '<span class="plaque'.concat(bm(m) ? " bureau" : "", '"><input class="txt pq" ').concat(S.locked ? "disabled" : "", ' data-rename="').concat(m.id, '" value="').concat(esc(m.name), '" style="width:').concat(Math.max(3, m.name.length + 1), 'ch" aria-label="Nom du bénévole" spellcheck="false"><button class="pqdel" data-delm="').concat(m.id, '" aria-label="Retirer ').concat(esc(m.name), '" title="Retirer">🗑</button></span>')).join(""), '</div>\n  <form class="addrow" id="addm"><input class="txt" id="newm" placeholder="Prénom du nouveau bénévole" aria-label="Prénom du nouveau bénévole"><button class="bigbtn">Ajouter</button></form></section>');
@@ -653,7 +684,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     const c = document.getElementById("coach");
     if (c) c.style.display = "none";
   };
-  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, span = span2, clashWith = clashWith2, clashes = clashes2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
@@ -735,7 +766,12 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     }
   }
   const allJeton = () => '<span class="jeton tous '.concat(sel === "__all" ? "sel" : "", '" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>');
-  const jeton = (id, from, hours) => '<span class="jeton '.concat(sel === id ? "sel" : "").concat(isB(id) ? " bureau" : "", '" data-j="').concat(id, '" data-from="').concat(from || "", '" role="button" tabindex="0" aria-label="').concat(esc(mName(id)), '">').concat(esc(mName(id)), "</span>");
+  const jeton = (id, from, hours) => {
+    const c = from ? clashWith2(id, from) : [], tt = c.length ? "Aussi sur ".concat(c.map((x) => "« " + x.name + " » (" + x.when + ")").join(", "), " au même moment") : "";
+    return '<span class="jeton '.concat(sel === id ? "sel" : "").concat(isB(id) ? " bureau" : "").concat(c.length ? " clash" : "", '" data-j="').concat(id, '" data-from="').concat(from || "", '" role="button" tabindex="0" aria-label="').concat(esc(mName(id))).concat(c.length ? " : " + esc(tt) : "", '"').concat(c.length ? ' title="'.concat(esc(tt), '"') : "", ">").concat(c.length ? "⚠ " : "").concat(esc(mName(id)), "</span>");
+  };
+  const over = (a, b) => a && b && a.day === b.day && a.s < b.e && b.s < a.e;
+  const clashLi = (x) => "<li><b>".concat(esc(x.m.name), "</b> : « ").concat(esc(x.a.name), " » (").concat(esc(x.a.when), ") et « ").concat(esc(x.b.name), " » (").concat(esc(x.b.when), ")</li>");
   let sauvs = [];
   const fdate = (d) => new Date(d).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const pl = (n, m) => n + " " + m + (n > 1 ? "s" : "");
