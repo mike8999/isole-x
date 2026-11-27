@@ -54,7 +54,7 @@ function renderDeck(){
   const cards=state.deck.map((c,i)=>{const f=state.flip[i];
     return`<div class="dcard${f?' neg':''}${pend&&pend.op!=='fn'&&pend.idx===i?' want':''}" data-deck="${i}">${f?'<span class="sign">−</span>':''}${hT(c,MBd)}${c.user?`<span class="ddel" data-del="${i}" title="Retirer ce jeton">✕</span>`:''}</div>`}).join('');
   const tools=state.tools.map((t,i)=>`<div class="dtool${pend&&pend.op==='fn'&&pend.tidx===i?' want':''}" data-tool="${i}" title="Outil : appliquer ${esc(toolTxt(t))} aux deux côtés">${toolLab(t)}</div>`).join('');
-  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span>'+cards+'<span class="tsep"></span>'+tools+'<div class="dtool dpar" data-par="1" title="Parenthèses : glisse « ( » devant le premier terme, puis touche le dernier">( )</div>';
+  $('#deck').innerHTML='<span class="lab">PIOCHE — touche un jeton pour le retourner (±)</span><div class="dtools">'+tools+'<div class="dtool dpar" data-par="1" title="Parenthèses : glisse « ( » devant le premier terme, puis touche le dernier">( )</div></div><div class="dcards">'+cards+'</div>';
 }
 function flashDeck(i){if(SILENT)return;const el=document.querySelector(`#deck [data-deck="${i}"]`);if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
 

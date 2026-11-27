@@ -39,3 +39,9 @@ body.dragboard #board .ins.hot{width:14px}
 .charbtn small{opacity:.75}
 body.calm .pet .peyes,body.calm .pet .ptail,body.calm .pet .zz{animation:none}
 @media (prefers-reduced-motion:reduce){.pet .peyes,.pet .ptail,.pet .zz{animation:none}}
+
+/* outils de la pioche en bas à gauche (le coin droit reste libre) */
+#deck{justify-content:flex-start;align-items:stretch;flex-wrap:nowrap}
+#deck .dtools{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-end;align-content:flex-end;max-width:42%;flex:0 1 auto;padding-right:10px;border-right:2px solid rgba(0,0,0,.25)}
+#deck .dcards{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+@media (max-width:600px){#deck .dtools{gap:4px;padding-right:6px}#deck .dtools .dtool{font-size:16px;min-width:2em}#deck .dcards{gap:8px}}

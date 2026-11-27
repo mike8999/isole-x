@@ -57,3 +57,9 @@ body.calm .pet .peyes,body.calm .pet .ptail,body.calm .pet .zz{animation:none}
 .petlost{color:#a3261a;font-weight:600}
 body.calm .act-hop,body.calm .act-dance,body.calm .act-stretch,body.calm .act-spin svg,body.calm .act-sulk,body.calm .winpet .pet{animation:none!important}
 @media (prefers-reduced-motion:reduce){.act-hop,.act-dance,.act-stretch,.act-spin svg,.act-sulk,.winpet .pet{animation:none!important}}
+
+/* outils de la pioche en bas à gauche (le coin droit reste libre) */
+#deck{justify-content:flex-start;align-items:stretch;flex-wrap:nowrap}
+#deck .dtools{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-end;align-content:flex-end;max-width:42%;flex:0 1 auto;padding-right:10px;border-right:2px solid rgba(0,0,0,.25)}
+#deck .dcards{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+@media (max-width:600px){#deck .dtools{gap:4px;padding-right:6px}#deck .dtools .dtool{font-size:16px;min-width:2em}#deck .dcards{gap:8px}}

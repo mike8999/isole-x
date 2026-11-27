@@ -14,6 +14,7 @@ Jeux pour s’entraîner en STI2D.
   - ancienne version 18 conservée : https://mike8999.github.io/isole-x/repartition-postes-v18/
   - ancienne version 17 conservée : https://mike8999.github.io/isole-x/repartition-postes-v17/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/repartition-postes-v16/
+  - ancienne version 17 conservée : https://mike8999.github.io/isole-x/v3-v17/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/v3-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/v3-v15/
   - ancienne version 14 conservée : https://mike8999.github.io/isole-x/v3-v14/
@@ -53,6 +54,7 @@ Jeux pour s’entraîner en STI2D.
   - Page Résultats (`?r`, code `PROF_CODE`) : séances, réponses, participation, score moyen, score par type de séance, évolution, barres par critère ; filtres classe et type
   - Serveur : `retour-seance/serveur-apps-script.gs` (Google Apps Script, propriétés `NOTION_TOKEN` et `PROF_CODE`) → base Notion « Retours de séance » ; boîte à idées vers la base Notion (Jeu = Retour de séance)
 - **Isole x ! Jungle, collège / seconde — dernière version** : https://mike8999.github.io/isole-x/college/
+  - ancienne version 18 conservée : https://mike8999.github.io/isole-x/college-v18/
   - ancienne version 17 conservée : https://mike8999.github.io/isole-x/college-v17/
   - ancienne version 16 conservée : https://mike8999.github.io/isole-x/college-v16/
   - ancienne version 15 conservée : https://mike8999.github.io/isole-x/college-v15/
