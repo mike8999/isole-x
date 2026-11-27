@@ -1,10 +1,11 @@
-// Serveur de données de « Répartition des postes » (So Caval) — version 3 : verrou contrôlé par le serveur + sauvegardes automatiques
+// Serveur de données de « Répartition des postes » (So Caval) — version 4 : verrou contrôlé par le serveur, sauvegardes automatiques, plusieurs événements
 // Mise à jour : coller ce fichier dans l'éditeur Apps Script, Enregistrer, puis
 // Déployer > Gérer les déploiements > ✎ Modifier > Version : Nouvelle version > Déployer (l'adresse reste la même).
 const ANCIEN = 'https://planning-benevoles-tbho.netlify.app/api/state';
 const P = PropertiesService.getScriptProperties();
 const TAILLE = 8000;
-const VERSION = 3;
+const VERSION = 4;
+const EVT_MAX = 60;              // anciens événements gardés
 const SAUV_MAX = 40, SAUV_MIN = 15; // 40 sauvegardes gardées ; au plus une toutes les 15 min, sauf suppression
 const CODE_DEFAUT = '8579';        // code utilisé tant que changerCode() n'a pas été lancé
 const ESSAIS_MAX = 5, BLOCAGE_S = 600; // 5 codes faux → verrou du cadenas pendant 10 min
@@ -47,6 +48,29 @@ function relire_(k) {
   let z = ''; for (let i = 0; i < o.n; i++) z += P.getProperty(k + '_' + i) || '';
   return JSON.parse(Utilities.ungzip(Utilities.newBlob(Utilities.base64Decode(z), 'application/x-gzip')).getDataAsString());
 }
+// ---- Anciens événements : rangés compressés à part (clés e…), hors des sauvegardes ----
+const evts_ = () => JSON.parse(P.getProperty('evts') || '[]');
+const gz_ = o => Utilities.base64Encode(Utilities.gzip(Utilities.newBlob(JSON.stringify(o), 'application/json')).getBytes());
+const ungz_ = z => JSON.parse(Utilities.ungzip(Utilities.newBlob(Utilities.base64Decode(z), 'application/x-gzip')).getDataAsString());
+function archiver_(state) {
+  const L = evts_(), k = 'e' + Date.now().toString(36), z = gz_(state), parts = {}; let n = 0;
+  for (let i = 0; i < z.length; i += TAILLE) parts[k + '_' + n++] = z.slice(i, i + TAILLE);
+  L.unshift(Object.assign({ k, d: Date.now(), n, ti: state.title || '', da: state.date || '' }, resume_(state)));
+  while (L.length > EVT_MAX) { const o = L.pop(); for (let i = 0; i < o.n; i++) P.deleteProperty(o.k + '_' + i); }
+  parts.evts = JSON.stringify(L);
+  P.setProperties(parts);
+}
+function relireEvt_(k) {
+  const o = evts_().find(x => x.k === k); if (!o) return null;
+  let z = ''; for (let i = 0; i < o.n; i++) z += P.getProperty(k + '_' + i) || '';
+  return ungz_(z);
+}
+function supprimerEvt_(k) {
+  const L = evts_(), o = L.find(x => x.k === k); if (!o) return false;
+  for (let i = 0; i < o.n; i++) P.deleteProperty(k + '_' + i);
+  P.setProperty('evts', JSON.stringify(L.filter(x => x.k !== k)));
+  return true;
+}
 function avantEcriture_(ancien, nouveau) { // garde l'état précédent si c'est utile
   const L = liste_(), a = resume_(ancien), b = resume_(nouveau);
   const perte = b.c < a.c || b.t < a.t || b.m < a.m || b.a <= a.a - 3;
@@ -77,7 +101,19 @@ function codeOk_(code) {
   return hash_(code) === P.getProperty('codeHash');
 }
 
+// Vérifie le code ; renvoie null si bon, sinon la réponse d'erreur
+function verifCode_(code) {
+  const C = CacheService.getScriptCache(), essais = +(C.get('essais') || 0);
+  if (essais >= ESSAIS_MAX) return { code: 429, error: 'Trop de codes faux : réessaie dans 10 minutes.' };
+  if (!codeOk_(code)) { C.put('essais', String(essais + 1), BLOCAGE_S); return { code: 403, error: 'Code incorrect.' }; }
+  C.remove('essais');
+  return null;
+}
+
 function doGet(e) {
+  const a = e && e.parameter && e.parameter.action;
+  if (a === 'evenements') return sortie_({ v: VERSION, evenements: evts_().map(o => ({ k: o.k, d: o.d, ti: o.ti, da: o.da, c: o.c, t: o.t, m: o.m, a: o.a })) });
+  if (a === 'evenement') { const st = relireEvt_(e.parameter.k); return sortie_(st ? { v: VERSION, state: st } : { code: 404, error: 'Événement introuvable.' }); }
   if (e && e.parameter && e.parameter.action === 'sauvegardes') return sortie_({ v: VERSION, sauvegardes: liste_().map(o => ({ k: o.k, d: o.d, w: o.w, c: o.c, t: o.t, m: o.m, a: o.a })) });
   return sortie_(Object.assign({ v: VERSION }, etat_()));
 }
@@ -91,14 +127,27 @@ function doPost(e) {
 
     // Verrouiller / déverrouiller : le code est vérifié ici, jamais dans la page
     if (b && b.action === 'lock') {
-      const C = CacheService.getScriptCache(), essais = +(C.get('essais') || 0);
-      if (essais >= ESSAIS_MAX) return sortie_({ code: 429, error: 'Trop de codes faux : réessaie dans 10 minutes.' });
-      if (!codeOk_(b.code)) { C.put('essais', String(essais + 1), BLOCAGE_S); return sortie_({ code: 403, error: 'Code incorrect.' }); }
-      C.remove('essais');
+      const err = verifCode_(b.code); if (err) return sortie_(err);
       cur.state.locked = !!b.locked;
       cur.etag = nouvelEtag_();
       ecrire_(cur);
       return sortie_(cur);
+    }
+
+    // Nouvel événement : l'actuel est rangé dans les anciens (code obligatoire, même si verrouillée)
+    if (b && b.action === 'nouveau') {
+      if (!b.state || !Array.isArray(b.state.tasks)) return sortie_({ code: 400, error: 'État invalide' });
+      const err = verifCode_(b.code); if (err) return sortie_(err);
+      archiver_(cur.state);
+      sauver_(cur.state, 'avant nouvel événement');
+      b.state.locked = false;
+      const r = { state: b.state, etag: nouvelEtag_() };
+      ecrire_(r);
+      return sortie_(r);
+    }
+    if (b && b.action === 'supprimerEvenement') {
+      const err = verifCode_(b.code); if (err) return sortie_(err);
+      return sortie_(supprimerEvt_(b.k) ? { ok: true } : { code: 404, error: 'Événement introuvable.' });
     }
 
     if (b && b.action === 'restaurer') {

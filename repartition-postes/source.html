@@ -121,10 +121,10 @@ html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
 .stat b{color:var(--gold1);font-size:20px}
 .stat.warn{background:rgba(120,30,15,.55)}.stat.warn b{color:#ffd2c7}
 nav.tabs{margin:0 0 8px}
-.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .tools button{width:100%;min-height:44px;padding:8px 6px;font:600 15px system-ui,sans-serif;color:inherit}
 .tools .bigbtn{color:#3a2a00;font-weight:700}
-@media(max-width:699px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tools #sauv{grid-column:1/-1}.tools .bigbtn{grid-column:1/-1}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:699px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tools .bigbtn{grid-column:1/-1}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .blocks{grid-template-columns:repeat(auto-fill,minmax(min(calc(50% - 5px),250px),1fr))}
 @media(max-width:599px){.block{padding:8px 9px;min-height:118px}.block h2{font-size:16px}.block .bh{flex-direction:column;align-items:flex-start;gap:4px}.block .pill{font-size:12px}.block .meta{font-size:12px}.block.new{min-height:118px}}
 .jeton.tous{background:linear-gradient(var(--gold1),var(--gold2));color:#3a2a00;box-shadow:0 3px 0 #9b6f10,0 4px 8px rgba(0,0,0,.3)}
@@ -156,7 +156,13 @@ nav.tabs{margin:0 0 8px}
 .lockbadge{background:#7a2a1c!important}
 body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.offline #newcat,body.offline #delcats,body.offline #sauv,body.offline #lock,body.offline [data-addtask],body.offline .bdel,body.offline .clr,body.offline #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
-body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}.tools #sauv{grid-column:span 2}
+body.locked .tools{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:699px){body.locked .tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.archbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:#5a4a1c;border:2px solid var(--gold1);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-weight:600}
+.archbar span{flex:1;min-width:200px}.archbar .bigbtn{flex:none}
+body.archive #lock,body.archive #undo,body.archive #sauv,body.archive .bdel{display:none!important}
+.evcur{background:rgba(0,0,0,.06);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.slist .evb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.dlg .chk.off{opacity:.45}
 .block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
 @media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
 
@@ -207,6 +213,8 @@ const VIEWS=['planning','moi','benevoles','equipe'];
 let me=null;try{me=localStorage.getItem('rp-moi')}catch(e){}
 const setMe=id=>{me=id;try{id?localStorage.setItem('rp-moi',id):localStorage.removeItem('rp-moi')}catch(e){}};
 let view='planning',cat=null;
+let arch=null,live=null; // ancien événement consulté (lecture seule) ; live = événement en cours mis de côté
+const ARCHMSG='Ancien événement : consultation seule. Reviens à l’événement en cours pour modifier.';
 function readHash(){const h=location.hash.slice(1);if(h.startsWith('moi-')){setMe(h.slice(4));view='moi';cat=null;return}if(h.startsWith('cat-')&&S.cats.some(c=>c.id===h.slice(4))){view='planning';cat=h.slice(4)}else{view=VIEWS.includes(h)?h:'planning';cat=null}}
 readHash();
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -229,11 +237,11 @@ const cnt=t=>hasB(t)&&!nb(t)?'Bureau':nb(t)+'/'+(t.need===0?'tous':need(t));
 function status(t,c){const e=$('#status');if(e){e.textContent=t;e.className='status '+(c||'')}const m=$('#apmsg');if(m)m.textContent=t}
 let ready=false;document.documentElement.classList.add('loading');
 let offline=false;const OFFMSG='Hors ligne : consultation seule. Les modifications seront possibles au retour du réseau.';
-function keep(){if(!ready||offline)return;try{localStorage.setItem('rp-etat',JSON.stringify({state:S,etag,t:Date.now()}))}catch(e){}}
+function keep(){if(!ready||offline||arch)return;try{localStorage.setItem('rp-etat',JSON.stringify({state:S,etag,t:Date.now()}))}catch(e){}}
 function cached(){try{return JSON.parse(localStorage.getItem('rp-etat')||'null')}catch(e){return null}}
 const LOCKMSG='Répartition verrouillée : déverrouille-la avec le cadenas (code) pour modifier.';
-function commit(fn){if(offline){modal=null;render();status(OFFMSG,'warn');return}if(!ready){status('Chargement des données en cours, patiente quelques secondes…','warn');return}if(S.locked){modal=null;render();status(LOCKMSG,'warn');return}hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
-function undo(){if(!hist.length||S.locked)return;const lk=!!S.locked;S=JSON.parse(hist.pop());S.locked=lk;render();queueSave()}
+function commit(fn){if(arch){modal=null;render();status(ARCHMSG,'warn');return}if(offline){modal=null;render();status(OFFMSG,'warn');return}if(!ready){status('Chargement des données en cours, patiente quelques secondes…','warn');return}if(S.locked){modal=null;render();status(LOCKMSG,'warn');return}hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
+function undo(){if(!hist.length||S.locked||arch)return;const lk=!!S.locked;S=JSON.parse(hist.pop());S.locked=lk;render();queueSave()}
 function queueSave(){pending=true;clearTimeout(timer);status('Modifications en attente…');timer=setTimeout(save,800)}
 async function save(){
   if(saving){timer=setTimeout(save,500);return}
@@ -248,7 +256,7 @@ async function save(){
   saving=false;
 }
 async function refresh(){
-  if(offline||pending||saving||modal||drag||mv||lp||tour||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  if(arch||offline||pending||saving||modal||drag||mv||lp||tour||document.activeElement?.matches?.('input.txt,.ttl'))return;
   try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
     if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
 }
@@ -272,7 +280,7 @@ function renderHead(){
   return `<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="${esc(S.title)}" aria-label="Nom de l’événement" ${S.locked?'disabled':''}><div class="drow"><input class="date" type="date" id="date" value="${esc(S.date)}" aria-label="Date de l’événement" ${S.locked?'disabled':''}><button type="button" class="lockbtn ${S.locked?'on':''}" id="lock" aria-pressed="${!!S.locked}" title="${S.locked?'Verrouillée : code pour déverrouiller':'Déverrouillée : code pour verrouiller'}">${S.locked?'🔒 Verrouillée':'🔓 Déverrouillée'}</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>
   <div class="stats"><div class="stat"><b>${vol().length}</b><span>bénévoles</span></div><div class="stat"><b>${ok}/${withNeed.length}</b><span>postes complets</span></div><div class="stat ${holes?'warn':''}"><b>${holes}</b><span>places à pourvoir</span></div></div>
   <nav class="tabs">${[['planning','Catégories'],['moi','Mes postes'],['benevoles','Fiche bénévole'],['equipe','Équipe']].map(([k,l])=>`<a class="chip" href="#${k}" ${view===k&&!cat?'aria-current="page"':''}>${l}</a>`).join('')}</nav>
-  <div class="tools"><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button><button type="button" class="ghostbtn" id="sauv">🕘 Sauvegardes</button></div>
+  <div class="tools"><button class="ghostbtn" id="undo" ${hist.length?'':'disabled'}>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button><button type="button" class="ghostbtn" id="sauv">🕘 Sauvegardes</button><button type="button" class="ghostbtn" id="evts">📅 Événements</button></div>
   <div class="status" id="status"></div>`;
 }
 function catStats(c){const ts=S.tasks.filter(t=>t.cat===c.id),wn=ts.filter(t=>need(t));return{ts,ok:wn.filter(full).length,n:wn.length,holes:wn.reduce((a,t)=>a+miss(t),0)}}
@@ -303,7 +311,7 @@ function delCatsDlg(){if(S.locked)return status(LOCKMSG,'warn');if(!S.cats.lengt
 let sauvs=[];
 const fdate=d=>new Date(d).toLocaleString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const pl=(n,m)=>n+' '+m+(n>1?'s':'');
-function sauvDlg(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class="modal"><div class="dlg wide"><h2>🕘 Sauvegardes</h2><p>Le serveur garde une copie automatique toutes les 15 minutes d’activité et avant chaque suppression (40 copies au plus).</p><div id="slist"><p>Chargement…</p></div><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button></div></div></div>`;render();
+function sauvDlg(){if(arch)return;if(S.locked)return status(LOCKMSG,'warn');modal=`<div class="modal"><div class="dlg wide"><h2>🕘 Sauvegardes</h2><p>Le serveur garde une copie automatique toutes les 15 minutes d’activité et avant chaque suppression (40 copies au plus).</p><div id="slist"><p>Chargement…</p></div><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button></div></div></div>`;render();
   fetch(window.API+(window.API.includes('?')?'&':'?')+'action=sauvegardes',{cache:'no-store'}).then(r=>r.json()).then(d=>{const el=$('#slist');if(!el)return;
     if(!d.sauvegardes){el.innerHTML='<p>Le serveur n’est pas à jour : redéploie le script Apps Script (version 3).</p>';return}
     sauvs=d.sauvegardes;el.innerHTML=sauvs.length?'<ul class="slist">'+sauvs.map(o=>`<li><div><b>${fdate(o.d)}</b> <em>${esc(o.w||'')}</em><br><small>${pl(o.c,'catégorie')} · ${pl(o.t,'poste')} · ${pl(o.m,'bénévole')} · ${pl(o.a,'affectation')}</small></div><button class="ghostbtn" data-rest="${o.k}">Restaurer</button></li>`).join('')+'</ul>':'<p>Aucune sauvegarde pour l’instant : la première sera faite à la prochaine modification.</p>'
@@ -313,6 +321,53 @@ function restDlg(k){const o=sauvs.find(x=>x.k===k);if(!o)return;if(pending||savi
     if(!d.state||(d.code&&d.code!==423)){render();return status(d.error||'Restauration refusée.','warn')}
     S=d.state;etag=d.etag;hist.length=0;render();status(d.code===423?LOCKMSG:`Version du ${fdate(o.d)} restaurée. L’état d’avant a été sauvegardé, tu peux y revenir.`,d.code===423?'warn':'')}).catch(()=>status('Pas de connexion : réessaie.','warn'))};
   go.direct=true;confirmDlg(`Revenir à la version du <b>${fdate(o.d)}</b> (${pl(o.c,'catégorie')}, ${pl(o.t,'poste')}, ${pl(o.a,'affectation')}) ? L’état actuel sera sauvegardé avant.`,go,'Restaurer')}
+/* plusieurs événements (serveur v4) : l'événement en cours + les anciens, rangés à part */
+let evts=[],nsrc=null;
+const fjour=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const apiGet=q=>fetch(window.API+(window.API.includes('?')?'&':'?')+q,{cache:'no-store'}).then(r=>r.json());
+const apiPost=o=>fetch(window.API,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(r=>r.json());
+const OLDSRV='Le serveur n’est pas à jour : redéploie le script Apps Script (version 4).';
+function evtsDlg(){const cur=arch?live:S;
+  modal=`<div class="modal"><div class="dlg wide"><h2>📅 Événements</h2><div class="evcur"><small>Événement en cours</small><br><b>${esc(cur.title)}</b>${cur.date?' · '+esc(fjour(cur.date)):''}<br><small>${pl(cur.cats.length,'catégorie')} · ${pl(cur.tasks.length,'poste')} · ${pl(cur.members.length,'bénévole')}</small></div>
+  <div class="acts" style="justify-content:flex-start;margin:0 0 14px">${arch?'<button class="ghostbtn" id="quitarch">Revenir à l’événement en cours</button>':''}<button class="bigbtn" id="nouvev">+ Nouvel événement${arch?' (copie de celui-ci)':''}</button></div>
+  <h3 style="margin:0 0 6px">Anciens événements</h3><div id="elist"><p>Chargement…</p></div><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button></div></div></div>`;render();
+  if(offline){$('#elist').innerHTML='<p>Hors ligne : la liste sera disponible au retour du réseau.</p>';return}
+  apiGet('action=evenements').then(d=>{const el=$('#elist');if(!el)return;if(!d.evenements){el.innerHTML='<p>'+OLDSRV+'</p>';return}
+    evts=d.evenements;el.innerHTML=evts.length?'<ul class="slist">'+evts.map(o=>`<li><div><b>${esc(o.ti||'Sans nom')}</b>${o.da?' · '+esc(fjour(o.da)):''}${arch&&arch.k===o.k?' <em>(affiché)</em>':''}<br><small>rangé le ${fdate(o.d)} · ${pl(o.t,'poste')} · ${pl(o.m,'bénévole')} · ${pl(o.a,'affectation')}</small></div><div class="evb"><button class="ghostbtn" data-voir="${o.k}">Voir</button><button class="ghostbtn" data-dupl="${o.k}">Dupliquer</button><button class="ghostbtn" data-delev="${o.k}" aria-label="Supprimer ${esc(o.ti)}">🗑</button></div></li>`).join('')+'</ul>':'<p>Aucun ancien événement : ils apparaîtront ici quand tu créeras le suivant.</p>'
+  }).catch(()=>{const el=$('#elist');if(el)el.innerHTML='<p>Pas de connexion : réessaie.</p>'})}
+function chargerEvt(k){status('Chargement de l’événement…');return apiGet('action=evenement&k='+encodeURIComponent(k)).then(d=>{if(!d.state)throw new Error(d.error||OLDSRV);return d.state},e=>{throw new Error(e.message&&e.message!=='Failed to fetch'?e.message:'Pas de connexion : réessaie.')})}
+function voirArch(k){if(pending||saving)return status('Enregistrement en cours, réessaie dans 2 secondes.','warn');const o=evts.find(x=>x.k===k);
+  chargerEvt(k).then(st=>{if(!arch)live=S;st.locked=true;S=st;arch={k,ti:o?o.ti:st.title,da:o?o.da:st.date};modal=null;sel=null;tourStop();view='planning';cat=null;history.replaceState(null,'','#planning');scrollTo(0,0);render();status('Consultation de « '+(st.title||'')+' » : rien n’est modifié pour l’équipe.')}).catch(e=>status(e.message,'warn'))}
+function quitArch(){if(!arch)return;S=live;live=null;arch=null;modal=null;sel=null;readHash();render();status('Retour à l’événement en cours.');refresh()}
+function nouvDlg(src,o){if(offline)return status(OFFMSG,'warn');if(!ready)return status('Chargement des données en cours, patiente quelques secondes…','warn');
+  nsrc=src||(arch?live:S);const nom=src?(o?o.ti:src.title):(arch?live:S).title;
+  modal=`<div class="modal"><form class="dlg" id="nform"><h2>Nouvel événement</h2><p>${src?`Copie de « <b>${esc(nom)}</b> ». `:''}L’événement en cours (« ${esc((arch?live:S).title)} ») sera rangé dans les anciens événements, consultable par tous.</p>
+  <label class="f" for="f-ename">Nom</label><input class="txt" id="f-ename" required value="${esc(nom)}">
+  <label class="f" for="f-edate">Date</label><input class="txt" id="f-edate" type="date">
+  <span class="f">Recopier</span>
+  <label class="chk"><input type="checkbox" id="f-cteam" checked>L’équipe (${pl(nsrc.members.length,'bénévole')})</label>
+  <label class="chk"><input type="checkbox" id="f-cposts" checked>Les catégories et les postes (${pl(nsrc.tasks.length,'poste')})</label>
+  <label class="chk"><input type="checkbox" id="f-cnotes">Les remarques des postes</label>
+  <label class="chk"><input type="checkbox" id="f-caff">Les affectations (qui fait quoi)</label>
+  <label class="f" for="f-ecode">Code du cadenas</label><input class="txt" id="f-ecode" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required>
+  <p class="apmsg" id="nmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Créer l’événement</button></div></form></div>`;render();setTimeout(()=>$('#f-ename')?.select(),0)}
+function nouvSubmit(f){const lm=$('#nmsg'),code=$('#f-ecode').value.trim(),title=$('#f-ename').value.trim();if(!title||!nsrc)return;
+  if(pending||saving){lm.textContent='Enregistrement en cours, réessaie dans 2 secondes.';return}
+  const team=$('#f-cteam').checked,posts=$('#f-cposts').checked,notes=posts&&$('#f-cnotes').checked,aff=team&&posts&&$('#f-caff').checked,src=JSON.parse(JSON.stringify(nsrc));
+  const st={title,date:$('#f-edate').value,members:team?src.members:[],cats:posts?src.cats:[],tasks:posts?src.tasks.map(t=>{const n=Object.assign({},t,{note:notes?t.note:'',who:aff?t.who:[]});delete n.done;return n}):[],locked:false};
+  const bt=f.querySelector('.bigbtn');bt.disabled=true;lm.textContent='Vérification du code…';
+  apiPost({action:'nouveau',code,state:st}).then(d=>{
+    if(d.code||!d.state){bt.disabled=false;const c=$('#f-ecode');lm.textContent=d.error||OLDSRV;if(c){c.value='';c.focus()}return}
+    const old=(arch?live:S).title;S=d.state;etag=d.etag;hist.length=0;arch=null;live=null;nsrc=null;modal=null;sel=null;view='planning';cat=null;history.replaceState(null,'','#planning');scrollTo(0,0);render();
+    status('« '+S.title+' » est l’événement en cours. « '+old+' » est rangé dans 📅 Événements.')
+  }).catch(()=>{bt.disabled=false;lm.textContent='Pas de connexion : réessaie.'})}
+function delEvtDlg(k){const o=evts.find(x=>x.k===k);if(!o)return;
+  modal=`<div class="modal"><form class="dlg" id="xform" data-k="${esc(k)}"><h2>Supprimer un ancien événement</h2><p>Supprimer définitivement « <b>${esc(o.ti||'Sans nom')}</b> »${o.da?' ('+esc(fjour(o.da))+')':''} ? Il ne pourra pas être récupéré.</p><label class="f" for="f-xcode">Code du cadenas</label><input class="txt" id="f-xcode" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="xmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Supprimer</button></div></form></div>`;render();setTimeout(()=>$('#f-xcode')?.focus(),0)}
+function delEvtSubmit(f){const k=f.dataset.k,lm=$('#xmsg'),bt=f.querySelector('.bigbtn');bt.disabled=true;lm.textContent='Vérification du code…';
+  apiPost({action:'supprimerEvenement',k,code:$('#f-xcode').value.trim()}).then(d=>{
+    if(!d.ok){bt.disabled=false;const c=$('#f-xcode');lm.textContent=d.error||OLDSRV;if(c){c.value='';c.focus()}return}
+    if(arch&&arch.k===k){S=live;live=null;arch=null;readHash()}evtsDlg();status('Ancien événement supprimé.')
+  }).catch(()=>{bt.disabled=false;lm.textContent='Pas de connexion : réessaie.'})}
 /* espace du bénévole : ses postes, s'inscrire, se retirer */
 const catN=id=>S.cats.find(c=>c.id===id)?.name||'';
 function takeTask(tid){const t=S.tasks.find(x=>x.id===tid);if(!t||!me)return;const go=()=>{if(!t.who.includes(me))t.who.push(me)};
@@ -342,8 +397,8 @@ function renderTeam(){
 function render(){
   const e0=$('#status'),st=e0?.textContent||'',sc=e0?.className||'status';
   if(cat&&!S.cats.some(c=>c.id===cat)){cat=null;if(location.hash.startsWith('#cat-'))history.replaceState(null,'','#planning')}
-  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);document.body.classList.toggle('locked',!!S.locked);document.body.classList.toggle('offline',offline);keep();
-  root.innerHTML='<div class="wrap">'+(inCat?renderCat():renderHead()+(view==='planning'?renderLanding():view==='moi'?renderMoi():view==='benevoles'?renderPeople():renderTeam()))+'</div>'+(modal||'');
+  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);document.body.classList.toggle('locked',!!S.locked);document.body.classList.toggle('offline',offline);document.body.classList.toggle('archive',!!arch);keep();
+  root.innerHTML='<div class="wrap">'+(arch?`<div class="archbar" role="status"><span>📅 Ancien événement : <b>${esc(arch.ti||'Sans nom')}</b>${arch.da?' ('+esc(fjour(arch.da))+')':''} — consultation seule</span><button class="bigbtn" id="quitarch">Revenir à l’événement en cours</button></div>`:'')+(inCat?renderCat():renderHead()+(view==='planning'?renderLanding():view==='moi'?renderMoi():view==='benevoles'?renderPeople():renderTeam()))+'</div>'+(modal||'');
   const e=$('#status');e.textContent=st;e.className=sc;
 }
 
@@ -394,7 +449,7 @@ function resetDlg(){if(S.locked)return status(LOCKMSG,'warn');modal=`<div class=
   <label class="chk"><input type="checkbox" id="f-wipe">Vider aussi toutes les affectations</label>
   <div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">Remplacer la liste</button></div></form></div>`;render();setTimeout(()=>$('#f-list')?.focus(),0)}
 let okFn=null;
-function lockDlg(){const on=!!S.locked;modal=`<div class="modal"><form class="dlg" id="lform"><h2>${on?'Déverrouiller':'Verrouiller'} la répartition</h2><p>${on?'Entre le code pour pouvoir de nouveau modifier.':'Une fois verrouillée, tout le monde peut consulter, imprimer et utiliser la boîte à idées, mais personne ne peut rien modifier.'}</p><label class="f" for="f-code">Code</label><input class="txt" id="f-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="lmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">${on?'🔓 Déverrouiller':'🔒 Verrouiller'}</button></div></form></div>`;render();setTimeout(()=>$('#f-code')&&$('#f-code').focus(),0)}
+function lockDlg(){if(arch)return;const on=!!S.locked;modal=`<div class="modal"><form class="dlg" id="lform"><h2>${on?'Déverrouiller':'Verrouiller'} la répartition</h2><p>${on?'Entre le code pour pouvoir de nouveau modifier.':'Une fois verrouillée, tout le monde peut consulter, imprimer et utiliser la boîte à idées, mais personne ne peut rien modifier.'}</p><label class="f" for="f-code">Code</label><input class="txt" id="f-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="lmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">${on?'🔓 Déverrouiller':'🔒 Verrouiller'}</button></div></form></div>`;render();setTimeout(()=>$('#f-code')&&$('#f-code').focus(),0)}
 function confirmDlg(msg,fn,ok){okFn=fn;modal=`<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>${msg}</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">${ok||'Supprimer'}</button></div></div></div>`;render();$('#okc').focus()}
 function closeDlg(){modal=null;okFn=null;render()}
 function fillAll(tid){const t=S.tasks.find(x=>x.id===tid);if(!t)return;if(t.need!==0){status('Pour affecter tout le monde, coche « Tous les bénévoles » dans le poste (bouton ✎).','warn');return}
@@ -481,6 +536,12 @@ root.addEventListener('click',e=>{
   if(b.id==='newcat')return catDialog();
   if(b.id==='delcats')return delCatsDlg();
   if(b.id==='sauv')return sauvDlg();
+  if(b.id==='evts')return evtsDlg();
+  if(b.id==='quitarch')return quitArch();
+  if(b.id==='nouvev')return nouvDlg(arch?S:null);
+  if(b.dataset.voir)return voirArch(b.dataset.voir);
+  if(b.dataset.dupl)return chargerEvt(b.dataset.dupl).then(st=>nouvDlg(st,evts.find(o=>o.k===b.dataset.dupl))).catch(e=>status(e.message,'warn'));
+  if(b.dataset.delev)return delEvtDlg(b.dataset.delev);
   if(b.dataset.me){setMe(b.dataset.me);history.replaceState(null,'','#moi');return render()}
   if(b.id==='notme'){setMe(null);return render()}
   if(b.id==='melink'){const u=location.href.split('#')[0]+'#moi-'+me;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>status('Lien copié : envoie-le à '+mName(me)+'.')).catch(()=>prompt('Copie ce lien :',u));return}
@@ -509,6 +570,7 @@ root.addEventListener('change',e=>{
   if(i.id==='ttl'){const v=i.value.trim()||'Répartition des postes';return commit(()=>{S.title=v})}
   if(i.id==='date')return commit(()=>{S.date=i.value});
   if(i.id==='f-cat'){$('#f-newcat').style.display=i.value==='__new'?'':'none';if(i.value==='__new')$('#f-newcat').focus()}
+  if(i.id==='f-cteam'||i.id==='f-cposts'){const ok=$('#f-cteam').checked&&$('#f-cposts').checked,a=$('#f-caff');a.disabled=!ok;if(!ok)a.checked=false;a.closest('.chk').classList.toggle('off',!ok);$('#f-cnotes').disabled=!$('#f-cposts').checked;$('#f-cnotes').closest('.chk').classList.toggle('off',!$('#f-cposts').checked)}
   if(i.id==='f-delall')document.querySelector('.wheel[data-for="f-delc"]').classList.toggle('off',i.checked);
   if(i.id==='f-all')document.querySelector('.wheel[data-for="f-need"]').classList.toggle('off',i.checked);
 });
@@ -522,6 +584,8 @@ root.addEventListener('submit',e=>{
     const c=S.cats.find(x=>x.id===$('#f-delc').value);if(!c)return;const n=S.tasks.filter(t=>t.cat===c.id).length;return confirmDlg(`Supprimer la catégorie « ${esc(c.name)} »${n?` et ses ${n} poste(s)`:''} ?`,()=>{S.cats=S.cats.filter(x=>x.id!==c.id);S.tasks=S.tasks.filter(t=>t.cat!==c.id)})}
   if(f.id==='cform'){const v=$('#f-cname').value.trim();if(!v)return;const id=uid('c');modal=null;commit(()=>S.cats.push({id,name:v}));location.hash='cat-'+id;return}
   if(f.id==='addc'){const v=$('#newc').value.trim();if(v)commit(()=>S.cats.push({id:uid('c'),name:v}));return}
+  if(f.id==='nform')return nouvSubmit(f);
+  if(f.id==='xform')return delEvtSubmit(f);
   if(f.id==='lform'){const lm=$('#lmsg'),code=$('#f-code').value.trim();
     if(!ready){lm.textContent='Chargement des données en cours, réessaie dans quelques secondes.';return}
     if(pending||saving){lm.textContent='Enregistrement en cours, réessaie dans 2 secondes.';return}
@@ -553,6 +617,7 @@ const TOURS={
     ['nav.tabs','« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms.'],
     ['#apercu','« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer.'],
     ['#lock','Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie.'],
+    ['#evts','« Événements » crée l’événement suivant à partir de celui-ci (avec le code) et garde les anciens, à consulter ou dupliquer.'],
     ['#sauv','« Sauvegardes » permet de revenir à une version précédente, enregistrée automatiquement par le serveur.'],
     ['#ideeOpen','Une idée, un bug ? La boîte à idées est anonyme.']],
   cat:[['#bench','Voici les jetons des bénévoles. Glisse un jeton sur un poste, ou touche un jeton puis les postes où l’affecter.'],
@@ -582,8 +647,8 @@ render();
 const getState=()=>Promise.race([fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),new Promise((_,no)=>setTimeout(no,15000))]);
 {const c=cached();if(c&&c.state){S=c.state;etag=c.etag;readHash();render();document.documentElement.classList.remove('loading')}}
 status('Chargement des données…');
-function connecte(d){const was=offline;offline=false;ready=true;document.documentElement.classList.remove('loading');if(d.state){S=d.state;etag=d.etag;hist.length=0;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status(was?'De retour en ligne : la répartition est à jour.':'Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}
-function horsLigne(){const c=cached();if(c&&c.state){S=c.state;etag=c.etag;offline=true;ready=true;document.documentElement.classList.remove('loading');readHash();render();status(`Hors ligne : version du ${fdate(c.t)}, en consultation seule. Elle se mettra à jour dès le retour du réseau.`,'warn')}
+function connecte(d){const was=offline;offline=false;ready=true;document.documentElement.classList.remove('loading');if(d.state&&arch){live=d.state;etag=d.etag;hist.length=0}else if(d.state){S=d.state;etag=d.etag;hist.length=0;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status(was?'De retour en ligne : la répartition est à jour.':'Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}
+function horsLigne(){const c=cached();if(c&&c.state&&!arch){S=c.state;etag=c.etag;offline=true;ready=true;document.documentElement.classList.remove('loading');readHash();render();status(`Hors ligne : version du ${fdate(c.t)}, en consultation seule. Elle se mettra à jour dès le retour du réseau.`,'warn')}
   else status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn')}
 let essai=false;const retry=()=>{if(!offline||essai)return;essai=true;getState().then(connecte).catch(()=>{}).then(()=>{essai=false})};
 getState().then(connecte).catch(horsLigne);setInterval(retry,20000);window.addEventListener('online',retry);
