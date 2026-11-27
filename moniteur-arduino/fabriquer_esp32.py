@@ -26,7 +26,7 @@ programme = r'''/* Moniteur Arduino : version ESP32 Wi-Fi (fonctionne sur tous l
 #include <WebServer.h>
 
 const char* NOM_WIFI     = "Moniteur-ESP32";  // ex. "Moniteur-ESP32-G3" pour le groupe 3
-const char* MOT_DE_PASSE = "A_REMPLACER";       // 8 caractères au moins
+const char* MOT_DE_PASSE = "A_REMPLACER";     // mets ton propre mot de passe (8 caractères au moins) avant de téléverser, sans le publier
 
 const int PIN_TEMP = 34;
 const int PIN_POT  = 35;
