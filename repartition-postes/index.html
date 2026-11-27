@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Répartition des postes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2f5a24"><link rel="apple-touch-icon" href="logo-socaval.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: ludique et clair, dans la famille d'Isole x ! (plateau vert).
    IDEA: un plateau de jeu en feutre : chaque bénévole est un jeton crème qu'on pose sur les cartes des tâches.
@@ -154,7 +154,7 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.offline #newcat,body.offline #delcats,body.offline #sauv,body.offline #lock,body.offline [data-addtask],body.offline .bdel,body.offline .clr,body.offline #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
 body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}.tools #sauv{grid-column:span 2}
 .block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
@@ -215,7 +215,25 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     }
     const m = $("#apmsg");
     if (m) m.textContent = t;
+  }, keep2 = function() {
+    if (!ready || offline) return;
+    try {
+      localStorage.setItem("rp-etat", JSON.stringify({ state: S, etag, t: Date.now() }));
+    } catch (e) {
+    }
+  }, cached2 = function() {
+    try {
+      return JSON.parse(localStorage.getItem("rp-etat") || "null");
+    } catch (e) {
+      return null;
+    }
   }, commit2 = function(fn) {
+    if (offline) {
+      modal = null;
+      render2();
+      status2(OFFMSG, "warn");
+      return;
+    }
     if (!ready) {
       status2("Chargement des données en cours, patiente quelques secondes…", "warn");
       return;
@@ -368,6 +386,8 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     document.body.classList.toggle("hasdock", !!inCat);
     document.body.classList.toggle("selecting", !!sel);
     document.body.classList.toggle("locked", !!S.locked);
+    document.body.classList.toggle("offline", offline);
+    keep2();
     root.innerHTML = '<div class="wrap">' + (inCat ? renderCat2() : renderHead2() + (view === "planning" ? renderLanding2() : view === "benevoles" ? renderPeople2() : renderTeam2())) + "</div>" + (modal || "");
     const e = $("#status");
     e.textContent = st;
@@ -683,8 +703,36 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     tour = null;
     const c = document.getElementById("coach");
     if (c) c.style.display = "none";
+  }, connecte2 = function(d) {
+    const was = offline;
+    offline = false;
+    ready = true;
+    document.documentElement.classList.remove("loading");
+    if (d.state) {
+      S = d.state;
+      etag = d.etag;
+      hist.length = 0;
+      readHash2();
+      render2();
+      if (S.title === "Planning des bénévoles") commit2(() => {
+        S.title = "Répartition des postes";
+      });
+    }
+    status2(was ? "De retour en ligne : la répartition est à jour." : "Répartition partagée : les modifications sont enregistrées pour toute l’équipe.");
+  }, horsLigne2 = function() {
+    const c = cached2();
+    if (c && c.state) {
+      S = c.state;
+      etag = c.etag;
+      offline = true;
+      ready = true;
+      document.documentElement.classList.remove("loading");
+      readHash2();
+      render2();
+      status2("Hors ligne : version du ".concat(fdate(c.t), ", en consultation seule. Elle se mettra à jour dès le retour du réseau."), "warn");
+    } else status2("Impossible de joindre le serveur : les modifications ne seront pas enregistrées.", "warn");
   };
-  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, span = span2, clashWith = clashWith2, clashes = clashes2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
+  var readHash = readHash2, status = status2, keep = keep2, cached = cached2, commit = commit2, undo = undo2, queueSave = queueSave2, span = span2, clashWith = clashWith2, clashes = clashes2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2, connecte = connecte2, horsLigne = horsLigne2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
@@ -714,6 +762,8 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   const cnt = (t) => hasB(t) && !nb(t) ? "Bureau" : nb(t) + "/" + (t.need === 0 ? "tous" : need(t));
   let ready = false;
   document.documentElement.classList.add("loading");
+  let offline = false;
+  const OFFMSG = "Hors ligne : consultation seule. Les modifications seront possibles au retour du réseau.";
   const LOCKMSG = "Répartition verrouillée : déverrouille-la avec le cadenas (code) pour modifier.";
   async function save() {
     if (saving) {
@@ -751,7 +801,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }
   async function refresh() {
     var _a, _b;
-    if (pending || saving || modal || drag || mv || lp || tour || ((_b = (_a = document.activeElement) == null ? void 0 : _a.matches) == null ? void 0 : _b.call(_a, "input.txt,.ttl"))) return;
+    if (offline || pending || saving || modal || drag || mv || lp || tour || ((_b = (_a = document.activeElement) == null ? void 0 : _a.matches) == null ? void 0 : _b.call(_a, "input.txt,.ttl"))) return;
     try {
       const r = await fetch(window.API, { cache: "no-store" });
       if (!r.ok) return;
@@ -1086,8 +1136,8 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       return commit2(() => {
         const old = S.members;
         S.members = names.map((n) => old.find((m) => m.name.toLowerCase() === n.toLowerCase()) || { id: uid("m"), name: n });
-        const keep = new Set(S.members.map((m) => m.id));
-        S.tasks.forEach((t) => t.who = wipe ? [] : t.who.filter((w) => keep.has(w)));
+        const keep3 = new Set(S.members.map((m) => m.id));
+        S.tasks.forEach((t) => t.who = wipe ? [] : t.who.filter((w) => keep3.has(w)));
       });
     }
     if (f.id === "dform") {
@@ -1238,21 +1288,32 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     render2();
   });
   render2();
-  status2("Chargement des données…");
-  fetch(window.API, { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((d) => {
-    ready = true;
-    document.documentElement.classList.remove("loading");
-    if (d.state) {
-      S = d.state;
-      etag = d.etag;
+  const getState = () => Promise.race([fetch(window.API, { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()), new Promise((_, no) => setTimeout(no, 15e3))]);
+  {
+    const c = cached2();
+    if (c && c.state) {
+      S = c.state;
+      etag = c.etag;
       readHash2();
       render2();
-      if (S.title === "Planning des bénévoles") commit2(() => {
-        S.title = "Répartition des postes";
-      });
+      document.documentElement.classList.remove("loading");
     }
-    status2("Répartition partagée : les modifications sont enregistrées pour toute l’équipe.");
-  }).catch(() => status2("Impossible de joindre le serveur : les modifications ne seront pas enregistrées.", "warn"));
+  }
+  status2("Chargement des données…");
+  let essai = false;
+  const retry = () => {
+    if (!offline || essai) return;
+    essai = true;
+    getState().then(connecte2).catch(() => {
+    }).then(() => {
+      essai = false;
+    });
+  };
+  getState().then(connecte2).catch(horsLigne2);
+  setInterval(retry, 2e4);
+  window.addEventListener("online", retry);
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {
+  });
   setInterval(refresh, 15e3);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refresh();

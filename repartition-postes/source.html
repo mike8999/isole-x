@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Répartition des postes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2f5a24"><link rel="apple-touch-icon" href="logo-socaval.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: ludique et clair, dans la famille d'Isole x ! (plateau vert).
    IDEA: un plateau de jeu en feutre : chaque bénévole est un jeton crème qu'on pose sur les cartes des tâches.
@@ -154,7 +154,7 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.offline #newcat,body.offline #delcats,body.offline #sauv,body.offline #lock,body.offline [data-addtask],body.offline .bdel,body.offline .clr,body.offline #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
 body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}.tools #sauv{grid-column:span 2}
 .block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
@@ -224,8 +224,11 @@ const cnt=t=>hasB(t)&&!nb(t)?'Bureau':nb(t)+'/'+(t.need===0?'tous':need(t));
 
 function status(t,c){const e=$('#status');if(e){e.textContent=t;e.className='status '+(c||'')}const m=$('#apmsg');if(m)m.textContent=t}
 let ready=false;document.documentElement.classList.add('loading');
+let offline=false;const OFFMSG='Hors ligne : consultation seule. Les modifications seront possibles au retour du réseau.';
+function keep(){if(!ready||offline)return;try{localStorage.setItem('rp-etat',JSON.stringify({state:S,etag,t:Date.now()}))}catch(e){}}
+function cached(){try{return JSON.parse(localStorage.getItem('rp-etat')||'null')}catch(e){return null}}
 const LOCKMSG='Répartition verrouillée : déverrouille-la avec le cadenas (code) pour modifier.';
-function commit(fn){if(!ready){status('Chargement des données en cours, patiente quelques secondes…','warn');return}if(S.locked){modal=null;render();status(LOCKMSG,'warn');return}hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
+function commit(fn){if(offline){modal=null;render();status(OFFMSG,'warn');return}if(!ready){status('Chargement des données en cours, patiente quelques secondes…','warn');return}if(S.locked){modal=null;render();status(LOCKMSG,'warn');return}hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();render();queueSave()}
 function undo(){if(!hist.length||S.locked)return;const lk=!!S.locked;S=JSON.parse(hist.pop());S.locked=lk;render();queueSave()}
 function queueSave(){pending=true;clearTimeout(timer);status('Modifications en attente…');timer=setTimeout(save,800)}
 async function save(){
@@ -241,7 +244,7 @@ async function save(){
   saving=false;
 }
 async function refresh(){
-  if(pending||saving||modal||drag||mv||lp||tour||document.activeElement?.matches?.('input.txt,.ttl'))return;
+  if(offline||pending||saving||modal||drag||mv||lp||tour||document.activeElement?.matches?.('input.txt,.ttl'))return;
   try{const r=await fetch(window.API,{cache:'no-store'});if(!r.ok)return;const d=await r.json();
     if(d.state&&d.etag!==etag){S=d.state;etag=d.etag;hist.length=0;render()}}catch(e){}
 }
@@ -319,7 +322,7 @@ function renderTeam(){
 function render(){
   const e0=$('#status'),st=e0?.textContent||'',sc=e0?.className||'status';
   if(cat&&!S.cats.some(c=>c.id===cat)){cat=null;if(location.hash.startsWith('#cat-'))history.replaceState(null,'','#planning')}
-  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);document.body.classList.toggle('locked',!!S.locked);
+  const inCat=view==='planning'&&cat;document.body.classList.toggle('hasdock',!!inCat);document.body.classList.toggle('selecting',!!sel);document.body.classList.toggle('locked',!!S.locked);document.body.classList.toggle('offline',offline);keep();
   root.innerHTML='<div class="wrap">'+(inCat?renderCat():renderHead()+(view==='planning'?renderLanding():view==='benevoles'?renderPeople():renderTeam()))+'</div>'+(modal||'');
   const e=$('#status');e.textContent=st;e.className=sc;
 }
@@ -550,7 +553,15 @@ function tourStop(){tour=null;const c=document.getElementById('coach');if(c)c.st
 window.addEventListener('scroll',()=>{if(tour)tourShow(false)},true);window.addEventListener('resize',()=>{if(tour)tourShow(false)});
 window.addEventListener('hashchange',()=>{tourStop();readHash();scrollTo(0,0);render()});
 render();
-status('Chargement des données…');fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{ready=true;document.documentElement.classList.remove('loading');if(d.state){S=d.state;etag=d.etag;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status('Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}).catch(()=>status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn'));
+const getState=()=>Promise.race([fetch(window.API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),new Promise((_,no)=>setTimeout(no,15000))]);
+{const c=cached();if(c&&c.state){S=c.state;etag=c.etag;readHash();render();document.documentElement.classList.remove('loading')}}
+status('Chargement des données…');
+function connecte(d){const was=offline;offline=false;ready=true;document.documentElement.classList.remove('loading');if(d.state){S=d.state;etag=d.etag;hist.length=0;readHash();render();if(S.title==='Planning des bénévoles')commit(()=>{S.title='Répartition des postes'})}status(was?'De retour en ligne : la répartition est à jour.':'Répartition partagée : les modifications sont enregistrées pour toute l’équipe.')}
+function horsLigne(){const c=cached();if(c&&c.state){S=c.state;etag=c.etag;offline=true;ready=true;document.documentElement.classList.remove('loading');readHash();render();status(`Hors ligne : version du ${fdate(c.t)}, en consultation seule. Elle se mettra à jour dès le retour du réseau.`,'warn')}
+  else status('Impossible de joindre le serveur : les modifications ne seront pas enregistrées.','warn')}
+let essai=false;const retry=()=>{if(!offline||essai)return;essai=true;getState().then(connecte).catch(()=>{}).then(()=>{essai=false})};
+getState().then(connecte).catch(horsLigne);setInterval(retry,20000);window.addEventListener('online',retry);
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 setInterval(refresh,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 }
 </script><style>
