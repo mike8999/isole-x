@@ -121,10 +121,10 @@ html.dragging,html.dragging body{overscroll-behavior:none;touch-action:none}
 .stat b{color:var(--gold1);font-size:20px}
 .stat.warn{background:rgba(120,30,15,.55)}.stat.warn b{color:#ffd2c7}
 nav.tabs{margin:0 0 8px}
-.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .tools button{width:100%;min-height:44px;padding:8px 6px;font:600 15px system-ui,sans-serif;color:inherit}
 .tools .bigbtn{color:#3a2a00;font-weight:700}
-@media(max-width:699px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tools .bigbtn{grid-column:1/-1}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:699px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tools #sauv{grid-column:1/-1}.tools .bigbtn{grid-column:1/-1}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .blocks{grid-template-columns:repeat(auto-fill,minmax(min(calc(50% - 5px),250px),1fr))}
 @media(max-width:599px){.block{padding:8px 9px;min-height:118px}.block h2{font-size:16px}.block .bh{flex-direction:column;align-items:flex-start;gap:4px}.block .pill{font-size:12px}.block .meta{font-size:12px}.block.new{min-height:118px}}
 .jeton.tous{background:linear-gradient(var(--gold1),var(--gold2));color:#3a2a00;box-shadow:0 3px 0 #9b6f10,0 4px 8px rgba(0,0,0,.3)}
@@ -154,9 +154,9 @@ nav.tabs{margin:0 0 8px}
 .drow{display:flex;align-items:center;flex-wrap:wrap}.drow>*{margin-right:8px}
 .lockbtn{min-height:34px;padding:4px 12px;border-radius:999px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.lockbtn:hover{background:rgba(255,255,255,.15)}.lockbtn.on{background:#7a2a1c;border-color:#e7a08f}
 .lockbadge{background:#7a2a1c!important}
-body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
+body.locked .edit,body.locked .clr,body.locked .bdel,body.locked [data-addtask],body.locked #undo,body.locked #newcat,body.locked #sauv,body.locked #aide,body.locked .chap .hint,body.locked #delcats,body.locked .delcat,body.locked .pqdel,body.locked #addm,body.locked #reset,body.locked .slot,body.locked .mhint,body.locked .dock .hint,body.locked .task:not(.fait) .done{display:none!important}
 body.locked .done{pointer-events:none}body.locked .task,body.locked .jeton{cursor:default}body.locked .ttl:disabled,body.locked .date:disabled,body.locked .pq:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
-body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.locked .tools{grid-template-columns:repeat(3,minmax(0,1fr))}.tools #sauv{grid-column:span 2}
 .block.new{min-height:56px!important}.catacts{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.block.delcats{border-color:rgba(255,154,138,.6)}.block.delcats:hover{background:rgba(120,30,15,.45)}
 @media print{body>*:not(#printzone){display:none!important}#printzone{display:block!important}html,body{background:#fff!important;color:#000}.ptab h2{break-after:avoid}.ptab tr{break-inside:avoid}}
 
@@ -181,6 +181,7 @@ html.dragging,html.dragging body{overflow:hidden}
 .wheel.wide .wi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 14px}
 .moving{opacity:.3;outline:3px dashed var(--gold1);outline-offset:-3px}
 .mvghost{position:fixed!important;left:0;top:0;margin:0;z-index:1000;pointer-events:none;opacity:1;box-shadow:0 12px 30px rgba(0,0,0,.45)!important;border-color:var(--gold1)!important;background:#3f7330!important;transition:none!important}
+.slist{list-style:none;padding:0;margin:0;max-height:55vh;overflow:auto}.slist li{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 2px;border-bottom:1px solid rgba(0,0,0,.12)}.slist em{opacity:.7}.slist small{opacity:.8}.slist .ghostbtn{background:#e8e0c4;border-color:#cfc6a6;color:var(--ink);flex:none}
 .bdel{position:absolute;bottom:8px;right:8px;width:33px;height:33px;border-radius:8px;border:2px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font-size:15.4px;display:grid;place-items:center;cursor:pointer;padding:0}.bdel:hover{background:rgba(120,30,15,.55)}.block .meta{min-height:30px;display:flex;align-items:center;padding-right:40px}
 .dropB{box-shadow:inset 4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}.dropA{box-shadow:inset -4px 0 0 var(--gold1),0 0 0 2px var(--gold1)!important}
 .delcat{color:#ffd2c7}.delcat:hover{background:rgba(120,30,15,.55)}
@@ -244,7 +245,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }, renderHead2 = function() {
     const T = S.tasks, withNeed = T.filter((t) => need(t)), ok = withNeed.filter(full).length;
     const holes = withNeed.reduce((a, t) => a + miss(t), 0);
-    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button></div>\n  <div class="status" id="status"></div>');
+    return '<div class="title"><img class="logo" src="logo-socaval.png" alt="So Caval"><div class="tcol"><input class="ttl" id="ttl" value="'.concat(esc(S.title), '" aria-label="Nom de l’événement" ').concat(S.locked ? "disabled" : "", '><div class="drow"><input class="date" type="date" id="date" value="').concat(esc(S.date), '" aria-label="Date de l’événement" ').concat(S.locked ? "disabled" : "", '><button type="button" class="lockbtn ').concat(S.locked ? "on" : "", '" id="lock" aria-pressed="').concat(!!S.locked, '" title="').concat(S.locked ? "Verrouillée : code pour déverrouiller" : "Déverrouillée : code pour verrouiller", '">').concat(S.locked ? "🔒 Verrouillée" : "🔓 Déverrouillée", '</button><button type="button" class="hbtn hsm" id="aide" title="Aide : comment ça marche" aria-label="Aide">?</button></div></div></div>\n  <div class="stats"><div class="stat"><b>').concat(vol().length, '</b><span>bénévoles</span></div><div class="stat"><b>').concat(ok, "/").concat(withNeed.length, '</b><span>postes complets</span></div><div class="stat ').concat(holes ? "warn" : "", '"><b>').concat(holes, '</b><span>places à pourvoir</span></div></div>\n  <nav class="tabs">').concat([["planning", "Catégories"], ["benevoles", "Fiche bénévole"], ["equipe", "Équipe"]].map(([k, l]) => '<a class="chip" href="#'.concat(k, '" ').concat(view === k && !cat ? 'aria-current="page"' : "", ">").concat(l, "</a>")).join(""), '</nav>\n  <div class="tools"><button class="ghostbtn" id="undo" ').concat(hist.length ? "" : "disabled", '>↶ Annuler</button><button class="ghostbtn" id="apercu">Export Excel</button><button class="ghostbtn" id="imprimer">🖨 Imprimer</button><button type="button" class="ghostbtn" id="ideeOpen">💡 Boîte à idées</button><button type="button" class="ghostbtn" id="sauv">🕘 Sauvegardes</button></div>\n  <div class="status" id="status"></div>');
   }, catStats2 = function(c) {
     const ts = S.tasks.filter((t) => t.cat === c.id), wn = ts.filter((t) => need(t));
     return { ts, ok: wn.filter(full).length, n: wn.length, holes: wn.reduce((a, t) => a + miss(t), 0) };
@@ -280,6 +281,43 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     render2();
     initWheels2();
     setTimeout(initWheels2, 0);
+  }, sauvDlg2 = function() {
+    if (S.locked) return status2(LOCKMSG, "warn");
+    modal = '<div class="modal"><div class="dlg wide"><h2>🕘 Sauvegardes</h2><p>Le serveur garde une copie automatique toutes les 15 minutes d’activité et avant chaque suppression (40 copies au plus).</p><div id="slist"><p>Chargement…</p></div><div class="acts"><button class="ghostbtn" id="cancel">Fermer</button></div></div></div>';
+    render2();
+    fetch(window.API + (window.API.includes("?") ? "&" : "?") + "action=sauvegardes", { cache: "no-store" }).then((r) => r.json()).then((d) => {
+      const el = $("#slist");
+      if (!el) return;
+      if (!d.sauvegardes) {
+        el.innerHTML = "<p>Le serveur n’est pas à jour : redéploie le script Apps Script (version 3).</p>";
+        return;
+      }
+      sauvs = d.sauvegardes;
+      el.innerHTML = sauvs.length ? '<ul class="slist">' + sauvs.map((o) => "<li><div><b>".concat(fdate(o.d), "</b> <em>").concat(esc(o.w || ""), "</em><br><small>").concat(pl(o.c, "catégorie"), " · ").concat(pl(o.t, "poste"), " · ").concat(pl(o.m, "bénévole"), " · ").concat(pl(o.a, "affectation"), '</small></div><button class="ghostbtn" data-rest="').concat(o.k, '">Restaurer</button></li>')).join("") + "</ul>" : "<p>Aucune sauvegarde pour l’instant : la première sera faite à la prochaine modification.</p>";
+    }).catch(() => {
+      const el = $("#slist");
+      if (el) el.innerHTML = "<p>Pas de connexion : réessaie.</p>";
+    });
+  }, restDlg2 = function(k) {
+    const o = sauvs.find((x) => x.k === k);
+    if (!o) return;
+    if (pending || saving) return status2("Enregistrement en cours, réessaie dans 2 secondes.", "warn");
+    const go = () => {
+      status2("Restauration…");
+      fetch(window.API, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "restaurer", k }) }).then((r) => r.json()).then((d) => {
+        if (!d.state || d.code && d.code !== 423) {
+          render2();
+          return status2(d.error || "Restauration refusée.", "warn");
+        }
+        S = d.state;
+        etag = d.etag;
+        hist.length = 0;
+        render2();
+        status2(d.code === 423 ? LOCKMSG : "Version du ".concat(fdate(o.d), " restaurée. L’état d’avant a été sauvegardé, tu peux y revenir."), d.code === 423 ? "warn" : "");
+      }).catch(() => status2("Pas de connexion : réessaie.", "warn"));
+    };
+    go.direct = true;
+    confirmDlg2("Revenir à la version du <b>".concat(fdate(o.d), "</b> (").concat(pl(o.c, "catégorie"), ", ").concat(pl(o.t, "poste"), ", ").concat(pl(o.a, "affectation"), ") ? L’état actuel sera sauvegardé avant."), go, "Restaurer");
   }, renderPeople2 = function() {
     const holes = S.tasks.filter((t) => need(t) && miss(t));
     let h = '<section class="chap"><h2>'.concat(holes.length ? "Il manque du monde" : "Tous les postes sont pourvus", "</h2>").concat(holes.length ? '<ul class="lst">'.concat(holes.map((t) => '<li><span style="flex:1">'.concat(esc(t.name)).concat(t.when ? " · " + esc(t.when) : "", '</span><b class="count short">').concat(miss(t), " à trouver</b></li>")).join(""), "</ul>") : "", "</section>");
@@ -393,9 +431,9 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     modal = '<div class="modal"><form class="dlg" id="lform"><h2>'.concat(on ? "Déverrouiller" : "Verrouiller", " la répartition</h2><p>").concat(on ? "Entre le code pour pouvoir de nouveau modifier." : "Une fois verrouillée, tout le monde peut consulter, imprimer et utiliser la boîte à idées, mais personne ne peut rien modifier.", '</p><label class="f" for="f-code">Code</label><input class="txt" id="f-code" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" required><p class="apmsg" id="lmsg" role="status"></p><div class="acts"><button type="button" class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn">').concat(on ? "🔓 Déverrouiller" : "🔒 Verrouiller", "</button></div></form></div>");
     render2();
     setTimeout(() => $("#f-code") && $("#f-code").focus(), 0);
-  }, confirmDlg2 = function(msg, fn) {
+  }, confirmDlg2 = function(msg, fn, ok) {
     okFn = fn;
-    modal = '<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>'.concat(msg, '</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">Supprimer</button></div></div></div>');
+    modal = '<div class="modal"><div class="dlg"><h2>Confirmer</h2><p>'.concat(msg, '</p><div class="acts"><button class="ghostbtn" id="cancel">Annuler</button><button class="bigbtn" id="okc">').concat(ok || "Supprimer", "</button></div></div></div>");
     render2();
     $("#okc").focus();
   }, closeDlg2 = function() {
@@ -615,7 +653,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     const c = document.getElementById("coach");
     if (c) c.style.display = "none";
   };
-  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
+  var readHash = readHash2, status = status2, commit = commit2, undo = undo2, queueSave = queueSave2, renderHead = renderHead2, catStats = catStats2, renderLanding = renderLanding2, renderCat = renderCat2, catDialog = catDialog2, delCatsDlg = delCatsDlg2, sauvDlg = sauvDlg2, restDlg = restDlg2, renderPeople = renderPeople2, renderTeam = renderTeam2, render = render2, taskDialog = taskDialog2, tableHTML = tableHTML2, apercu = apercu2, imprimer = imprimer2, wheel = wheel2, initWheels = initWheels2, wheelSet = wheelSet2, parseWhen = parseWhen2, joinWhen = joinWhen2, resetDlg = resetDlg2, lockDlg = lockDlg2, confirmDlg = confirmDlg2, closeDlg = closeDlg2, fillAll = fillAll2, toggle = toggle2, moveItem = moveItem2, stepItem = stepItem2, sameOrder = sameOrder2, bar = bar2, lpCancel = lpCancel2, mvStart = mvStart2, mvMove = mvMove2, mvEnd = mvEnd2, endDrag = endDrag2, tourStart = tourStart2, tourShow = tourShow2, tourStop = tourStop2;
   const $ = (s) => document.querySelector(s), root = $("#root");
   let S = JSON.parse(document.getElementById("state").textContent);
   let mv = null;
@@ -698,6 +736,9 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
   }
   const allJeton = () => '<span class="jeton tous '.concat(sel === "__all" ? "sel" : "", '" data-j="__all" data-from="" role="button" tabindex="0" aria-label="Tous les bénévoles">Tous</span>');
   const jeton = (id, from, hours) => '<span class="jeton '.concat(sel === id ? "sel" : "").concat(isB(id) ? " bureau" : "", '" data-j="').concat(id, '" data-from="').concat(from || "", '" role="button" tabindex="0" aria-label="').concat(esc(mName(id)), '">').concat(esc(mName(id)), "</span>");
+  let sauvs = [];
+  const fdate = (d) => new Date(d).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const pl = (n, m) => n + " " + m + (n > 1 ? "s" : "");
   const WH = 40;
   document.addEventListener("scroll", (e) => {
     const w = e.target;
@@ -888,8 +929,10 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       const f = okFn;
       modal = null;
       okFn = null;
+      if (f && f.direct) return f();
       return commit2(f);
     }
+    if (b.dataset.rest) return restDlg2(b.dataset.rest);
     if (b.id === "undo") return undo2();
     if (b.id === "unsel") {
       sel = null;
@@ -897,6 +940,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
     }
     if (b.id === "newcat") return catDialog2();
     if (b.id === "delcats") return delCatsDlg2();
+    if (b.id === "sauv") return sauvDlg2();
     if (b.id === "reset") return resetDlg2();
     if (b.id === "apercu") return apercu2();
     if (b.id === "imprimer") return imprimer2();
@@ -1125,6 +1169,7 @@ html.loading #root{opacity:.45;pointer-events:none;transition:opacity .2s}
       ["nav.tabs", "« Fiche bénévole » montre les postes de chacun ; « Équipe » sert à gérer la liste des prénoms."],
       ["#apercu", "« Export Excel » affiche le tableau complet, à copier dans Excel ou à imprimer."],
       ["#lock", "Le cadenas verrouille la répartition avec un code : tout le monde consulte, personne ne modifie."],
+      ["#sauv", "« Sauvegardes » permet de revenir à une version précédente, enregistrée automatiquement par le serveur."],
       ["#ideeOpen", "Une idée, un bug ? La boîte à idées est anonyme."]
     ],
     cat: [
